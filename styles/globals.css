@@ -1,0 +1,46 @@
+html,
+body, h1 {
+  overflow-x: clip;
+  padding: 0;
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Oxygen,
+    Ubuntu, Cantarell, Fira Sans, Droid Sans, Helvetica Neue, sans-serif;
+}
+
+html{
+  background-color: white;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Firefox */
+input[type=number] {
+  -moz-appearance: textfield;
+}
+
+input:required {
+  background-color: rgba(255, 165, 0, 0.28);
+}
+input:required:valid {
+  background-color: unset;
+}
+input.invalid{
+  background-color: rgba(255, 165, 0, 0.28) !important;
+}
+
+input:disabled.invalid{
+  background-color: unset !important;
+}

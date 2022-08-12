@@ -1,0 +1,61 @@
+.background{
+    position: fixed;
+    top: 0;
+    left: 0;
+    min-height: 100vh;
+    height: inherit;
+    width: 100vw;
+    display: flex;
+
+    z-index: 3;
+
+    backdrop-filter: blur(20px) brightness(20%);
+}
+.hide{
+    display: none;
+}
+
+.menu{
+    z-index: 2;
+    padding: 2% !important;
+    border-radius: 10px;
+    text-align: left !important;
+    width: 15em;
+    background-color: white;
+    margin: auto auto !important;
+}
+
+.code{
+    width: 4.5em;
+    font-size: 3em !important;
+    background: none;
+    border: none;
+    letter-spacing: 0.2em;
+    text-align: left;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    z-index: 2;
+}
+
+.code:focus{
+    background: none;
+    border: none;
+    outline: none;
+}
+
+.overlay{
+    font-size: 4.2em !important;
+    padding: 2px;
+    letter-spacing: 0.12em;
+    position: relative;
+    top: -1.2em;
+    z-index: 1;
+    padding: 0;
+    height: 0.2em;
+}
+
+.menu button{
+    width: 6em;
+    margin: 0 0 !important;
+}

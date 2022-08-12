@@ -1,0 +1,199 @@
+.fullPage{
+    margin : 0;
+    width: 100vw;
+    min-height: 95vh;
+    --topPadd: 2.5em;
+    --rightPadd: 18em;
+}
+
+.getHeight{
+    height: inherit;
+}
+
+@media (max-width: 41em) {
+    .fullPage{
+        --topPadd: 4.8em;
+        --rightPadd: 0em;
+    }
+
+    .courseMenuMain{
+        display: none !important;
+    }
+}
+
+@media(max-width: 32em) {
+    .fullPage{
+        --topPadd: 6.7em;
+    }
+}
+
+.limited{
+    margin-top: var(--topPadd);
+    margin-right: var(--rightPadd);
+    padding: 2em;
+}
+
+.courseMenuMain{
+    position: fixed;
+    padding: 0.5em 0.5em;
+    z-index: 1;
+    top: var(--topPadd);
+    width: 17em;
+    right: 0;
+    min-height: inherit;
+    height: available;
+    background-color: rgba(0, 0, 0, 0.2);
+    display: flex;
+    flex-direction: column;
+}
+
+.courseMenuInline{
+    padding: 0.5em 0.5em;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.navbarMain{
+    position: fixed;
+    display: inline-block;
+    min-height: 2.5em;
+    top: 0;
+    width: 100%;
+    background-color: #545454;
+    clear: both;
+    z-index: 2;
+}
+
+.navbarMain .logoContainer{
+    float: left;
+    color: white;
+    height: inherit;
+    font-size: 1.25em;
+    padding-top: 0.1em;
+    padding-left: 1em;
+}
+
+.navbarMain .logoContainer svg{
+    position: relative;
+    top: -0.1em;
+}
+
+.navbarMain .linkContainer{
+    float: right;
+    color: white;
+    width: fit-content;
+    display: inline-block;
+    text-align: right;
+    height: max-content;
+    font-size: 1.25em;
+    padding-top: 0.1em;
+    padding-left: 1em;
+    overflow: hidden
+}
+
+.navbarMain .linkContainer a{
+    color: white;
+    text-decoration: none;
+    height: inherit;
+    padding: 0.05em 1em 0.5em;
+    z-index: 1;
+    margin-right: 1em;
+}
+
+.navbarMain .linkContainer button{
+    padding: 0;
+    margin: 0;
+    color: unset;
+    border: none;
+    background: none;
+}
+
+.navbarMain .searchBar{
+    white-space: nowrap;
+}
+
+.navbarMain .searchBar input{
+    width: 15em;
+    font-size: 0.7em;
+    margin-right: 0em;
+    padding-right: 1.5em;
+    margin-bottom: 0.3em;
+    border-radius: 5px;
+    box-shadow: 1px 1px black;
+}
+
+.navbarMain .linkContainer .searchButton{
+    position: relative;
+    border: none;
+    background: none;
+    color: black;
+    left: -1.5em;
+}
+
+.navbarMain .linkContainer a:hover{
+    background-color: white;
+    color: #545454;
+    border-radius: 10px 10px 0 0;
+}
+
+.logoContainer{
+    height: 2em !important;
+    width: fit-content;
+}
+
+.logoContainer:hover{
+    cursor: pointer;
+    color: lightgrey;
+}
+
+
+.logoContainer img{
+    position: relative !important;
+}
+
+.addPadding{
+    padding-left: 1em;
+    font-size: 85%;
+}
+
+.addExtraPadding{
+    padding-left: 2em;
+    font-size: 70%;
+}
+
+.navigationContainer{
+    font-size: 70%;
+    padding: 0em 0.5em;
+    border: none;
+    border-radius: 3px;
+    background: none;
+    color: black;
+}
+
+.navigationContainer:hover{
+    background-color: rgba(0, 0, 0, 0.45);
+    text-decoration: none !important;
+}
+
+.navigationContainer h2{
+    font-size: 150%;
+}
+
+.keyword{
+    background-color: #dcdcdc;
+    padding: 0.2em;
+    border-radius: 5px;
+    margin-right: 0.2em;
+}
+
+.searchWarning{
+    z-index: 2;
+    margin: 0.5em;
+    font-size: 90%;
+    color: white;
+}
+
+.hide{
+    display: none;
+}

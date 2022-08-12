@@ -1,0 +1,70 @@
+.hideButton {
+    background: none;
+    border: none;
+    padding: 0;
+}
+
+.hideButton:hover{
+    text-decoration: underline;
+}
+
+.details {
+    font-size: 0.9em;
+    padding-left: 2em;
+}
+
+.main{
+    max-width: 70em;
+    min-width: 50vw;
+    width: available;
+    margin: 0 auto;
+}
+
+.criteria{
+    font-size: 1.4em;
+    margin: 0 auto;
+}
+
+.criteria td{
+    padding: 0.4em;
+}
+
+.main button{
+    border-radius: 10px;
+    padding: 0.2em 0.4em;
+    margin: 0.2em;
+    background-color: lightgrey;
+}
+
+.main button:hover{
+    background-color: #727986;
+}
+
+.main button:disabled:hover{
+    background-color: lightgrey;
+}
+
+.submit{
+    font-size: 1.4em;
+    float: right;
+}
+
+.modifyButton{
+    margin-top: 0.4em;
+    margin-left: 0.3em;
+    background-color: #dcdcdc;
+    border-radius: 4px;
+}
+
+.modifyButton:hover{
+    background-color: #cbcbcb;
+}
+
+.modifyButton:disabled{
+    opacity: 60%;
+    background-color: white;
+}
+
+.keyword:disabled{
+    text-decoration: line-through
+}

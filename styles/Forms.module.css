@@ -1,0 +1,110 @@
+.page{
+    background-image: url("https://images.unsplash.com/photo-1478361000558-6f397482ffbd?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1228&q=80");
+    background-size: cover;
+    width: 100%;
+    min-height: 100vh;
+    display: flex;
+    font-size: 1.2em;
+    color: #4F64A8;
+}
+
+.hide{
+    animation: fadeIn 1s;
+    filter: brightness(20%) blur(10px);
+}
+
+@keyframes fadeIn {
+    0% { filter: brightness(100%) blur(0px); }
+    100% {  filter: brightness(20%) blur(10px); }
+}
+
+.form {
+    display: flex;
+    flex-direction: column;
+    margin: 0 auto;
+    background-color: white;
+    min-width: 600px;
+    max-width: 100vw;
+    min-height: 10vh;
+    width: 50em;
+    text-align: center;
+    padding: 2% 5%;
+}
+
+@media(max-width: 600px)
+{
+    .form {
+        min-width: unset;
+        width: 100vw;
+    }
+
+}
+
+
+.form h1{
+    margin: 0;
+    padding: 0;
+    font-size: 1.2em;
+}
+
+.form .logoContainer{
+    position: relative;
+    width: 32%;
+    height: 6%;
+    margin: 0 auto;
+}
+
+.form a{
+    color: #314073;
+    margin: 0 auto;
+    width: fit-content;
+    font-style: italic;
+}
+
+.field{
+    display: block;
+    margin: 0 auto;
+    width: 15em;
+    text-align: left;
+}
+
+.field input{
+    font-size: 1.2em;
+    width: inherit;
+    padding: 3px;
+}
+
+.form button{
+    color: white;
+    background-color: #4F64A8;
+    border: 2px white solid;
+    padding: 2% 4%;
+    border-radius: 5px;
+    font-size: 2em;
+    margin: 0 auto;
+}
+
+.form button:hover{
+    color: #4F64A8;
+    border: 2px #4F64A8 solid;
+    background-color: white;
+}
+
+.form button:disabled{
+    opacity: 60%;
+}
+
+.form button:disabled:hover{
+    opacity: 60%;
+    cursor: not-allowed;
+    color: white;
+    border: 2px white solid;
+    background-color: #4F64A8;
+}
+
+.waring{
+    font-size: 0.85em;
+    height: 0em;
+    padding: 0;
+    opacity: 70%;
+}
