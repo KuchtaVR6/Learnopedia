@@ -1,7 +1,7 @@
 import {Dispatch, FC, SetStateAction, useEffect, useRef, useState} from "react";
 
-import prompt from "../../styles/Prompt.module.css";
-import styles from "../../styles/Forms.module.css"
+import prompt from "../../../styles/Prompt.module.css";
+import styles from "../../../styles/Forms.module.css"
 import Authenticator from "./authenticator";
 import {ApolloCache, DefaultContext, gql, MutationFunctionOptions} from "@apollo/client";
 

@@ -1,5 +1,5 @@
 import {Dispatch, FC, SetStateAction, useState} from "react";
-import styles from "../../styles/Forms.module.css";
+import styles from "../../../styles/Forms.module.css";
 
 type Args = {
     setProp: Dispatch<SetStateAction<string>>,

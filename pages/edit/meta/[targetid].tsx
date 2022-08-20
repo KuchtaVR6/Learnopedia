@@ -3,7 +3,7 @@ import {GetServerSidePropsContext, NextPage} from "next";
 import client from "../../../apollo-client";
 import {fetchquery} from "../../view/[viewId]";
 import {FullOutput, MetaOutput} from "../../../models/backEnd/contents/Content";
-import MetaForm from "../../../models/frontEnd/metaForm";
+import MetaForm from "../../../models/frontEnd/editForms/metaForm";
 import {useEffect, useState} from "react";
 import styles from "../../../styles/ContentDisplay.module.css";
 import {gql, useMutation} from "@apollo/client";
@@ -62,8 +62,7 @@ const EditChild: NextPage<{
                 newName: changes.title !== data.mainMeta.name ? changes.title : null,
                 newDescription: changes.description !== data.mainMeta.description ? changes.description : null,
                 addedKeywords: changes.addedKeywords,
-                deletedKeywordIDs: changes.deletedKeywords,
-                seqNumber: 32
+                deletedKeywordIDs: changes.deletedKeywords
             }
         }
     })
@@ -84,8 +83,13 @@ const EditChild: NextPage<{
     const [validity, setValidity] = useState<boolean>(false)
 
     useEffect(() => {
-        if (changes.title || changes.description || (changes.addedKeywords && changes.addedKeywords.length > 3)) {
-            setValidity(true)
+        if (changes.title || changes.description || (changes.addedKeywords && changes.addedKeywords.length > 0)) {
+            if(calculateKeywords()>3) {
+                setValidity(true)
+            }
+            else{
+                setValidity(false)
+            }
         } else {
             setValidity(false)
         }

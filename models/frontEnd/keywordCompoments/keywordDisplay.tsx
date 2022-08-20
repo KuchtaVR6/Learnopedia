@@ -1,5 +1,5 @@
 import {FC} from "react";
-import styles from "../../styles/RegPage.module.css";
+import styles from "../../../styles/RegPage.module.css";
 
 const KeywordDisplay: FC<{ keywords: { ID: number, Score: number, word: string }[] }> = ({keywords}) => {
     return (

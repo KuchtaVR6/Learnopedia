@@ -4,7 +4,7 @@ import {useRouter} from "next/router";
 import client from "../../apollo-client";
 import {gql} from "@apollo/client";
 import {MetaOutput} from "../../models/backEnd/contents/Content";
-import SearchDisplay from "../../models/frontEnd/searchDisplay";
+import SearchDisplay from "../../models/frontEnd/navigational/searchDisplay";
 
 const Search: NextPage<{data : {
         score: number,

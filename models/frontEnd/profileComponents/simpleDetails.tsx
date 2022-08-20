@@ -1,15 +1,16 @@
 import {FC, useEffect, useState} from "react";
 import {gql, useMutation} from "@apollo/client";
 import styles from "/styles/Profile.module.css";
-import ModifyDisplayConstrained, {ConstrainedInputTypes} from "./modifyDisplayConstrained";
-import ModifyDisplay from "./modifyDisplay";
+import ModifyDisplayConstrained, {ConstrainedInputTypes} from "../inputs/modifyDisplayConstrained";
+import ModifyDisplay from "../inputs/modifyDisplay";
 
 type args = {
     data: any,
     loading: boolean
+    hideOptions?: boolean
 }
 
-const SimpleDetails: FC<args> = ({data, loading}) => {
+const SimpleDetails: FC<args> = ({data, loading, hideOptions}) => {
     const modUser = gql`
         mutation Mutation($lname: String, $fname: String, $nickname: String) {
             modifyUser(lname: $lname, fname: $fname, nickname: $nickname) {
@@ -86,14 +87,16 @@ const SimpleDetails: FC<args> = ({data, loading}) => {
                     <>
                         <ModifyDisplayConstrained desc={"Username: "} value={displayNick}
                                                   setProp={setNickname}
-                                                  type={ConstrainedInputTypes.NICKNAME}/>
-                        <ModifyDisplay desc={"Forename: "} value={displayFName} setProp={setFName}/>
-                        <ModifyDisplay desc={"Surname: "} value={displayLName} setProp={setLName}/>
+                                                  type={ConstrainedInputTypes.NICKNAME}
+                                                  hideOptions={hideOptions}
+                        />
+                        <ModifyDisplay desc={"Forename: "} value={displayFName} setProp={setFName} hideOption={hideOptions}/>
+                        <ModifyDisplay desc={"Surname: "} value={displayLName} setProp={setLName} hideOption={hideOptions}/>
                     </>
                 }
             </div>
-            <button disabled={(!simpleChanges || loading)} onClick={() => simpleMod()}
-                    className={styles.save}>{loading ? "Loading..." : simpleChanges ? "Save the changes" : "No changes"}</button>
+            {hideOptions? "" : <button disabled={(!simpleChanges || loading)} onClick={() => simpleMod()}
+                    className={styles.save}>{loading ? "Loading..." : simpleChanges ? "Save the changes" : "No changes"}</button>}
         </div>
     )
 }

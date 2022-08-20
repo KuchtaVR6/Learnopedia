@@ -1,11 +1,64 @@
-import Amendment from "./Amendment";
+import Amendment, {SpecificAmendmentOutput} from "./Amendment";
+import {ContentType} from "../contents/Content";
 
-class ListAmendment extends Amendment{
-    public readonly changes : {ChildID : number, newSeqNumber? : number, delete? : boolean}[];
+export type ListAmendmentOutput = {
+    __typename: "ListAmendmentOutput",
+    listChanges : { ChildID?: number, LessonPartID?: number, newSeqNumber?: number, delete?: boolean }[]
+}
 
-    public constructor(id : number, authorID : number, targetID : number, changes : {ChildID : number, newSeqNumber? : number, delete? : boolean}[]) {
-        super(id, authorID, targetID);
+class ListAmendment extends Amendment {
+    public readonly changes: { ChildID?: number, LessonPartID?: number, newSeqNumber?: number, delete?: boolean }[];
+
+    public constructor(
+        id: number,
+        authorID: number | null,
+        targetID: number,
+        changes: { ChildID?: number, LessonPartID?: number, newSeqNumber?: number, delete?: boolean }[],
+        secondary : {dbInput : false, targetType: ContentType} | {dbInput : true, creationDate : Date, significance : number, tariff : number, applied : boolean})
+    {
+        if(!secondary.dbInput){
+            let significance = 0;
+
+            let elemSignificance: number;
+
+            switch (secondary.targetType) {
+                case ContentType.COURSE:
+                    elemSignificance = 100;
+                    break;
+                case ContentType.CHAPTER:
+                    elemSignificance = 1000;
+                    break;
+                case ContentType.LESSON:
+                    elemSignificance = 10000;
+                    break;
+            }
+
+            changes.map((change) => {
+                if (change.delete) {
+                    significance += elemSignificance
+                } else {
+                    significance += 1;
+                }
+            })
+
+            super(id, authorID, targetID, significance, 100);
+        }
+        else{
+            super(id, authorID, targetID, secondary.significance, secondary.tariff, secondary.creationDate, secondary.applied)
+        }
         this.changes = changes;
+    }
+
+    protected async getSpecificOutput() : Promise<SpecificAmendmentOutput> {
+        return {
+            __typename: "ListAmendmentOutput",
+            listChanges : this.changes
+        }
+    }
+
+    public fullyFetched()
+    {
+        return true;
     }
 }
 

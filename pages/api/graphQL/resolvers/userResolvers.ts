@@ -7,8 +7,14 @@ import MailManager, {ActionType} from "../../../../models/backEnd/managers/MailM
 
 export const userResolvers = {
     Query: {
-        getUser: async (parent: undefined, args: any, context: { user: User, agent: string, refreshToken: string, response: any, setCookies: any, setHeaders: any }) => {
-            let thisUser = await enforceUser(context)
+        getUser: async (parent: undefined, args: { nickname? : string }, context: { user: User, agent: string, refreshToken: string, response: any, setCookies: any, setHeaders: any }) => {
+            let thisUser;
+            if(args.nickname){
+                thisUser = await UserManager.getInstance().getUser(args.nickname)
+            }
+            else{
+                thisUser = await enforceUser(context);
+            }
             return thisUser.getAllDetails()
         },
         vacantEmail: (parent: undefined, args: { email: string }, context: { user: User, agent: string, refreshToken: string, response: any, setCookies: any, setHeaders: any }) => {

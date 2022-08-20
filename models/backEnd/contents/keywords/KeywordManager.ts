@@ -1,9 +1,20 @@
 import prisma from "../../../../prisma/prisma";
 import Keyword, {ActiveKeyword} from "./Keyword";
-import Content, {MetaOutput} from "../Content";
+import {MetaOutput} from "../Content";
 import ContentManager from "../ContentManager";
-import {NOTFOUND} from "dns";
 import {NotFoundException} from "../../tools/Errors";
+import {
+    adoptionamendment,
+    amendment,
+    creationamendment,
+    keyword,
+    keywordentrymod,
+    keywordmodamendment,
+    listamendment,
+    metaamendment,
+    partaddreplaceamendment,
+    partamendment
+} from "@prisma/client";
 
 class KeywordManager {
     private static instance: KeywordManager | null = null;
@@ -18,7 +29,7 @@ class KeywordManager {
 
         keywordsInput.map((value) => {
             if (value.ContentID) {
-                let activeKeyword = new ActiveKeyword(value.ID ,value.Score, value.word, value.ContentID)
+                let activeKeyword = new ActiveKeyword(value.ID, value.Score, value.word, value.ContentID)
 
                 let currentMap = this.activeKeywords.get(value.word)
                 if (currentMap) {
@@ -41,32 +52,48 @@ class KeywordManager {
         return this.instance;
     }
 
-    private appendActive(keyword : ActiveKeyword)
-    {
+    private appendActive(keyword: ActiveKeyword) {
         let currentTable = this.activeKeywords.get(keyword.getWord())
 
-        if(currentTable)
-        {
+        if (currentTable) {
             currentTable.push(keyword)
-        }
-        else{
+        } else {
             this.activeKeywords.set(keyword.getWord(), [keyword])
         }
     }
 
-    private removeActive(keyword : ActiveKeyword)
-    {
+    private removeActive(keyword: ActiveKeyword) {
         let currentTable = this.activeKeywords.get(keyword.getWord())
 
-        if(currentTable)
-        {
+        if (currentTable) {
             currentTable.filter((thisKeyword) => {
-                if(keyword === thisKeyword){
-                    return false
-                }
-                return true
+                return keyword !== thisKeyword;
             })
         }
+    }
+
+    public interpretKeywordAdditions(input: (keywordentrymod & { keyword: keyword | null })[]): Keyword[] {
+        let result: Keyword[] = [];
+
+        for (let row of input) {
+            if (row.keyword && !row.delete && row.newWord && row.score) {
+                result.push(new Keyword(row.keyword.ID, row.score, row.newWord))
+            }
+        }
+
+        return result;
+    }
+
+    public interpretKeywordDeletions(input: (keywordentrymod & { keyword: keyword | null })[]): Keyword[] {
+        let result: Keyword[] = [];
+
+        for (let row of input) {
+            if (row.keyword && row.delete) {
+                result.push(new Keyword(row.keyword.ID, row.keyword.Score, row.keyword.word))
+            }
+        }
+
+        return result;
     }
 
     private static async fetchKeywords() {
@@ -80,7 +107,7 @@ class KeywordManager {
         });
     }
 
-    public async resolveSearch(query: String): Promise<{score : number, content : MetaOutput}[]> {
+    public async resolveSearch(query: String): Promise<{ score: number, content: MetaOutput }[]> {
         let words = query.split(" ");
 
         let contentIDs = new Map<number, number>;
@@ -102,9 +129,9 @@ class KeywordManager {
 
         let fetchedContents = await ContentManager.getInstance().fetchContentsWithIDs(Array.from(contentIDs.keys()));
 
-        let resultingMap : {score : number, content : MetaOutput}[] = [];
+        let resultingMap: { score: number, content: MetaOutput }[] = [];
 
-        for(let fetchedContent of fetchedContents) {
+        for (let fetchedContent of fetchedContents) {
             let score = contentIDs.get(fetchedContent.getID())
             if (score) {
                 let overall = score * fetchedContent.getSignificance();
@@ -115,8 +142,7 @@ class KeywordManager {
         return resultingMap
     }
 
-    public activate(keyword : Keyword, contentID : number)
-    {
+    public activate(keyword: Keyword, contentID: number) {
         let x = new ActiveKeyword(keyword.getID(), keyword.getScore(), keyword.getWord(), contentID)
         this.allKeywords.set(keyword.getID(), x)
         this.appendActive(x)
@@ -124,16 +150,15 @@ class KeywordManager {
         return x
     }
 
-    public deactivate(keyword : ActiveKeyword)
-    {
+    public deactivate(keyword: ActiveKeyword) {
         this.removeActive(keyword)
 
         let x = new Keyword(keyword.getID(), keyword.getScore(), keyword.getWord())
         prisma.keyword.update({
-            where : {
-                ID : keyword.getID()
+            where: {
+                ID: keyword.getID()
             },
-            data : {
+            data: {
                 ContentID: null
             }
         })
@@ -143,32 +168,41 @@ class KeywordManager {
         return x
     }
 
-    public async createKeywords(input : { word : string, Score : number }[]) : Promise<Keyword[]> {
+    public async createKeywords(input: { word: string, Score: number }[]): Promise<Keyword[]> {
 
-        let result : Keyword[] = [];
+        let result: Keyword[] = [];
 
         await Promise.all(input.map(async (row) => {
-            let newKeyword = new Keyword(-1,row.Score,row.word);
+            let newKeyword = new Keyword(-1, row.Score, row.word);
             let dbOutput = await prisma.keyword.create({
                 data: row
             })
             newKeyword.setID(dbOutput.ID)
             result.push(newKeyword)
-            this.allKeywords.set(dbOutput.ID,newKeyword);
+            this.allKeywords.set(dbOutput.ID, newKeyword);
         }))
 
         return result;
 
     }
 
-    public getKeywordByID(id : number) {
+    public getKeywordByID(id: number) {
         let output = this.allKeywords.get(id)
 
-        if(output)
-        {
+        if (output) {
             return output
         }
-        throw new NotFoundException("Keyword",id)
+        throw new NotFoundException("Keyword", id)
+    }
+
+    public static readKeywords(array: Keyword[]): { ID: number, Score: number, word: string }[] {
+        let result: { ID: number, Score: number, word: string }[] = []
+
+        for (let key of array) {
+            result.push({ID: key.getID(), Score: key.getScore(), word: key.getWord()})
+        }
+
+        return result;
     }
 }
 

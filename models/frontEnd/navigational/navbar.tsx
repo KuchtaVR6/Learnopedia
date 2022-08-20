@@ -1,9 +1,9 @@
-import {FC, useContext, useState} from "react";
-import styles from "../../styles/RegPage.module.css";
+import {FC, useContext, useEffect, useState} from "react";
+import styles from "../../../styles/RegPage.module.css";
 import Link from "next/link";
 import {TbSearch} from "react-icons/tb";
 import {GiFlexibleLamp} from "react-icons/gi";
-import {UserContext} from "./userContext";
+import {UserContext} from "../authentication/userContext";
 import {gql, useLazyQuery} from "@apollo/client";
 import {useRouter} from "next/router";
 
@@ -17,15 +17,7 @@ const Navbar: FC = () => {
 
     const [showWarning, setShowWarning] = useState(false)
 
-    const logoutQuery = gql`
-        query Logout {
-            logout {
-                authorisation
-            }
-        }
-    `
-
-    const [logout] = useLazyQuery(logoutQuery)
+    const [loggedIn, setLoggedIn] = useState<boolean | null>(null)
 
     const search = () => {
         if(searchInput.length > 2)
@@ -45,18 +37,18 @@ const Navbar: FC = () => {
 
             <div className={styles.linkContainer}>
 
-                {userContext.loggedIn() ?
+                {loggedIn || (loggedIn===null && userContext.loggedIn())?
                     <>
                         <a>
                         <button onClick={
-                            () =>
-                            {
-                                logout().then(
-                                    () => {
-                                        //todo
-                                        window.sessionStorage.setItem("loggedIn","false")
-                                        router.push("/")
-                                    })}}>Logout</button>
+                            () => {
+                                userContext.logout()
+                                setLoggedIn(false)
+                                router.reload()
+                            }}
+                        >
+                            Logout
+                        </button>
                         </a>
                         <Link href={"/profile"}>Profile</Link>
                     </>

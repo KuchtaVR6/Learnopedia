@@ -1,5 +1,5 @@
 import {Expirable} from "../tools/Expirable";
-import Amendment from "../amendments/Amendment";
+import Amendment, {AmendmentOutput} from "../amendments/Amendment";
 import CreationAmendment from "../amendments/CreationAmendment";
 import MetaAmendment from "../amendments/MetaAmendment";
 import {User} from "../User";
@@ -11,10 +11,7 @@ import AdoptionAmendment from "../amendments/AdoptionAmendment";
 import ListAmendment from "../amendments/ListAmendment";
 import {displayableOutput} from "../lessonParts/LessonPart";
 import {CourseOutput} from "./Course";
-import ContentManager from "./ContentManager";
-import PartModificationAmendment from "../amendments/PartAmendments/PartModificationAmendment";
-import PartInsertAmendment from "../amendments/PartAmendments/PartInsertAmendment";
-import PartDeletionAmendment from "../amendments/PartAmendments/PartDeletionAmendment";
+import PartAddReplaceAmendment from "../amendments/PartAmendments/PartAddReplaceAmendment";
 
 export type FullOutput = {
     metas: CourseOutput,
@@ -61,11 +58,11 @@ class Content extends Expirable {
     private dateModified: Date;
     private readonly dateCreated: Date;
 
-    private type: ContentType;
+    private readonly type: ContentType;
 
     private seqNumber: number;
 
-    private amendments: Array<Amendment>;
+    private readonly amendments: Array<Amendment>;
 
     public constructor(
         id: number,
@@ -118,7 +115,7 @@ class Content extends Expirable {
 
     public async applyMetaAmendment(amendment: MetaAmendment) {
 
-        this.modification()
+        await this.modification()
 
         await prisma.amendment.update({
             where: {
@@ -224,10 +221,6 @@ class Content extends Expirable {
         return this.upVotes - this.downVotes
     }
 
-    public getName() {
-        return this.name
-    }
-
     public async modification() {
         this.dateModified = new Date();
 
@@ -241,7 +234,7 @@ class Content extends Expirable {
         })
     }
 
-    private twoDigit(input: number) {
+    private static twoDigit(input: number) {
         if (input < 10) {
             return "0" + input.toString()
         }
@@ -249,24 +242,14 @@ class Content extends Expirable {
     }
 
     public getCreationDate() {
-        return this.dateCreated.getFullYear() + "." + this.twoDigit(this.dateCreated.getMonth() + 1) + "." + this.twoDigit(this.dateCreated.getDate())
+        return Content.twoDigit(this.dateCreated.getDate())  + "." + Content.twoDigit(this.dateCreated.getMonth() + 1) + "." + this.dateCreated.getFullYear()
     }
 
     public getModificationDate() {
-        return this.dateModified.getFullYear() + "." + this.twoDigit(this.dateModified.getMonth() + 1) + "." + this.twoDigit(this.dateModified.getDate())
+        return Content.twoDigit(this.dateModified.getDate()) + "." + Content.twoDigit(this.dateModified.getMonth() + 1) + "." + this.dateModified.getFullYear()
     }
 
-    public getDetailsForDisplay() {
-        return {
-            name: this.name,
-            description: this.description,
-            score: this.getOverallScore(),
-            modification: this.dateModified,
-            creation: this.dateCreated
-        }
-    }
-
-    public async getLDJSON(): Promise<LDNJSON> {
+    public async getLDJSON(): Promise<LDNJSON> { //todo in the future remove
         return (
             {
                 "@context": "https://schema.org",
@@ -345,9 +328,19 @@ class Content extends Expirable {
 
     public getSignificance() {
         if (this.downVotes === 0) {
-            return this.upVotes * this.views;
+            let x = this.upVotes * this.views
+            if(x < 1)
+            {
+                return 1;
+            }
+            return x;
         }
-        return (((this.upVotes - this.downVotes) / this.downVotes) + 1) * this.views;
+        let x = (((this.upVotes - this.downVotes) / this.downVotes) + 1) * this.views
+        if(x < 1)
+        {
+            return 1;
+        }
+        return x;
     }
 
     public getID() {
@@ -389,8 +382,15 @@ class Content extends Expirable {
         this.amendments.push(amendment)
     }
 
-    public getAmendments() {
-        return this.amendments;
+    public async getAmendmentsOutput() {
+        let outputs : AmendmentOutput[] = [];
+
+        for(let amendment of this.amendments)
+        {
+            outputs.push(await amendment.getFullAmendmentOutput())
+        }
+
+        return outputs;
     }
 
     public setSeqNumber(seqNumber: number) {
@@ -432,19 +432,11 @@ class Content extends Expirable {
         return this.specificID;
     }
 
-    public async applyPartModificationAmendment(amendment: PartModificationAmendment) {
-        throw new UnsupportedOperation("Non-Lesson Content", "applyPartModificationAmendment")
+    public async applyPartAddReplaceAmendment(amendment: PartAddReplaceAmendment) {
+        throw new UnsupportedOperation("Non-Lesson Content", "applyPartAddReplaceAmendment")
     }
 
-    public async applyPartInsertAmendment(amendment: PartInsertAmendment) {
-        throw new UnsupportedOperation("Non-Lesson Content", "applyPartInsertAmendment")
-    }
-
-    public async applyPartDeletionAmendment(amendment: PartDeletionAmendment) {
-        throw new UnsupportedOperation("Non-Lesson Content", "applyPartDeletionAmendment")
-    }
-
-    public checkPaternity(ids: { ChildID: number, newSeqNumber?: number, delete: boolean }[]): boolean {
+    public checkPaternity(ids: { ChildID?: number, LessonPartID? : number, newSeqNumber?: number, delete: boolean }[]): boolean {
         throw ContentNotFetched
     }
 

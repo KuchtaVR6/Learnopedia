@@ -1,6 +1,6 @@
 import {Dispatch, FC, SetStateAction, useEffect, useState} from "react";
 import {DocumentNode, useLazyQuery} from "@apollo/client";
-import styles from "../../styles/Forms.module.css";
+import styles from "../../../styles/Forms.module.css";
 import {ConstrainedInputTypes} from "./modifyDisplayConstrained";
 import OnStopInput, {OSIStates} from "./OnStopInput";
 

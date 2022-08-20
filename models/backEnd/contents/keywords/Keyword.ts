@@ -1,4 +1,3 @@
-import ContentManager from "../ContentManager";
 import {InvalidArgument} from "../../tools/Errors";
 
 class Keyword {
@@ -64,10 +63,6 @@ export class ActiveKeyword extends Keyword{
     public constructor(id: number, score : number, word : string, contentID : number) {
         super(id, score, word);
         this.contentID = contentID;
-    }
-
-    public getContent() {
-        return ContentManager.getInstance().getContentByID(this.contentID);
     }
 
     public getContentID() {

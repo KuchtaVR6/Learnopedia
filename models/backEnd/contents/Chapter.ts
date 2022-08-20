@@ -1,10 +1,10 @@
 import Content, {ContentType, FullOutput, MetaOutput} from "./Content";
-import Lesson, {LessonOutput} from "./Lesson";
-import {Course, CourseOutput} from "./Course";
+import Lesson from "./Lesson";
+import {Course} from "./Course";
 import CreationAmendment from "../amendments/CreationAmendment";
 import {ActiveKeyword} from "./keywords/Keyword";
 import Amendment from "../amendments/Amendment";
-import {ContentNotFetched, NotFoundException, SequenceNumberTaken} from "../tools/Errors";
+import {NotFoundException, SequenceNumberTaken} from "../tools/Errors";
 import AdoptionAmendment from "../amendments/AdoptionAmendment";
 import prisma from "../../../prisma/prisma";
 import ListAmendment from "../amendments/ListAmendment";
@@ -161,11 +161,12 @@ class Chapter extends Content {
             })
             if(!found)
             {
-                throw new NotFoundException("Child",change.ChildID)
+                throw new NotFoundException("Child",change.ChildID? change.ChildID : -1)
             }
         }
 
-        await idsToNewSQMap.forEach( async (seqNum, ID) => {
+        for(let ID of Array.from(idsToNewSQMap.keys())) {
+            let seqNum = idsToNewSQMap.get(ID);
             await prisma.content.update({
                 where: {
                     ID: ID
@@ -174,7 +175,7 @@ class Chapter extends Content {
                     seqNumber: seqNum
                 }
             })
-        })
+        }
 
         this.sortChildern();
         this.balanced = false;
@@ -186,27 +187,28 @@ class Chapter extends Content {
     public async balance() {
         if (!this.balanced) {
             this.sortChildern()
-            console.log("sorted")
-            let childernCopy = Array.from(this.children.keys());
+            let childrenCopy = new Map<number,Lesson>(this.children);
+            let childernKeys = Array.from(this.children.keys());
 
             let patern = 32;
-            for(let seq of childernCopy){
+            for(let seq of childernKeys){
                 if (seq !== patern) {
-                    let child = this.children.get(seq)
-                    this.children.delete(seq)
+                    let child = childrenCopy.get(seq)
+                    if(child) {
+                        this.children.delete(seq)
 
-                    child!.setSeqNumber(patern)
-                    this.children.set(patern, child!)
-                    console.log(patern," -> ",child)
+                        child!.setSeqNumber(patern)
+                        this.children.set(patern, child!)
 
-                    await prisma.content.update({
-                        where: {
-                            ID: child!.getID()
-                        },
-                        data: {
-                            seqNumber: patern
-                        }
-                    })
+                        await prisma.content.update({
+                            where: {
+                                ID: child!.getID()
+                            },
+                            data: {
+                                seqNumber: patern
+                            }
+                        })
+                    }
                 }
                 patern += 32;
             }
@@ -227,7 +229,7 @@ class Chapter extends Content {
         return this.children.has(newSeqNumber)
     }
 
-    public checkPaternity(ids : { ChildID: number, newSeqNumber?: number, delete: boolean }[]) : boolean {
+    public checkPaternity(ids : { ChildID?: number, LessonPartID?: number, newSeqNumber?: number, delete: boolean }[]) : boolean {
         let justIDs : number[]= [];
 
         this.children.forEach((child) => {
@@ -235,8 +237,12 @@ class Chapter extends Content {
         })
 
         for(let id of ids) {
-            if(justIDs.indexOf(id.ChildID)<0)
-            {
+            if(id.ChildID) {
+                if (justIDs.indexOf(id.ChildID) < 0) {
+                    return false
+                }
+            }
+            else{
                 return false
             }
         }

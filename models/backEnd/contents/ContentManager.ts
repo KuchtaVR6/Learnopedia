@@ -1,5 +1,5 @@
 import SelfPurgingMap from "../tools/SelfPurgingMap";
-import Content, {ContentType} from "./Content";
+import Content, {ContentType, MetaOutput} from "./Content";
 import {
     ContentNotFoundException,
     ContentNotNavigable,
@@ -24,18 +24,119 @@ import {amendment, keyword} from "@prisma/client";
 import {Course} from "./Course";
 import Chapter from "./Chapter";
 import Lesson from "./Lesson";
-import PartDeletionAmendment from "../amendments/PartAmendments/PartDeletionAmendment";
 import LessonPartManager, {lessonPartArgs} from "../lessonParts/LessonPartManager";
-import PartModificationAmendment from "../amendments/PartAmendments/PartModificationAmendment";
-import PartInsertAmendment from "../amendments/PartAmendments/PartInsertAmendment";
+import PartAddReplaceAmendment from "../amendments/PartAmendments/PartAddReplaceAmendment";
+import {UserManager} from "../managers/UserManager";
+import AmendmentManager, {prismaInclusions} from "../amendments/AmendmentManager";
 
 class ContentManager {
     private static instance: ContentManager | null = null;
 
     private cache: SelfPurgingMap<number, Content>
 
+    private recommended: Content[];
+    private staleTime : number;
+
     private constructor() {
         this.cache = new SelfPurgingMap<number, Content>();
+        this.recommended = [];
+        this.staleTime = 0;
+    }
+
+    public async getRecommendations() {
+        if(this.staleTime<(new Date()).getTime())
+        {
+            //create recommendations
+            let dbResults = await prisma.content.findMany({
+                where : {
+                    public : true
+                },
+                orderBy : {
+                    views : "desc"
+                },
+                take : 20,
+                include : {
+                    keyword : true,
+                    amendment : true,
+
+                    lesson : true,
+                    course : true,
+                    chapter : true,
+                }
+            })
+
+            this.recommended = [];
+
+            for(let value of dbResults) {
+                if (value.public) {
+                    let keywordsArray: ActiveKeyword[] = []
+                    value.keyword.map((keyword) => {
+                        keywordsArray.push(new ActiveKeyword(keyword.ID, keyword.Score, keyword.word, value!.ID))
+                    })
+
+                    let amendmentsArray: Amendment[] = []
+                    value.amendment.map((amendment) => {
+                        amendmentsArray.push(new Amendment(amendment.ID, amendment.CreatorID, amendment.ContentID!, amendment.significance, amendment.tariff, amendment.timestamp))
+                    })
+
+                    let type: ContentType;
+
+                    let specificID : number;
+
+                    if (value.lesson) {
+                        type = ContentType.LESSON
+                        specificID = value.lesson.LessonID
+                    } else if (value.course) {
+                        type = ContentType.COURSE
+                        specificID = value.course.CourseID
+                    } else if (value.chapter) {
+                        type = ContentType.CHAPTER
+                        specificID = value.chapter.ChapterID
+                    } else {
+                        throw new Error("UNCLASSIFIED CONTENT CRITICAL")
+                    }
+
+                    let content = new Content(
+                        value.ID,
+                        specificID,
+                        {
+                            name: value.name,
+                            description: value.description,
+                            dateCreated: value.dateCreated,
+                            dateModified: value.dateModified,
+                            downVotes: value.downVotes,
+                            upVotes: value.upVotes,
+                            views: value.views,
+                            seqNumber: value.seqNumber,
+                            amendments: amendmentsArray,
+                            keywords: keywordsArray,
+                            type: type
+                        })
+                    this.cache.set(value.ID, content)
+
+                    this.recommended.push(content);
+                } else {
+                    throw new ContentNotNavigable();
+                }
+
+                this.staleTime = (new Date()).getTime() + 60*60*1000
+            }
+        }
+        return this.recommended;
+    }
+
+    public async getRecommendedMetas() : Promise<MetaOutput[]>
+    {
+        let x = (await this.getRecommendations())
+
+        let result : MetaOutput[] = [];
+
+        for(let recommendation of x)
+        {
+            result.push(await recommendation.getMeta())
+        }
+
+        return result;
     }
 
     public static getInstance() {
@@ -85,23 +186,20 @@ class ContentManager {
                     keywordsArray.push(new ActiveKeyword(keyword.ID, keyword.Score, keyword.word, dbResult!.ID))
                 })
 
-                let amendmentsArray: Amendment[] = []
-                dbResult.amendment.map((amendment) => {
-                    amendmentsArray.push(new Amendment(amendment.ID, amendment.CreatorID, amendment.ContentID!, amendment.timestamp))
-                })
+                let amendmentsArray: Amendment[] = AmendmentManager.getInstance().insertManyToCachePartial(dbResult.amendment);
 
                 let type: ContentType;
                 let specificID : number;
 
-                if (dbResult.lesson.length > 0) {
+                if (dbResult.lesson) {
                     type = ContentType.LESSON
-                    specificID = dbResult.lesson[0].LessonID
-                } else if (dbResult.course.length > 0) {
+                    specificID = dbResult.lesson.LessonID
+                } else if (dbResult.course) {
                     type = ContentType.COURSE
-                    specificID = dbResult.course[0].CourseID
-                } else if (dbResult.chapter.length > 0) {
+                    specificID = dbResult.course.CourseID
+                } else if (dbResult.chapter) {
                     type = ContentType.CHAPTER
-                    specificID = dbResult.chapter[0].ChapterID
+                    specificID = dbResult.chapter.ChapterID
                 } else {
                     throw new Error("UNCLASSIFIED CONTENT CRITICAL")
                 }
@@ -177,12 +275,12 @@ class ContentManager {
             if (dbResult.public) {
                 let targetHost: number;
 
-                if (dbResult.course.length > 0) {
-                    targetHost = dbResult.course[0].ContentID
-                } else if (dbResult.chapter.length > 0) {
-                    targetHost = dbResult.chapter[0].course.ContentID
-                } else if (dbResult.lesson.length > 0) {
-                    targetHost = dbResult.lesson[0].chapter.course.ContentID
+                if (dbResult.course) {
+                    targetHost = dbResult.course.ContentID
+                } else if (dbResult.chapter) {
+                    targetHost = dbResult.chapter.course.ContentID
+                } else if (dbResult.lesson) {
+                    targetHost = dbResult.lesson.chapter.course.ContentID
                 } else {
                     throw new Error("UNCLASSIFIED CONTENT CRITICAL")
                 }
@@ -194,7 +292,9 @@ class ContentManager {
                     },
                     include: {
                         keyword: true,
-                        amendment: true,
+                        amendment: {
+                            include : prismaInclusions
+                        },
 
                         course: {
                             include: {
@@ -203,7 +303,9 @@ class ContentManager {
                                         content: {
                                             include: {
                                                 keyword: true,
-                                                amendment: true,
+                                                amendment: {
+                                                    include : prismaInclusions
+                                                },
                                             }
                                         },
                                         lesson: {
@@ -211,7 +313,9 @@ class ContentManager {
                                                 content: {
                                                     include: {
                                                         keyword: true,
-                                                        amendment: true,
+                                                        amendment: {
+                                                            include : prismaInclusions
+                                                        },
                                                     }
                                                 }
                                             }
@@ -223,12 +327,12 @@ class ContentManager {
                     }
                 });
 
-                if (dbFull && dbFull.public) {
+                if (dbFull && dbFull.public && dbFull.course) {
                     //caching the course
                     let KeywordsArray = this.interpretKeywords(dbFull.keyword, dbFull.ID);
-                    let AmendmentsArray = this.interpretAmendments(dbFull.amendment);
+                    let AmendmentsArray = await AmendmentManager.getInstance().insertManyToCache(dbFull.amendment);
 
-                    let host = new Course(dbFull.ID, dbFull.course[0].CourseID, {
+                    let host = new Course(dbFull.ID, dbFull.course.CourseID, {
                         name: dbFull.name,
                         description: dbFull.description,
                         keywords: KeywordsArray,
@@ -244,12 +348,12 @@ class ContentManager {
 
                     this.cache.set(dbFull.ID, host)
 
-                    dbFull.course[0].chapter.map((chapter) => {
+                    for(let chapter of dbFull.course.chapter) {
                         if(chapter.content.public) {
                             let row = chapter.content
 
                             let KeywordsArray = this.interpretKeywords(row.keyword, row.ID);
-                            let AmendmentsArray = this.interpretAmendments(row.amendment);
+                            let AmendmentsArray = await AmendmentManager.getInstance().insertManyToCache(row.amendment);
 
                             let newChapter = new Chapter(row.ID, chapter.ChapterID,
                                 {
@@ -270,13 +374,13 @@ class ContentManager {
 
                             this.cache.set(row.ID, newChapter)
 
-                            chapter.lesson.map((lesson) => {
+                            for(let lesson of chapter.lesson) {
                                 let row = lesson.content
 
                                 if(row.public) {
 
                                     let KeywordsArray = this.interpretKeywords(row.keyword, row.ID);
-                                    let AmendmentsArray = this.interpretAmendments(row.amendment);
+                                    let AmendmentsArray = await AmendmentManager.getInstance().insertManyToCache(row.amendment);
 
                                     let newLesson = new Lesson(row.ID, lesson.LessonID,
                                         {
@@ -297,8 +401,8 @@ class ContentManager {
 
                                     this.cache.set(row.ID, newLesson)
                                 }
-                            })
-                        }})
+                            }
+                        }}
                 }
                 let finished = this.cache.get(dbResult.ID)
                 if (finished) {
@@ -320,14 +424,6 @@ class ContentManager {
             keywordsArray.push(new ActiveKeyword(keyword.ID, keyword.Score, keyword.word, id))
         })
         return keywordsArray
-    }
-
-    private interpretAmendments(input: amendment[]): Amendment[] {
-        let amendmentsArray: Amendment[] = []
-        input.map((amendment) => {
-            amendmentsArray.push(new Amendment(amendment.ID, amendment.CreatorID, amendment.ContentID!, amendment.timestamp))
-        })
-        return amendmentsArray
     }
 
     public async fetchContentsWithIDs(idTable: number[]): Promise<Content[]> {
@@ -368,22 +464,22 @@ class ContentManager {
 
                 let amendmentsArray: Amendment[] = []
                 value.amendment.map((amendment) => {
-                    amendmentsArray.push(new Amendment(amendment.ID, amendment.CreatorID, amendment.ContentID!, amendment.timestamp))
+                    amendmentsArray.push(new Amendment(amendment.ID, amendment.CreatorID, amendment.ContentID!, amendment.significance, amendment.tariff, amendment.timestamp))
                 })
 
                 let type: ContentType;
 
                 let specificID : number;
 
-                if (value.lesson.length > 0) {
+                if (value.lesson) {
                     type = ContentType.LESSON
-                    specificID = value.lesson[0].LessonID
-                } else if (value.course.length > 0) {
+                    specificID = value.lesson.LessonID
+                } else if (value.course) {
                     type = ContentType.COURSE
-                    specificID = value.course[0].CourseID
-                } else if (value.chapter.length > 0) {
+                    specificID = value.course.CourseID
+                } else if (value.chapter) {
                     type = ContentType.CHAPTER
-                    specificID = value.chapter[0].ChapterID
+                    specificID = value.chapter.ChapterID
                 } else {
                     throw new Error("UNCLASSIFIED CONTENT CRITICAL")
                 }
@@ -417,6 +513,7 @@ class ContentManager {
 
     public async createMetaAmendment(authorID: number, targetID: number, args : {newName?: string, newDescription?: string, addedKeywords?: Keyword[], deletedKeywords?: Keyword[]}) {
         let content = await this.getContentByID(targetID)
+        let author = await UserManager.getInstance().getUserID(authorID);
 
         if(!args.newName && !args.newDescription && !args.addedKeywords && !args.deletedKeywords)
         {
@@ -443,7 +540,7 @@ class ContentManager {
             newDescription: args.newDescription,
             addedKeywords: args.addedKeywords,
             deletedKeywords: args.deletedKeywords
-        })
+        }, {dbInput : false, targetType : content.getType()})
 
         content.addAmendment(amendment)
 
@@ -502,6 +599,7 @@ class ContentManager {
                 timestamp: amendment.getCreationDate(),
                 ContentID: targetID,
                 significance: amendment.getSignificance(),
+                tariff: amendment.getTariff(),
                 applied: false,
                 keywordmodamendment: {
                     create: {
@@ -547,11 +645,14 @@ class ContentManager {
         }
 
         amendment.setID(parent.ID)
+        author.addAmendment(amendment);
 
-        content.applyMetaAmendment(amendment);
+        await content.applyMetaAmendment(amendment);
     }
 
     public async createCreationAmendment(authorID: number, name: string, description: string, keywords: Keyword[], seqNumber: number, type: ContentType, parentID?: number) {
+        let author = await UserManager.getInstance().getUserID(authorID);
+
         if(type !== ContentType.COURSE && !parentID)
         {
             throw OrphanedContent
@@ -577,7 +678,6 @@ class ContentManager {
                     break;
                 case ContentType.LESSON:
                     throw new LessonCannotBeParent()
-                    break;
             }
             if(parent.checkSeqNumberVacant(seqNumber)!){
                 throw SequenceNumberTaken;
@@ -593,7 +693,7 @@ class ContentManager {
             seqNumber: seqNumber,
             type: type,
             parentID: parentID
-        })
+        },{dbInput : false})
 
         let keywordMods:
             {
@@ -641,6 +741,7 @@ class ContentManager {
                 timestamp: amendment.getCreationDate(),
                 ContentID: null,
                 significance: amendment.getSignificance(),
+                tariff: amendment.getTariff(),
                 applied: false,
                 keywordmodamendment: {
                     create: {
@@ -649,8 +750,8 @@ class ContentManager {
                                 newName: name,
                                 newDescription: description,
                                 seqNumber: seqNumber,
+                                newParent: parentID,
                                 type: typeString,
-                                newParent: parentID
                             }
                         },
                         keywordentrymod: {
@@ -689,13 +790,17 @@ class ContentManager {
         }
 
         amendment.setID(parent.ID)
+        author.addAmendment(amendment);
 
-        this.applyContentCreation(amendment);
+        await AmendmentManager.getInstance().push(amendment);
+
+        await this.applyContentCreation(amendment);
     }
 
     public async createAdoptionAmendment(authorID: number, targetID: number, newParent: number) {
         let content = await this.getSpecificByID(targetID)
         let newParentalContent = await this.getSpecificByID(newParent)
+        let author = await UserManager.getInstance().getUserID(authorID);
 
         switch (content.getType())
         {
@@ -715,7 +820,7 @@ class ContentManager {
                 throw new CourseHasNoParent();
         }
 
-        let amendment = new AdoptionAmendment(-1, authorID, targetID, newParent)
+        let amendment = new AdoptionAmendment(-1, authorID, targetID, newParent, {dbInput: false, otherSignificance: newParentalContent.getSignificance()})
 
         content.addAmendment(amendment)
 
@@ -723,12 +828,13 @@ class ContentManager {
             throw new CourseHasNoParent();
         }
 
-        let parent = await prisma.amendment.create({
+        let secondEntry = await prisma.amendment.create({
             data: {
                 CreatorID: authorID,
                 timestamp: amendment.getCreationDate(),
                 ContentID: targetID,
                 significance: amendment.getSignificance(),
+                tariff : amendment.getTariff(),
                 applied: false,
                 adoptionamendment: {
                     create: {
@@ -738,24 +844,42 @@ class ContentManager {
             }
         })
 
+        let parent = await prisma.amendment.create({
+            data: {
+                CreatorID: authorID,
+                timestamp: amendment.getCreationDate(),
+                ContentID: targetID,
+                significance: amendment.getSignificance(),
+                tariff : amendment.getTariff(),
+                applied: false,
+                adoptionamendment: {
+                    create: {
+                        newParent: newParent,
+                        receiverAmendment : secondEntry.ID
+                    }
+                }
+            }
+        })
+
         amendment.setID(parent.ID)
+
+        amendment.setReceivingAmendmentID(secondEntry.ID)
+        author.addAmendment(amendment);
+
+        await AmendmentManager.getInstance().push(amendment);
 
         await content.getAdopted(amendment)
     }
 
-    public async createListAmendment(authorID: number, targetID: number, changes: { ChildID: number, newSeqNumber?: number, delete: boolean }[]) {
+    public async createListAmendment(authorID: number, targetID: number, changes: { ChildID?: number, newSeqNumber?: number, LessonPartID? : number, delete: boolean }[]) {
         let content = await this.getSpecificByID(targetID)
-
-        if(content.getType() === ContentType.LESSON)
-        {
-            throw new UnsupportedOperation("Lesson","createListAmendment")
-        }
+        let author = await UserManager.getInstance().getUserID(authorID);
 
         if(!content.checkPaternity(changes)){
             throw new WrongParent("provided child",targetID.toString())
         }
 
-        let amendment = new ListAmendment(-1, authorID, targetID, changes)
+        let amendment = new ListAmendment(-1, authorID, targetID, changes, {dbInput: false, targetType: content.getType()})
 
         content.addAmendment(amendment)
 
@@ -765,24 +889,30 @@ class ContentManager {
                 timestamp: amendment.getCreationDate(),
                 ContentID: targetID,
                 significance: amendment.getSignificance(),
+                tariff: amendment.getTariff(),
                 applied: false,
-                listamendments: {
-                    create: {
+                listamendment: {
+                    create : {
                         contentlistmod : {
                             create : changes
                         }
                     }
                 }
+
             }
         })
 
         amendment.setID(parent.ID)
+        author.addAmendment(amendment);
+
+        await AmendmentManager.getInstance().push(amendment);
 
         await content.applyListAmendment(amendment);
     }
 
-    public async createPartInsertAmendment(authorID: number, targetID: number, seqNumber : number, arg : { moveExisting : true, oldID : number } | { moveExisting : false,newArgs : lessonPartArgs }) {
+    public async createAddReplaceAmendment(authorID: number, targetID: number, seqNumber : number, arg : { oldID? : number, newArgs : lessonPartArgs }) {
 
+        let author = await UserManager.getInstance().getUserID(authorID);
         let content = await this.getSpecificByID(targetID)
 
         if(content.getType() !== ContentType.LESSON)
@@ -792,15 +922,9 @@ class ContentManager {
 
         let newLessonPartID : number;
 
-        if(arg.moveExisting)
-        {
-            newLessonPartID = arg.oldID
-        }
-        else {
-            newLessonPartID = await LessonPartManager.getInstance().push(seqNumber, arg.newArgs);
-        }
+        newLessonPartID = await LessonPartManager.getInstance().push(seqNumber, arg.newArgs);
 
-        let amendment = new PartInsertAmendment(-1, authorID, targetID, newLessonPartID, seqNumber, arg.moveExisting)
+        let amendment = new PartAddReplaceAmendment(-1, authorID, targetID, newLessonPartID, seqNumber, {dbInput: false}, arg.oldID)
 
         let parent = await prisma.amendment.create({
             data : {
@@ -808,14 +932,15 @@ class ContentManager {
                 timestamp : amendment.getCreationDate(),
                 ContentID : targetID,
                 significance: amendment.getSignificance(),
+                tariff: amendment.getTariff(),
                 applied: false,
                 partamendment: {
                     create : {
                         LessonPartID : newLessonPartID,
-                        partinsertamendment : {
+                        partaddreplaceamendment : {
                             create : {
+                                OldPartID : arg.oldID,
                                 seqNumber : seqNumber,
-                                moveExisting : arg.moveExisting
                             }
                         }
                     }
@@ -824,82 +949,11 @@ class ContentManager {
         })
 
         amendment.setID(parent.ID)
+        author.addAmendment(amendment);
 
-        await content.applyPartInsertAmendment(amendment);
-    }
+        await AmendmentManager.getInstance().push(amendment);
 
-    public async createPartModificationAmendment(authorID: number, targetID: number, oldPartID : number, lessonPartArgs : lessonPartArgs) {
-
-        let content = (await this.getContentByID(targetID) as Lesson)
-
-        let seqNumber = content.getLessonPartByID(oldPartID).getSeqNumber();
-
-        if(content.getType() !== ContentType.LESSON)
-        {
-            throw new InvalidArgument("target with id="+targetID.toString(),"Must be a lesson.")
-        }
-
-        let newLessonPartID = await LessonPartManager.getInstance().push(seqNumber, lessonPartArgs);
-
-        let amendment = new PartModificationAmendment(-1, authorID, targetID, oldPartID, newLessonPartID)
-
-        let parent = await prisma.amendment.create({
-            data : {
-                CreatorID : authorID,
-                timestamp : amendment.getCreationDate(),
-                ContentID : targetID,
-                significance: amendment.getSignificance(),
-                applied: false,
-                partamendment: {
-                    create : {
-                        LessonPartID : oldPartID,
-                        partmodificationamendment : {
-                            create : {
-                                NewPartID: newLessonPartID
-                            }
-                        }
-                    }
-                }
-            }
-        })
-
-        amendment.setID(parent.ID)
-
-        await content.applyPartModificationAmendment(amendment);
-    }
-
-    public async createPartDeletionAmendment(authorID: number, targetID: number, deletionID : number) {
-
-        let content = await this.getContentByID(targetID)
-
-        if(content.getType() !== ContentType.LESSON)
-        {
-            throw new InvalidArgument("target with id="+targetID.toString(),"Must be a lesson.")
-        }
-
-        let amendment = new PartDeletionAmendment(-1, authorID, targetID, deletionID)
-
-        let parent = await prisma.amendment.create({
-            data : {
-                CreatorID : authorID,
-                timestamp : amendment.getCreationDate(),
-                ContentID : targetID,
-                significance: amendment.getSignificance(),
-                applied: false,
-                partamendment: {
-                    create : {
-                        LessonPartID : deletionID,
-                        partdeletionamendment : {
-                            create : {}
-                        }
-                    }
-                }
-            }
-        })
-
-        amendment.setID(parent.ID)
-
-        content.applyPartDeletionAmendment(amendment);
+        await content.applyPartAddReplaceAmendment(amendment);
     }
 
     public async applyContentCreation(amendment: CreationAmendment) {

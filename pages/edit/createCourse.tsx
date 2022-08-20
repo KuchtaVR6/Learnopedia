@@ -4,7 +4,7 @@ import {gql, useMutation} from "@apollo/client";
 import {useRouter} from "next/router";
 import {NextPage} from "next";
 import RegularLayout from "../../models/frontEnd/regularLayout";
-import MetaForm from "../../models/frontEnd/metaForm";
+import MetaForm from "../../models/frontEnd/editForms/metaForm";
 
 export type MetaChanges = {
     title: string | null,

@@ -1,11 +1,11 @@
 import {FC, useEffect, useState} from "react";
 import styles from "/styles/Profile.module.css";
-import ModifyDisplayConstrained, {ConstrainedInputTypes} from "./modifyDisplayConstrained";
+import ModifyDisplayConstrained, {ConstrainedInputTypes} from "../inputs/modifyDisplayConstrained";
 import {AiOutlineDelete} from "react-icons/ai";
-import PasswordValidator from "./passwordValidator";
+import PasswordValidator from "../authentication/passwordValidator";
 import {useRouter} from "next/router";
 import {gql, useMutation} from "@apollo/client";
-import VerifyCode from "./verifyCode";
+import VerifyCode from "../authentication/verifyCode";
 
 type args = {
     data: any,

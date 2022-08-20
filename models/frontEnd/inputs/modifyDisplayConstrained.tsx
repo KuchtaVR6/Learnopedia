@@ -1,7 +1,7 @@
 import {Dispatch, FC, SetStateAction, useState} from "react";
 import {MdModeEditOutline} from "react-icons/md";
 import {ImCross} from "react-icons/im";
-import styles from "../../styles/Profile.module.css"
+import styles from "../../../styles/Profile.module.css"
 import SelfValidatingInput from "./selfValidatingInput";
 import {gql} from "@apollo/client";
 
@@ -9,10 +9,11 @@ type args = {
     desc?: string,
     value: string,
     setProp: Dispatch<SetStateAction<string>>,
-    type : ConstrainedInputTypes
+    type : ConstrainedInputTypes,
+    hideOptions? : boolean,
 }
 
-const ModifyDisplayConstrained: FC<args> = ({desc, value, setProp, type}) => {
+const ModifyDisplayConstrained: FC<args> = ({desc, value, setProp, type, hideOptions}) => {
 
     const [editable, setEditable] = useState(false)
 
@@ -54,7 +55,7 @@ const ModifyDisplayConstrained: FC<args> = ({desc, value, setProp, type}) => {
                 disable={!editable}
                 placeholder={value}
             />
-            {editable ?
+            {hideOptions? "" : editable ?
                 <button onClick={() => {
                     setEditable(false)
                 }}><ImCross/></button>

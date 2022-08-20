@@ -2,6 +2,8 @@ import {User} from "../User";
 import {CredentialsNotUnique, UserNotFoundException} from "../tools/Errors";
 import SelfPurgingMap from "../tools/SelfPurgingMap";
 import prisma from "../../../prisma/prisma";
+import Amendment from "../amendments/Amendment";
+import AmendmentManager, {prismaInclusions} from "../amendments/AmendmentManager";
 
 export class UserManager {
     private static instance: UserManager | undefined;
@@ -27,7 +29,7 @@ export class UserManager {
     }
 
     public deletedUser() {
-        return new User(-1,"DELETED USER", "deleted@deleted", "DELETED", "DELETED", "===")
+        return new User(-1,"DELETED USER", "deleted@deleted", "DELETED", "DELETED", "===", [])
     }
 
     public async addUser(nickname: string, email: string, fname: string, lname: string, password: string): Promise<User> {
@@ -59,16 +61,16 @@ export class UserManager {
         return !this.userStore.nicknameTaken(email, true)
     }
 
-    public updateUserNonIdentifier(email: string, fname: string, lname: string, passHash: string) {
-        this.userStore.updateDB(email, fname, lname, passHash);
+    public async updateUserNonIdentifier(email: string, fname: string, lname: string, passHash: string) {
+        await this.userStore.updateDB(email, fname, lname, passHash);
     }
 
-    public updateEmail(oldIdentifier: string, newIdentifier: string) {
-        this.userStore.updateEmail(oldIdentifier, newIdentifier)
+    public async updateEmail(oldIdentifier: string, newIdentifier: string) {
+        await this.userStore.updateEmail(oldIdentifier, newIdentifier)
     }
 
-    public updateNick(oldIdentifier: string, newIdentifier: string) {
-        this.userStore.updateNick(oldIdentifier, newIdentifier)
+    public async updateNick(oldIdentifier: string, newIdentifier: string) {
+        await this.userStore.updateNick(oldIdentifier, newIdentifier)
     }
 
     public reserve(email: string, nickname: string) {
@@ -167,9 +169,7 @@ class UserStore {
             }
         })
 
-        let newUser = this.cache(new User(output.ID, nickname, email, fname, lname, passHash))
-
-        return newUser;
+        return this.cache(new User(output.ID, nickname, email, fname, lname, passHash, []));
     }
 
     public async delete(user: User): Promise<boolean> {
@@ -203,18 +203,18 @@ class UserStore {
                     {nickname: query}
                 ]
             },
-            select: {
-                ID : true,
-                email: true,
-                passHash: true,
-                lname: true,
-                fname: true,
-                nickname: true
+            include:{
+                amendment : {
+                    include : prismaInclusions
+                }
             }
         })
 
+        let amendArray : Amendment[] = [];
+
         if (dbUser) {
-            return this.cache(new User(dbUser.ID, dbUser.nickname, dbUser.email, dbUser.fname, dbUser.lname, dbUser.passHash))
+            let amendArray : Amendment[] = await AmendmentManager.getInstance().insertManyToCache(dbUser.amendment);
+            return this.cache(new User(dbUser.ID, dbUser.nickname, dbUser.email, dbUser.fname, dbUser.lname, dbUser.passHash, amendArray))
         }
 
         throw new UserNotFoundException(query)
@@ -230,19 +230,17 @@ class UserStore {
             where: {
                 ID: id
             },
-            select: {
-                ID : true,
-                email: true,
-                passHash: true,
-                lname: true,
-                fname: true,
-                nickname: true
+            include : {
+                amendment: {
+                    include : prismaInclusions
+                }
             }
         })
 
         if(dbUser)
         {
-            let newUser = new User(dbUser.ID,dbUser.nickname, dbUser.email, dbUser.fname, dbUser.lname, dbUser.passHash);
+            let amendArray : Amendment[] = await AmendmentManager.getInstance().insertManyToCache(dbUser.amendment);
+            let newUser = new User(dbUser.ID,dbUser.nickname, dbUser.email, dbUser.fname, dbUser.lname, dbUser.passHash, amendArray);
             this.idMap.set(id, newUser)
             return newUser;
         }

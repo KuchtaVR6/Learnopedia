@@ -8,6 +8,8 @@ import styles from "../../../styles/ContentDisplay.module.css";
 import {gql, useMutation} from "@apollo/client";
 import {useRouter} from "next/router";
 import {AiFillDelete} from "react-icons/ai";
+import {displayableOutput} from "../../../models/backEnd/lessonParts/LessonPart";
+
 
 const ModList: NextPage<{
     data: {
@@ -25,7 +27,8 @@ const ModList: NextPage<{
     `
 
     type listChange = {
-        ChildID: number,
+        ChildID: number | null,
+        LessonPartID: number | null,
         newSeqNumber: number | null,
         delete: boolean
     }
@@ -55,26 +58,33 @@ const ModList: NextPage<{
         })
     }
 
-    const extractRelevant = (): MetaOutput[] => {
-        if (data.mainMeta.id === data.output.metas.meta.id) {
-            return data.output.metas.chapters.map((chapter) => {
-                return chapter.meta
-            })
-        } else {
-            for (let chapter of data.output.metas.chapters) {
-                if (data.mainMeta.id === chapter.meta.id) {
-                    return chapter.lessons
+    const extractRelevant = (): MetaOutput[] | displayableOutput[] => {
+        if (data.mainMeta.type !== 2) {
+            if (data.mainMeta.id === data.output.metas.meta.id) {
+                return data.output.metas.chapters.map((chapter) => {
+                    return chapter.meta
+                })
+            } else {
+                for (let chapter of data.output.metas.chapters) {
+                    if (data.mainMeta.id === chapter.meta.id) {
+                        return chapter.lessons
+                    }
                 }
             }
+            throw new Error("Navigation not found")
         }
-        throw new Error("Navigation not found")
+        if (data.output.content) {
+            return data.output.content
+        } else {
+            throw new Error("Navigation not found")
+        }
     }
 
     const [validity, setValidity] = useState<boolean>(false)
 
     const [selected, setSelected] = useState(-1)
     const [extracted, setExtracted] = useState(extractRelevant())
-    const [extractedModifiable, setExtractedModifiable] = useState([... extracted])
+    const [extractedModifiable, setExtractedModifiable] = useState([...extracted])
 
     useEffect(() => {
         if (listOfChanges.length > 0) {
@@ -83,38 +93,72 @@ const ModList: NextPage<{
             setValidity(false)
         }
 
-        let x = [... extracted]
+        let deletion;
+        let x : MetaOutput[] | displayableOutput[];
 
-        x = x.filter((row) => {
-            for(let change of listOfChanges)
+        if(data.mainMeta.type===2)
+        {
+            x = new Array<displayableOutput>();
+            for(let row of extracted)
             {
-                if(row.id === change.ChildID)
-                {
-                    if(change.delete)
+                deletion = false
+                let copy = {...row as displayableOutput}
+
+                for (let change of listOfChanges) {
+                    if ((change.ChildID && row.id === change.ChildID) || (change.LessonPartID && row.id === change.LessonPartID))
                     {
-                        return false;
-                    }
-                    else{
-                        if(change.newSeqNumber)
+                        if(!change.delete)
                         {
-                            row.seqNumber = change.newSeqNumber;
+                            if(change.newSeqNumber)
+                            {
+                                copy.seqNumber = change.newSeqNumber
+                            }
+                        }
+                        else{
+                            deletion = true;
                         }
                     }
                 }
+                if(!deletion)
+                {
+                    x.push(copy)
+                }
             }
-            return true;
-        })
+        }
+        else{
+            x = new Array<MetaOutput>();
+            for(let row of extracted)
+            {
+                deletion = false
+                let copy = {...row as MetaOutput}
+                for (let change of listOfChanges) {
+                    if ((change.ChildID && row.id === change.ChildID) || (change.LessonPartID && row.id === change.LessonPartID))
+                    {
+                        if(!change.delete)
+                        {
+                            if(change.newSeqNumber)
+                            {
+                                copy.seqNumber = change.newSeqNumber
+                            }
+                        }
+                        else{
+                            deletion = true;
+                        }
+                    }
+                }
+                if(!deletion)
+                {
+                    x.push(copy)
+                }
+            }
+        }
 
-        x.sort((a,b) => {
-            if(a.seqNumber > b.seqNumber)
-            {
+        x.sort((a, b) => {
+            if (a.seqNumber > b.seqNumber) {
                 return 1
-            }
-            else if (a.seqNumber == b.seqNumber)
-            {
+            } else if (a.seqNumber == b.seqNumber) {
                 return 0
-            }
-            else{
+            } else {
                 return -1
             }
         })
@@ -126,7 +170,7 @@ const ModList: NextPage<{
 
     const checkIfModded = (id: number) => {
         for (let child of listOfChanges) {
-            if (child.ChildID == id) {
+            if (child.ChildID == id || child.LessonPartID == id) {
                 return true;
             }
         }
@@ -137,155 +181,172 @@ const ModList: NextPage<{
         setSelected(-1)
     }
 
+    const getName = (arg : MetaOutput | displayableOutput) =>
+    {
+        let x = (arg as MetaOutput).name || undefined
+
+        if(x){
+            return x
+        }
+        else{
+            return "lessonPart"
+        }
+    }
+
+    const isL = () => {
+        return data.mainMeta.type===2
+    }
+
     let prevSeqNumber = 0;
     let noChange = 0;
 
-    if (data.mainMeta.type !== 2) {
-        return (
-            <RegularLayout enforceUser={true} navigation={data.output}>
-                <div className={styles.main}>
-                    <h1>List modifications on {data.mainMeta.name}</h1>
-                    <hr/>
-                    <table style={{width: "100%"}}>
-                        <tbody>
-                        <tr>
-                            <td>
-                                <p>Choose the child to modify:</p>
-                                {
-                                    extracted.map((child) => {
-                                        let moded = checkIfModded(child.id);
-                                        return (<>
-                                            <button key={child.id} onClick={() => {
-                                                setSelected(child.id)
-                                            }} disabled={selected == child.id || moded}>
-                                                {child.id} - {child.name} | {moded? <>Already moded</> : <>SQNo.{child.seqNumber}</>}
-                                            </button>
-                                            <br/>
-                                        </>)
-                                    })
-                                }
-                            </td>
-                            <td>
-                                <p>Perform</p>
-                                <button disabled={!(selected >= 0)} onClick={() => {
-                                    setLOCH([ ...listOfChanges, {ChildID: selected, delete: true, newSeqNumber: null}]);
-                                }}><AiFillDelete/>Delete
-                                </button>
-                                {
-                                    extractedModifiable.map((nav) => {
-                                        let targetValue = Math.ceil(prevSeqNumber + ((nav.seqNumber - prevSeqNumber) / 2));
-                                        if(targetValue!==nav.seqNumber && targetValue!==prevSeqNumber) {
-                                            if (nav.id === selected) {
-                                                noChange = 2;
-                                            }
-                                            let x = (
-                                                <div key={nav.seqNumber}>
-                                                    <button
-                                                        onClick={() => {
-                                                            setLOCH([ ...listOfChanges, {
-                                                                ChildID: selected,
-                                                                delete: false,
-                                                                newSeqNumber: targetValue
-                                                            }]);
-                                                        }}
-                                                        disabled={!(selected >= 0) || noChange !== 0}>
-                                                        Insert Here | SQNo: <i>{targetValue}</i> {noChange !== 0 ?
-                                                        <b>No change</b> : ""}
-                                                    </button>
-                                                    <br/>
-                                                    <b>{nav.name} | SQNo: <i>{nav.seqNumber}</i></b>
-                                                </div>
-                                            )
-                                            prevSeqNumber = nav.seqNumber;
-                                            if (noChange > 0) {
-                                                noChange -= 1;
-                                            }
-                                            return x;
+    return (
+        <RegularLayout enforceUser={true} navigation={data.output}>
+            <div className={styles.main}>
+                <h1>List modifications on {data.mainMeta.name}</h1>
+                <hr/>
+                <table style={{width: "100%"}}>
+                    <tbody>
+                    <tr>
+                        <td>
+                            <p>Choose the child to modify:</p>
+                            {
+                                extracted.map((child) => {
+                                    let moded = checkIfModded(child.id);
+                                    return (<>
+                                        <button key={child.id} onClick={() => {
+                                            setSelected(child.id)
+                                        }} disabled={selected == child.id || moded}>
+                                            {child.id} - {getName(child)} | {moded ? <>Already
+                                            moded</> : <>SQNo.{child.seqNumber}</>}
+                                        </button>
+                                        <br/>
+                                    </>)
+                                })
+                            }
+                        </td>
+                        <td>
+                            <p>Perform</p>
+                            <button disabled={!(selected >= 0)} onClick={() => {
+                                setLOCH([...listOfChanges, {ChildID: isL()? null : selected, LessonPartID : isL()? selected : null, delete: true, newSeqNumber: null}]);
+                            }}><AiFillDelete/>Delete
+                            </button>
+                            {
+                                extractedModifiable.map((nav) => {
+                                    let targetValue = Math.ceil(prevSeqNumber + ((nav.seqNumber - prevSeqNumber) / 2));
+                                    if (targetValue !== nav.seqNumber && targetValue !== prevSeqNumber) {
+                                        if (nav.id === selected) {
+                                            noChange = 2;
                                         }
-                                        else{
-                                            prevSeqNumber = nav.seqNumber;
-                                            return (
+                                        let x = (
                                             <div key={nav.seqNumber}>
-                                                <button disabled={true} >SQNo. not possible<br/>Submit changes for list re-balancing</button> <br/>
-                                                <b>{nav.name} | SQNo: <i>{nav.seqNumber}</i></b>
-                                            </div>)
+                                                <button
+                                                    onClick={() => {
+                                                        setLOCH([...listOfChanges, {
+                                                            ChildID: isL()? null : selected,
+                                                            LessonPartID : isL()? selected : null,
+                                                            delete: false,
+                                                            newSeqNumber: targetValue
+                                                        }]);
+                                                    }}
+                                                    disabled={!(selected >= 0) || noChange !== 0}>
+                                                    Insert Here | SQNo: <i>{targetValue}</i> {noChange !== 0 ?
+                                                    <b>No change</b> : ""}
+                                                </button>
+                                                <br/>
+                                                <b>{getName(nav)} | SQNo: <i>{nav.seqNumber}</i></b>
+                                            </div>
+                                        )
+                                        prevSeqNumber = nav.seqNumber;
+                                        if (noChange > 0) {
+                                            noChange -= 1;
                                         }
-                                    })
-                                }
+                                        return x;
+                                    } else {
+                                        prevSeqNumber = nav.seqNumber;
+                                        return (
+                                            <div key={nav.seqNumber}>
+                                                <button disabled={true}>SQNo. not possible<br/>Submit changes for list
+                                                    re-balancing
+                                                </button>
+                                                <br/>
+                                                <b>{getName(nav)} | SQNo: <i>{nav.seqNumber}</i></b>
+                                            </div>)
+                                    }
+                                })
+                            }
+                            <button
+                                onClick={() => {
+                                    setLOCH([...listOfChanges, {
+                                        ChildID: isL()? null : selected,
+                                        LessonPartID : isL()? selected : null,
+                                        delete: false,
+                                        newSeqNumber: prevSeqNumber + 32
+                                    }]);
+                                }}
+                                disabled={!(selected >= 0) || extractedModifiable.length == 0 || noChange !== 0}>
+                                Insert Here |
+                                SQNo: <i>{prevSeqNumber + 32}</i> {noChange !== 0 ? <b>No change</b> : ""}
+                            </button>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+                <hr/>
+                <p>Changes so far:</p>
+                {listOfChanges.map((change) => {
+                        return (
+                            <>
                                 <button
+                                    key={change.ChildID? change.ChildID - 200 : change.LessonPartID! - 200}
                                     onClick={() => {
-                                        setLOCH([ ...listOfChanges, {
-                                            ChildID: selected,
-                                            delete: false,
-                                            newSeqNumber: prevSeqNumber + 32
-                                        }]);
+                                        setLOCH(listOfChanges.filter((row) => {
+                                            return (!row.ChildID || row.ChildID !== change.ChildID) && (!row.LessonPartID || row.LessonPartID !== change.LessonPartID);
+                                        }));
                                     }}
-                                    disabled={!(selected >= 0) || extractedModifiable.length==0 || noChange!==0}>
-                                    Insert Here |
-                                    SQNo: <i>{prevSeqNumber + 32}</i> {noChange!==0? <b>No change</b> : ""}
+                                >
+                                    <AiFillDelete/>
+                                    {change.ChildID? change.ChildID : change.LessonPartID} - {change.delete ? "to be deleted" : `to be moved to seqNumber ${change.newSeqNumber}`}
                                 </button>
-                            </td>
-                        </tr>
-                        </tbody>
-                    </table>
-                    <hr/>
-                    <p>Changes so far:</p>
-                    {listOfChanges.map((change) => {
-                            return (
-                                <>
-                                    <button
-                                        key={change.ChildID - 200}
-                                        onClick={() => {setLOCH(listOfChanges.filter((row) => {return row.ChildID !== change.ChildID; }));}}
-                                    >
-                                        <AiFillDelete/>
-                                        {change.ChildID} - {change.delete ? "to be deleted" : `to be moved to seqNumber ${change.newSeqNumber}`}
-                                    </button>
-                                </>)
-                        }
-                    )}
-                    <hr/>
-                    <p>Current State:</p>
-                    {
-                        extractedModifiable.map((row) => {
-                            return(<p key={row.id}>
-                                {row.id} - {row.name} | SQNo. {row.seqNumber}
-                            </p>)
-                        })
+                            </>)
                     }
-                    <table className={styles.criteria}>
-                        <tbody>
-                        <tr>
-                            <td>
-                                Changes
-                            </td>
-                            <td>
-                                {listOfChanges.length > 0 ? "✔" : "❌"}
-                            </td>
-                        </tr>
-                        <tr>
-                            <td colSpan={2}>
-                                {!submitted? <button onClick={submit} className={styles.submit}
-                                        disabled={!validity || output.loading}>Submit
-                                </button>: "You may close this page."}
-                            </td>
-                        </tr>
-                        <tr>
-                            <td colSpan={2}>
-                                <p>{warning}</p>
-                            </td>
-                        </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </RegularLayout>
-        )
-    } else {
-        return (
-            <RegularLayout enforceUser={false} navigation={data.output}>
-                <p>Coming soon.</p>
-            </RegularLayout>
-        )
-    }
+                )}
+                <hr/>
+                <p>Current State:</p>
+                {
+                    extractedModifiable.map((row) => {
+                        return (<p key={row.id}>
+                            {row.id} - {getName(row)} | SQNo. {row.seqNumber}
+                        </p>)
+                    })
+                }
+                <table className={styles.criteria}>
+                    <tbody>
+                    <tr>
+                        <td>
+                            Changes
+                        </td>
+                        <td>
+                            {listOfChanges.length > 0 ? "✔" : "❌"}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colSpan={2}>
+                            {!submitted ? <button onClick={submit} className={styles.submit}
+                                                  disabled={!validity || output.loading}>Submit
+                            </button> : "You may close this page."}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colSpan={2}>
+                            <p>{warning}</p>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </RegularLayout>
+    )
 }
 
 export async function getServerSideProps(context: GetServerSidePropsContext) {

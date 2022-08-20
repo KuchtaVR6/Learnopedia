@@ -4,13 +4,13 @@ import {gql, useMutation} from "@apollo/client";
 import Link from "next/link";
 import styles from '../styles/Forms.module.css'
 import Image from "next/image";
-import VerifyCode from "../models/frontEnd/verifyCode";
-import SelfValidatingInput from "../models/frontEnd/selfValidatingInput";
-import PasswordValidator from "../models/frontEnd/passwordValidator";
+import VerifyCode from "../models/frontEnd/authentication/verifyCode";
+import SelfValidatingInput from "../models/frontEnd/inputs/selfValidatingInput";
+import PasswordValidator from "../models/frontEnd/authentication/passwordValidator";
 
 import logo from "../public/images/logo.png";
 import {useRouter} from "next/router";
-import {ConstrainedInputTypes} from "../models/frontEnd/modifyDisplayConstrained";
+import {ConstrainedInputTypes} from "../models/frontEnd/inputs/modifyDisplayConstrained";
 import HCaptcha from "@hcaptcha/react-hcaptcha";
 
 

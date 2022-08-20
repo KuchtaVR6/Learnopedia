@@ -3,7 +3,7 @@ import styles from "../styles/Forms.module.css";
 import Image from "next/image";
 import logo from "../public/images/logo.png";
 import Link from "next/link";
-import VerifyCode from "../models/frontEnd/verifyCode";
+import VerifyCode from "../models/frontEnd/authentication/verifyCode";
 import {useEffect, useRef, useState} from "react";
 import {useRouter} from "next/router";
 import {gql, useMutation} from "@apollo/client";

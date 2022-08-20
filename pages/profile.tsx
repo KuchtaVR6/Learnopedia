@@ -1,6 +1,6 @@
 import {NextPage} from "next";
 import RegularLayout from "../models/frontEnd/regularLayout";
-import ProfileComponent from "../models/frontEnd/profileComponent";
+import ProfileComponent from "../models/frontEnd/profileComponents/profileComponent";
 
 const Profile: NextPage = () => {
 

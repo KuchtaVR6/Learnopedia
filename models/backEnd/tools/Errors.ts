@@ -1,5 +1,3 @@
-import exp from "constants";
-
 export class UserNotFoundException extends Error{
     public constructor(query : string) {
         super("User with the: " + query + ", doesn't exist in the system.")
@@ -51,12 +49,6 @@ export class EmptyModification extends Error{
 export class ContentNotFetched extends Error{
     public constructor() {
         super("Content is not fetched yet");
-    }
-}
-
-export class ConstructionArgumetsMissing extends Error{
-    public constructor() {
-        super("Not all creation required arguments where provided");
     }
 }
 
@@ -130,5 +122,11 @@ export class InvalidArgument extends Error{
     public constructor(child : string, doesntMeet : string)
     {
         super("Argument " + child + " doesn't meet the requirement: " + doesntMeet)
+    }
+}
+
+export class LegacyAmendment extends Error{
+    public constructor() {
+        super("Provided Amendment was created on Content that doesn't exist anymore.");
     }
 }

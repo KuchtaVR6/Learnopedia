@@ -3,12 +3,12 @@ import {GetServerSidePropsContext, NextPage} from "next";
 import client from "../../../apollo-client";
 import {fetchquery} from "../../view/[viewId]";
 import {ContentType, FullOutput, MetaOutput} from "../../../models/backEnd/contents/Content";
-import MetaForm from "../../../models/frontEnd/metaForm";
+import MetaForm from "../../../models/frontEnd/editForms/metaForm";
 import {useEffect, useState} from "react";
 import styles from "../../../styles/ContentDisplay.module.css";
 import {gql, useMutation} from "@apollo/client";
 import {useRouter} from "next/router";
-import EvaluatorInput from "../../../models/frontEnd/evaluatorInput";
+import EvaluatorInput from "../../../models/frontEnd/inputs/evaluatorInput";
 
 const Adopt: NextPage<{
     data: {

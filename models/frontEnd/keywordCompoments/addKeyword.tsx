@@ -1,6 +1,6 @@
 import {Dispatch, FC, SetStateAction, useState} from "react";
 import {BsFillPlusSquareFill} from "react-icons/bs";
-import EvaluatorInput from "./evaluatorInput";
+import EvaluatorInput from "../inputs/evaluatorInput";
 
 type args = {
     setAddedKeywords : Dispatch<SetStateAction<{ Score: number; word: string; }[]>>,

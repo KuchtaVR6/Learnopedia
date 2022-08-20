@@ -1,10 +1,10 @@
 import {FC} from "react";
-import {FullOutput, MetaOutput} from "../backEnd/contents/Content";
-import {displayableOutput} from "../backEnd/lessonParts/LessonPart";
+import {FullOutput, MetaOutput} from "../../backEnd/contents/Content";
+import {displayableOutput} from "../../backEnd/lessonParts/LessonPart";
 import NavigationTile from "./navigationTile";
-import KeywordDisplay from "./keywordDisplay";
+import KeywordDisplay from "../keywordCompoments/keywordDisplay";
 import {useRouter} from "next/router";
-import styles from "../../styles/ContentDisplay.module.css";
+import styles from "../../../styles/ContentDisplay.module.css";
 
 type args = {
     array : {

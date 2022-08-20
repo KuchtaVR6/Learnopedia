@@ -1,13 +1,13 @@
-import {gql, useLazyQuery} from "@apollo/client";
+import {gql, useLazyQuery, useQuery} from "@apollo/client";
 import 'bootstrap/dist/css/bootstrap.css'
-import Navbar from "../../models/frontEnd/navbar";
-import CourseMenu from "../../models/frontEnd/courseMenu";
+import Navbar from "./navigational/navbar";
+import CourseMenu from "./navigational/courseMenu";
 
-import {ReactNode, useEffect} from "react";
+import {ReactNode, useEffect, useState} from "react";
 
 import styles from '../../styles/RegPage.module.css'
 import {FC} from "react";
-import {UserContext} from "./userContext";
+import {UserContext} from "./authentication/userContext";
 import {useRouter} from "next/router";
 import {FullOutput} from "../backEnd/contents/Content";
 
@@ -29,10 +29,21 @@ const RegularLayout: FC<args> = ({children, enforceUser, navigation, noInlineNav
                 email
                 lname
                 fname
+                XP
             }
         }
     `
+
+    const [logoutQuery] = useLazyQuery(
+        gql`query Logout {
+            logout {
+                authorisation
+            }
+        }`
+    )
+
     const [fetch, {loading, error, data}] = useLazyQuery(getUser);
+    const [loggedOut, setLoggedOut] = useState(false);
 
     useEffect(() => {
         if(enforceUser || window.sessionStorage.getItem("loggedIn")==="true"){
@@ -69,7 +80,8 @@ const RegularLayout: FC<args> = ({children, enforceUser, navigation, noInlineNav
 
     return (
         <UserContext.Provider value={{
-            loggedIn: () => {return !!data},
+            loggedIn: () => {if(!loggedOut) {return !!data} return false;},
+            logout: () => {if(data) {logoutQuery()}; setLoggedOut(true); window.sessionStorage.setItem("loggedIn","false")},
             loading: () => {return loading},
             request: fetch,
             user: () => {return data? data.getUser : undefined}

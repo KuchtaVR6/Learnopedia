@@ -2,8 +2,8 @@ import RegularLayout from "../../../models/frontEnd/regularLayout";
 import {GetServerSidePropsContext, NextPage} from "next";
 import client from "../../../apollo-client";
 import {fetchquery} from "../../view/[viewId]";
-import {ContentType, FullOutput, MetaOutput} from "../../../models/backEnd/contents/Content";
-import MetaForm from "../../../models/frontEnd/metaForm";
+import {FullOutput, MetaOutput} from "../../../models/backEnd/contents/Content";
+import MetaForm from "../../../models/frontEnd/editForms/metaForm";
 import {useEffect, useState} from "react";
 import styles from "../../../styles/ContentDisplay.module.css";
 import {gql, useMutation} from "@apollo/client";
@@ -149,9 +149,10 @@ const AddChild: NextPage<{
         )
     }
     else {
+        router.push("/edit/add/lessonpart/"+router.query.targetid)
         return (
-            <RegularLayout enforceUser={false} navigation={data.output}>
-                <p>Comming soon</p>
+            <RegularLayout enforceUser={true} navigation={data.output}>
+                <p>Redirecting...</p>
             </RegularLayout>
         )
     }

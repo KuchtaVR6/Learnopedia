@@ -2,7 +2,7 @@ import {NextPage} from "next";
 import {useState} from "react";
 import {gql} from "@apollo/client";
 import Link from "next/link";
-import Authenticator from "../models/frontEnd/authenticator";
+import Authenticator from "../models/frontEnd/authentication/authenticator";
 import Image from 'next/image'
 import styles from '../styles/Forms.module.css'
 import logo from "../public/images/logo.png";
@@ -32,15 +32,13 @@ const Login: NextPage = () => {
 
     const router = useRouter();
 
-    console.log()
-
     return (
         <div className={styles.page}>
             <form className={styles.form} onSubmit={(e) => {e.preventDefault()}}>
 
-                <div className={styles.logoContainer}>
+                <a className={styles.logoContainer} href={"/"}>
                     <Image src={logo} alt="Learnopedia Logo"/>
-                </div>
+                </a>
 
                 <br/>
                 <br/>

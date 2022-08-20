@@ -51,7 +51,7 @@
 
 .modifyButton{
     margin-top: 0.4em;
-    margin-left: 0.3em;
+    margin-right: 0.6em !important;
     background-color: #dcdcdc;
     border-radius: 4px;
 }
@@ -67,4 +67,27 @@
 
 .keyword:disabled{
     text-decoration: line-through
+}
+
+.center{
+    text-align: center;
+    width: fit-content;
+    margin: 0 auto;
+}
+
+.progressBarParent{
+    width: 100%;
+    height: 1em;
+    background-color: grey;
+    border-radius: 5px;
+}
+
+.progressBarParent div{
+    height: inherit;
+    background-color: green;
+    border-radius: 5px;
+}
+
+.lessonPart{
+    font-size: 2em;
 }

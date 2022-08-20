@@ -52,7 +52,7 @@ export const contentModificationResolvers = {
             await ContentManager.getInstance().createAdoptionAmendment(thisUser.getID(), args.targetID, args.newParent)
             return {continue: true}
         },
-        listAmendment: async (parent: undefined, args: { targetID: number, changes: { ChildID: number, newSeqNumber?: number, delete: boolean }[] }, context: { user: User, agent: string, refreshToken: string, response: any, setCookies: any, setHeaders: any }) => {
+        listAmendment: async (parent: undefined, args: { targetID: number, changes: { ChildID?: number, newSeqNumber?: number, LessonPartID? : number, delete: boolean }[] }, context: { user: User, agent: string, refreshToken: string, response: any, setCookies: any, setHeaders: any }) => {
             let thisUser = await enforceUser(context)
 
             await ContentManager.getInstance().createListAmendment(thisUser.getID(), args.targetID, args.changes)
@@ -62,36 +62,18 @@ export const contentModificationResolvers = {
         createParagraph: async (parent: undefined, args: { targetID: number, seqNumber: number, args: ParagraphOutput }, context: genericContext) => {
             let thisUser = await enforceUser(context)
 
-            await ContentManager.getInstance().createPartInsertAmendment(thisUser.getID(), args.targetID, args.seqNumber, {
-                moveExisting: false,
+            await ContentManager.getInstance().createAddReplaceAmendment(thisUser.getID(), args.targetID, args.seqNumber, {
                 newArgs: {type: lessonPartTypes.PARAGRAPH, content: args.args}
             })
 
             return {continue: true}
         },
-        insertPart: async (parent: undefined, args: { targetID: number, seqNumber: number, oldID : number }, context: genericContext) => {
+        modToParagraph: async (parent: undefined, args: { targetID: number, seqNumber: number, oldID : number, args: ParagraphOutput }, context: genericContext) => {
             let thisUser = await enforceUser(context)
 
-            await ContentManager.getInstance().createPartInsertAmendment(thisUser.getID(), args.targetID, args.seqNumber, {
-                moveExisting: true,
+            await ContentManager.getInstance().createAddReplaceAmendment(thisUser.getID(), args.targetID, args.seqNumber, {
+                newArgs: {type: lessonPartTypes.PARAGRAPH, content: args.args},
                 oldID : args.oldID
-            })
-
-            return {continue: true}
-        },
-        deletePart: async (parent: undefined, args: { targetID: number, oldID : number }, context: genericContext) => {
-            let thisUser = await enforceUser(context)
-
-            await ContentManager.getInstance().createPartDeletionAmendment(thisUser.getID(), args.targetID, args.oldID)
-
-            return {continue: true}
-        },
-        modifyToParagraph: async (parent: undefined, args: { targetID: number, oldID : number, args : ParagraphOutput }, context: genericContext) => {
-            let thisUser = await enforceUser(context)
-
-            await ContentManager.getInstance().createPartModificationAmendment(thisUser.getID(), args.targetID, args.oldID, {
-                type : lessonPartTypes.PARAGRAPH,
-                content : args.args
             })
 
             return {continue: true}

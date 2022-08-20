@@ -10,6 +10,7 @@ datasource db {
 model adoptionamendment {
   AmendmentID Int       @id
   newParent   Int?
+  receiverAmendment Int?
   amendment   amendment @relation(fields: [AmendmentID], references: [ID], onDelete: Cascade, map: "FKAdoptionAm923671")
   content     content?  @relation(fields: [newParent], references: [ID], map: "FKAdoptionAm410338")
 
@@ -21,13 +22,14 @@ model amendment {
   CreatorID           Int?
   timestamp           DateTime             @db.DateTime(0)
   ContentID           Int?
-  significance        Int
-  applied             Boolean              @db.Bit(1)
+  significance        Int                  @default(0)
+  tariff              Int                  @default(100)
+  applied             Boolean
   content             content?             @relation(fields: [ContentID], references: [ID], map: "FKAmendment887662")
   user                user?                @relation(fields: [CreatorID], references: [ID], map: "FKAmendment140140")
   adoptionamendment   adoptionamendment?
   keywordmodamendment keywordmodamendment?
-  listamendments      listamendments?
+  listamendment       listamendment?
   partamendment       partamendment?
 
   @@index([CreatorID], map: "FKAmendment140140")
@@ -36,13 +38,12 @@ model amendment {
 
 model chapter {
   ChapterID Int      @id @default(autoincrement())
-  ContentID Int      @unique
+  ContentID Int      @unique(map: "ContentID")
   CourseID  Int
   content   content  @relation(fields: [ContentID], references: [ID], onDelete: Cascade, map: "FKChapter222112")
   course    course   @relation(fields: [CourseID], references: [CourseID], onDelete: Cascade, map: "FKChapter463302")
   lesson    lesson[]
 
-  @@index([ContentID], map: "FKChapter222112")
   @@index([CourseID], map: "FKChapter463302")
 }
 
@@ -59,34 +60,35 @@ model content {
   public            Boolean             @db.Bit(1)
   adoptionamendment adoptionamendment[]
   amendment         amendment[]
-  chapter           chapter[]
+  chapter           chapter?
   contentlistmod    contentlistmod[]
-  course            course[]
+  course            course?
   creationamendment creationamendment[]
   keyword           keyword[]
-  lesson            lesson[]
+  lesson            lesson?
 }
 
 model contentlistmod {
-  ID             Int             @id @default(autoincrement())
-  AmendmentID    Int?
-  ChildID        Int?
-  newSeqNumber   Int?
-  delete         Boolean         @db.Bit(1)
-  listamendments listamendments? @relation(fields: [AmendmentID], references: [AmendmentID], onDelete: Cascade, map: "FKContentLis336816")
-  content        content?        @relation(fields: [ChildID], references: [ID], map: "FKContentLis373697")
+  ID            Int            @id @default(autoincrement())
+  AmendmentID   Int?
+  ChildID     Int?
+  LessonPartID  Int?
+  newSeqNumber  Int?
+  delete        Boolean?       @db.Bit(1)
+  listamendment listamendment? @relation(fields: [AmendmentID], references: [AmendmentID], onDelete: Cascade, map: "FKContentLis156423")
+  content       content?       @relation(fields: [ChildID], references: [ID], map: "FKContentLis689679")
+  lessonpart    lessonpart?    @relation(fields: [LessonPartID], references: [LessonPartID], map: "FKContentLis770552")
 
-  @@index([AmendmentID], map: "FKContentLis336816")
-  @@index([ChildID], map: "FKContentLis373697")
+  @@index([AmendmentID], map: "FKContentLis156423")
+  @@index([ChildID], map: "FKContentLis689679")
+  @@index([LessonPartID], map: "FKContentLis770552")
 }
 
 model course {
   CourseID  Int       @id @default(autoincrement())
-  ContentID Int       @unique
+  ContentID Int       @unique(map: "ContentID")
   content   content   @relation(fields: [ContentID], references: [ID], onDelete: Cascade, map: "FKCourse342777")
   chapter   chapter[]
-
-  @@index([ContentID], map: "FKCourse342777")
 }
 
 model creationamendment {
@@ -104,7 +106,7 @@ model creationamendment {
 
 model figure {
   LessonPartID Int         @id
-  lessonparts  lessonparts @relation(fields: [LessonPartID], references: [LessonPartID], onDelete: Cascade, map: "FKFigure146251")
+  lessonpart   lessonpart  @relation(fields: [LessonPartID], references: [LessonPartID], onDelete: Cascade, map: "FKFigure783054")
   subfigure    subfigure[]
 }
 
@@ -123,7 +125,7 @@ model keywordentrymod {
   ID                  Int
   AmendmentID         Int
   KeywordID           Int?
-  newWord             String?
+  newWord             String?             @db.VarChar(255)
   score               Int?
   delete              Boolean?            @db.Bit(1)
   keywordmodamendment keywordmodamendment @relation(fields: [AmendmentID], references: [AmendmentID], onDelete: Cascade, map: "FKKeywordEnt546603")
@@ -143,35 +145,35 @@ model keywordmodamendment {
 }
 
 model lesson {
-  LessonID    Int           @id @default(autoincrement())
-  ContentID   Int           @unique
-  ChapterID   Int
-  chapter     chapter       @relation(fields: [ChapterID], references: [ChapterID], onDelete: Cascade, map: "FKLesson585002")
-  content     content       @relation(fields: [ContentID], references: [ID], onDelete: Cascade, map: "FKLesson260152")
-  lessonparts lessonparts[]
+  LessonID   Int          @id @default(autoincrement())
+  ContentID  Int          @unique(map: "ContentID")
+  ChapterID  Int
+  chapter    chapter      @relation(fields: [ChapterID], references: [ChapterID], onDelete: Cascade, map: "FKLesson585002")
+  content    content      @relation(fields: [ContentID], references: [ID], onDelete: Cascade, map: "FKLesson260152")
+  lessonpart lessonpart[]
 
-  @@index([ContentID], map: "FKLesson260152")
   @@index([ChapterID], map: "FKLesson585002")
 }
 
-model lessonparts {
-  LessonPartID              Int                         @id @default(autoincrement())
-  LessonID                  Int?
-  seqNumber                 Int
-  lesson                    lesson?                     @relation(fields: [LessonID], references: [LessonID], onDelete: Cascade, map: "FKLessonPart224088")
-  figure                    figure?
-  paragraph                 paragraph?
-  partamendment             partamendment[]
-  partmodificationamendment partmodificationamendment[]
-  protocol_snippet          protocol_snippet?
-  video                     video?
+model lessonpart {
+  LessonPartID            Int                       @id @default(autoincrement())
+  LessonID                Int?
+  seqNumber               Int
+  lesson                  lesson?                   @relation(fields: [LessonID], references: [LessonID], onDelete: Cascade, map: "FKLessonPart139108")
+  contentlistmod          contentlistmod[]
+  figure                  figure?
+  paragraph               paragraph?
+  partaddreplaceamendment partaddreplaceamendment[]
+  partamendment           partamendment[]
+  protocolsnippet         protocolsnippet?
+  video                   video?
 
-  @@index([LessonID], map: "FKLessonPart224088")
+  @@index([LessonID], map: "FKLessonPart139108")
 }
 
-model listamendments {
+model listamendment {
   AmendmentID    Int              @id
-  amendment      amendment        @relation(fields: [AmendmentID], references: [ID], onDelete: Cascade, map: "FKListAmendm497932")
+  amendment      amendment        @relation(fields: [AmendmentID], references: [ID], onDelete: Cascade, map: "FKListAmendm321674")
   contentlistmod contentlistmod[]
 }
 
@@ -183,62 +185,47 @@ model metaamendment {
 }
 
 model paragraph {
-  LessonPartID Int         @id
-  basicText    String      @db.VarChar(255)
-  advancedText String?     @db.VarChar(255)
-  lessonparts  lessonparts @relation(fields: [LessonPartID], references: [LessonPartID], onDelete: Cascade, map: "FKParagraph761528")
+  LessonPartID Int        @id
+  basicText    String     @db.VarChar(1000)
+  advancedText String?    @db.VarChar(1000)
+  lessonpart   lessonpart @relation(fields: [LessonPartID], references: [LessonPartID], onDelete: Cascade, map: "FKParagraph124725")
+}
+
+model partaddreplaceamendment {
+  AmendmentID   Int           @id
+  OldPartID     Int?
+  seqNumber     Int
+  partamendment partamendment @relation(fields: [AmendmentID], references: [AmendmentID], onDelete: Cascade, map: "FKPartAddRep747054")
+  lessonpart    lessonpart?   @relation(fields: [OldPartID], references: [LessonPartID], map: "FKPartAddRep928829")
+
+  @@index([OldPartID], map: "FKPartAddRep928829")
 }
 
 model partamendment {
-  AmendmentID               Int                        @id
-  LessonPartID              Int?
-  amendment                 amendment                  @relation(fields: [AmendmentID], references: [ID], onDelete: Cascade, map: "FKPartAmendm644504")
-  lessonparts               lessonparts?               @relation(fields: [LessonPartID], references: [LessonPartID], map: "FKPartAmendm280467")
-  partdeletionamendment     partdeletionamendment?
-  partinsertamendment       partinsertamendment?
-  partmodificationamendment partmodificationamendment?
+  AmendmentID             Int                      @id
+  LessonPartID            Int?
+  amendment               amendment                @relation(fields: [AmendmentID], references: [ID], onDelete: Cascade, map: "FKPartAmendm644504")
+  lessonpart              lessonpart?              @relation(fields: [LessonPartID], references: [LessonPartID], map: "FKPartAmendm643663")
+  partaddreplaceamendment partaddreplaceamendment?
 
-  @@index([LessonPartID], map: "FKPartAmendm280467")
+  @@index([LessonPartID], map: "FKPartAmendm643663")
 }
 
-model partdeletionamendment {
-  AmendmentID   Int           @id
-  partamendment partamendment @relation(fields: [AmendmentID], references: [AmendmentID], onDelete: Cascade, map: "FKPartDeleti287587")
-}
-
-model partinsertamendment {
-  AmendmentID   Int           @id
-  seqNumber     Int
-  moveExisting  Boolean?      @db.Bit(1)
-  partamendment partamendment @relation(fields: [AmendmentID], references: [AmendmentID], onDelete: Cascade, map: "FKPartInsert504372")
-}
-
-model partmodificationamendment {
-  AmendmentID   Int           @id
-  NewPartID     Int?
-  partamendment partamendment @relation(fields: [AmendmentID], references: [AmendmentID], onDelete: Cascade, map: "FKPartModifi264552")
-  lessonparts   lessonparts?  @relation(fields: [NewPartID], references: [LessonPartID], map: "FKPartModifi577240")
-
-  @@index([NewPartID], map: "FKPartModifi577240")
-}
-
-model protocol_snippet {
-  LessonPartID Int         @id
-  language     String?     @db.VarChar(255)
-  content      String      @db.VarChar(255)
-  lessonparts  lessonparts @relation(fields: [LessonPartID], references: [LessonPartID], onDelete: Cascade, map: "FKProtocol S929228")
-
-  @@map("protocol snippet")
+model protocolsnippet {
+  LessonPartID Int        @id
+  language     String?    @db.VarChar(255)
+  content      String     @db.VarChar(500)
+  lessonpart   lessonpart @relation(fields: [LessonPartID], references: [LessonPartID], onDelete: Cascade, map: "FKProtocolSn123813")
 }
 
 model subfigure {
   ID          Int     @id @default(autoincrement())
   FigureID    Int
   path        String  @db.VarChar(255)
-  Xoffset     Int?
-  Yoffset     Int?
+  XOffset     Int?
+  YOffset     Int?
   name        String? @db.VarChar(255)
-  description String? @db.VarChar(255)
+  description String? @db.VarChar(500)
   figure      figure  @relation(fields: [FigureID], references: [LessonPartID], onDelete: Cascade, map: "FKSubfigure449135")
 
   @@index([FigureID], map: "FKSubfigure449135")
@@ -255,7 +242,7 @@ model user {
 }
 
 model video {
-  LessonPartID Int         @id
-  url          String      @db.VarChar(255)
-  lessonparts  lessonparts @relation(fields: [LessonPartID], references: [LessonPartID], onDelete: Cascade, map: "FKVideo400387")
+  LessonPartID Int        @id
+  url          String     @db.VarChar(255)
+  lessonpart   lessonpart @relation(fields: [LessonPartID], references: [LessonPartID], onDelete: Cascade, map: "FKVideo763583")
 }

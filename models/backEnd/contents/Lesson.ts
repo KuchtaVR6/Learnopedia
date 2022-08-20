@@ -1,4 +1,4 @@
-import Content, {ContentType, FullOutput, MetaOutput} from "./Content";
+import Content, {ContentType, FullOutput} from "./Content";
 import CreationAmendment from "../amendments/CreationAmendment";
 import {ActiveKeyword} from "./keywords/Keyword";
 import Amendment from "../amendments/Amendment";
@@ -8,21 +8,16 @@ import AdoptionAmendment from "../amendments/AdoptionAmendment";
 import prisma from "../../../prisma/prisma";
 import ListAmendment from "../amendments/ListAmendment";
 import {
+    InvalidArgument,
     MissingLessonPart,
     NotFoundException,
     SequenceNumberTaken,
     UnsupportedOperation
 } from "../tools/Errors";
 import Paragraph from "../lessonParts/Paragraph";
-import PartDeletionAmendment from "../amendments/PartAmendments/PartDeletionAmendment";
-import PartInsertAmendment from "../amendments/PartAmendments/PartInsertAmendment";
-import PartModificationAmendment from "../amendments/PartAmendments/PartModificationAmendment";
+import PartAddReplaceAmendment from "../amendments/PartAmendments/PartAddReplaceAmendment";
 import LessonPartManager from "../lessonParts/LessonPartManager";
 import ContentManager from "./ContentManager";
-
-export type LessonOutput = {
-    meta: MetaOutput
-}
 
 class Lesson extends Content {
     private parent: Chapter;
@@ -61,12 +56,12 @@ class Lesson extends Content {
     }
 
     private async fetchParts() {
-        let result = await prisma.lessonparts.findMany({
+        let result = await prisma.lessonpart.findMany({
             where: {
                 LessonID: this.getSpecificID()
             },
             include: {
-                protocol_snippet: true,
+                protocolsnippet: true,
                 paragraph: true,
                 figure: {
                     include: {
@@ -153,8 +148,66 @@ class Lesson extends Content {
         this.addAmendment(amendment)
     }
 
-    public applyListAmendment(amendment: ListAmendment) {
-        throw new UnsupportedOperation("Lesson", "applyListAmendment")
+    public async applyListAmendment(amendment: ListAmendment) {
+        await this.modification()
+
+        await amendment.getApplied()
+
+        let idsToNewSQMap = new Map<number, number>();
+
+        this.sortChildern();
+
+        for (let change of amendment.changes)
+        {
+            if(change.LessonPartID && (change.delete || change.LessonPartID)) {
+                let found = false;
+                this.children.forEach((lessonPart, key) => {
+                    if (lessonPart.getID() === change.LessonPartID && !found) {
+                        found = true;
+                        if (change.newSeqNumber) {
+                            if (this.children.has(change.newSeqNumber)) {
+                                throw new SequenceNumberTaken
+                            }
+
+                            lessonPart.setSeqNumber(change.newSeqNumber)
+                            idsToNewSQMap.set(lessonPart.getID(), change.newSeqNumber)
+                            this.children.set(change.newSeqNumber, lessonPart)
+                        }
+                        this.children.delete(key)
+                        if (change.delete) {
+                            lessonPart.hide()
+                        }
+                    }
+                })
+                if (!found) {
+                    throw new NotFoundException("Child", change.LessonPartID ? change.LessonPartID : -1)
+                }
+            }
+            else{
+                throw new InvalidArgument("Changes on Lesson", "Need LessonPartID, then delete or newSeqNumber")
+            }
+        }
+
+        for(let ID of Array.from(idsToNewSQMap.keys())) {
+            let seqNum = idsToNewSQMap.get(ID);
+            if (seqNum) {
+                await prisma.lessonpart.update({
+                    where: {
+                        LessonPartID: ID
+                    },
+                    data: {
+                        seqNumber: seqNum
+                    }
+                });
+            }
+        }
+
+
+        await this.sortChildern();
+        this.balanced = false;
+        await this.balance(); //TODO in the future it will not be always called
+
+        this.addAmendment(amendment)
     }
 
     public addChild(seqNum: number, child: LessonPart) {
@@ -170,68 +223,37 @@ class Lesson extends Content {
     public async balance() {
         if (!this.balanced) {
             this.sortChildern()
-            let childernCopy = Array.from(this.children.keys());
+            let childernCopy = new Map<number,LessonPart>(this.children);
+            let childernKeys = Array.from(this.children.keys());
 
             let patern = 32;
-            for (let seq of childernCopy) {
+            for (let seq of childernKeys) {
                 if (seq !== patern) {
-                    let child = this.children.get(seq)
-                    this.children.delete(seq)
+                    let child = childernCopy.get(seq)
+                    if(child) {
+                        this.children.delete(seq)
 
-                    child!.setSeqNumber(patern)
-                    this.children.set(patern, child!)
+                        child.setSeqNumber(patern)
+                        this.children.set(patern, child)
 
-                    await prisma.lessonparts.update({
-                        where: {
-                            LessonPartID: child!.getID()
-                        },
-                        data: {
-                            seqNumber: patern
-                        }
-                    })
+                        await prisma.lessonpart.update({
+                            where: {
+                                LessonPartID: child.getID()
+                            },
+                            data: {
+                                seqNumber: patern
+                            }
+                        })
+                    }
                 }
                 patern += 32;
             }
         }
     }
 
-    public async applyPartDeletionAmendment(amendment: PartDeletionAmendment) {
+    public async applyPartAddReplaceAmendment(amendment: PartAddReplaceAmendment) {
 
-        if (!amendment.getLessonPartID()) {
-            throw MissingLessonPart
-        }
-
-        await this.modification()
-
-        await amendment.getApplied()
-
-        let id = amendment.getLessonPartID()!
-        let found = false
-
-        this.children.forEach((child) => {
-            if (!found && child.getID() === id) {
-                this.children.delete(child.getSeqNumber())
-                found = true;
-            }
-        })
-
-        if (found) {
-            await prisma.lessonparts.update({
-                where: {
-                    LessonPartID: id
-                },
-                data: {
-                    LessonID: null
-                }
-            })
-        }
-
-        this.addAmendment(amendment)
-    }
-
-    public async applyPartInsertAmendment(amendment: PartInsertAmendment) {
-
-        if (this.children.has(amendment.getNewSeqNum())) {
+        if (!amendment.getOldID() && this.children.has(amendment.getNewSeqNum())) {
             throw new SequenceNumberTaken();
         }
 
@@ -243,94 +265,65 @@ class Lesson extends Content {
 
         await amendment.getApplied()
 
-        let id = amendment.getLessonPartID()
+        let newPartId = amendment.getLessonPartID()
+        if (!newPartId) {
+            throw new InvalidArgument("LessonPart for add/replace", "Has not been deleted")
+        }
 
-        if (amendment.isMove()) {
+        if (amendment.getOldID()) {
             let found = false
 
+            let oldId = amendment.getOldID()
+
             for (let child of Array.from(this.children.values())) {
-                if (!found && child.getID() === id) {
-                    this.children.set(amendment.getNewSeqNum(), child)
+                if (!found && child.getID() === oldId) {
+                    this.children.delete(child.getSeqNumber())
 
-                    child.setSeqNumber(amendment.getNewSeqNum())
+                    this.children.set(child.getSeqNumber(), await LessonPartManager.getInstance().retrieve(newPartId))
 
-                    await prisma.lessonparts.update({
+                    await prisma.lessonpart.update({
                         where: {
                             LessonPartID: child.getID()
                         },
                         data: {
-                            seqNumber: amendment.getNewSeqNum()
+                            LessonID: null
                         }
                     })
 
-                    this.children.delete(child.getSeqNumber())
+                    await prisma.lessonpart.update({
+                        where: {
+                            LessonPartID: newPartId
+                        },
+                        data: {
+                            LessonID: this.getSpecificID()
+                        }
+                    })
+                    await child.hide();
+
                     found = true;
                 }
             }
         } else {
-
-            if (amendment.getLessonPartID()) {
-                let newPart = await LessonPartManager.getInstance().retrieve(amendment.getLessonPartID()!)
-                this.children.set(amendment.getNewSeqNum(), newPart)
-
-                await prisma.lessonparts.update({
-                    where: {
-                        LessonPartID: newPart.getID()
-                    },
-                    data: {
-                        LessonID: this.getSpecificID()
-                    }
-                })
-            } else {
-                throw MissingLessonPart
+            let newPart = await LessonPartManager.getInstance().retrieve(newPartId)
+            if(this.children.has(amendment.getNewSeqNum()))
+            {
+                throw new SequenceNumberTaken()
             }
-        }
+            this.children.set(amendment.getNewSeqNum(), newPart)
 
-        this.sortChildern()
-        this.balanced = false;
-        await this.balance() //TODO in the future not called always
-
-        this.addAmendment(amendment)
-    }
-
-    public async applyPartModificationAmendment(amendment: PartModificationAmendment) {
-        if (!amendment.getLessonPartID()) {
-            throw MissingLessonPart
-        }
-
-        await this.modification()
-
-        await amendment.getApplied()
-
-        let id = amendment.getLessonPartID()!
-        let found = false
-
-        for (let child of Array.from(this.children.values())) {
-            if (!found && child.getID() === id) {
-                this.children.set(child.getSeqNumber(), await LessonPartManager.getInstance().retrieve(amendment.getNewPartID()))
-
-                found = true;
-            }
-        }
-
-        if (found) {
-            await prisma.lessonparts.update({
+            await prisma.lessonpart.update({
                 where: {
-                    LessonPartID: id
-                },
-                data: {
-                    LessonID: null
-                }
-            })
-            await prisma.lessonparts.update({
-                where: {
-                    LessonPartID: amendment.getNewPartID()
+                    LessonPartID: newPart.getID()
                 },
                 data: {
                     LessonID: this.getSpecificID()
                 }
             })
         }
+
+        this.sortChildern()
+        this.balanced = false;
+        await this.balance() //TODO in the future not called always
 
         this.addAmendment(amendment)
     }
@@ -355,8 +348,25 @@ class Lesson extends Content {
         }
     }
 
-    public checkPaternity(ids: { ChildID: number, newSeqNumber?: number, delete: boolean }[]): boolean {
-        throw new UnsupportedOperation("Lesson", "checkPaternity")
+    public checkPaternity(ids : { ChildID?: number, LessonPartID? : number, newSeqNumber?: number, delete: boolean }[]) : boolean {
+
+        let justIDs : number[]= [];
+
+        this.children.forEach((child) => {
+            justIDs.push(child.getID())
+        })
+
+        for(let id of ids) {
+            if(id.LessonPartID) {
+                if (justIDs.indexOf(id.LessonPartID) < 0) {
+                    return false
+                }
+            }
+            else{
+                return false
+            }
+        }
+        return true
     }
 
     public checkIfFullyFetched(): boolean {

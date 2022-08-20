@@ -3,7 +3,7 @@ import CreationAmendment from "../amendments/CreationAmendment";
 import {ActiveKeyword} from "./keywords/Keyword";
 import Amendment from "../amendments/Amendment";
 import Chapter, {ChapterOutput} from "./Chapter";
-import {ContentNotFetched, CourseHasNoParent, SequenceNumberTaken} from "../tools/Errors";
+import {CourseHasNoParent, SequenceNumberTaken} from "../tools/Errors";
 import AdoptionAmendment from "../amendments/AdoptionAmendment";
 import ListAmendment from "../amendments/ListAmendment";
 import prisma from "../../../prisma/prisma";
@@ -127,8 +127,9 @@ export class Course extends Content {
             })
         })
 
-        idsToNewSQMap.forEach((seqNum, ID) => {
-            prisma.content.update({
+        for(let ID of Array.from(idsToNewSQMap.keys())) {
+            let seqNum = idsToNewSQMap.get(ID);
+            await prisma.content.update({
                 where: {
                     ID: ID
                 },
@@ -136,12 +137,12 @@ export class Course extends Content {
                     seqNumber: seqNum
                 }
             })
-        })
+        }
 
         this.sortChildern()
         this.balanced = false
 
-        await this.balance() //todo not always in the future
+        await this.balance() //todo in the future not always
 
         this.addAmendment(amendment)
     }
@@ -159,25 +160,28 @@ export class Course extends Content {
     public async balance() {
         if (!this.balanced) {
             this.sortChildern()
-            let childernCopy = Array.from(this.children.keys());
+            let childrenCopy = new Map<number,Chapter>(this.children)
+            let childrenKeys = Array.from(this.children.keys());
 
             let patern = 32;
-            for (let seq of childernCopy) {
+            for (let seq of childrenKeys) {
                 if (seq !== patern) {
-                    let child = this.children.get(seq)
-                    this.children.delete(seq)
+                    let child = childrenCopy.get(seq)
+                    if(child) {
+                        this.children.delete(seq)
 
-                    child!.setSeqNumber(patern)
-                    this.children.set(patern, child!)
+                        child!.setSeqNumber(patern)
+                        this.children.set(patern, child!)
 
-                    await prisma.content.update({
-                        where: {
-                            ID: child!.getID()
-                        },
-                        data: {
-                            seqNumber: patern
-                        }
-                    })
+                        await prisma.content.update({
+                            where: {
+                                ID: child!.getID()
+                            },
+                            data: {
+                                seqNumber: patern
+                            }
+                        })
+                    }
                 }
                 patern += 32;
             }
@@ -188,7 +192,7 @@ export class Course extends Content {
         return this.children.has(newSeqNumber)
     }
 
-    public checkPaternity(ids : { ChildID: number, newSeqNumber?: number, delete: boolean }[]) : boolean {
+    public checkPaternity(ids : { ChildID?: number, LessonPartID? : number, newSeqNumber?: number, delete: boolean }[]) : boolean {
 
         let justIDs : number[]= [];
 
@@ -197,8 +201,12 @@ export class Course extends Content {
         })
 
         for(let id of ids) {
-            if(justIDs.indexOf(id.ChildID)<0)
-            {
+            if(id.ChildID) {
+                if (justIDs.indexOf(id.ChildID) < 0) {
+                    return false
+                }
+            }
+            else{
                 return false
             }
         }

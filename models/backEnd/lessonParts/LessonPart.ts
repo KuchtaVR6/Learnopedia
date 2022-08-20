@@ -1,6 +1,7 @@
 import {UnsupportedOperation} from "../tools/Errors";
 import {ParagraphOutput} from "./Paragraph";
 import {Expirable} from "../tools/Expirable";
+import prisma from "../../../prisma/prisma";
 
 export type displayableOutput = {
     id : number,
@@ -35,6 +36,17 @@ abstract class LessonPart extends Expirable{
 
     public setSeqNumber(number : number) {
         this.seqNumber = number;
+    }
+
+    public async hide() {
+        await prisma.lessonpart.update({
+            where : {
+                LessonPartID : this.id
+            },
+            data : {
+                LessonID : null
+            }
+        })
     }
 }
 

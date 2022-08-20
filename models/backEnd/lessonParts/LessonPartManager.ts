@@ -5,11 +5,18 @@ import Paragraph, {ParagraphOutput} from "./Paragraph";
 
 export type lessonPartArgs = {
     type : lessonPartTypes,
-    content : ParagraphOutput
+    content : ParagraphInput
 }
 
 export enum lessonPartTypes {
     PARAGRAPH
+}
+
+export type LessonPartInputs = ParagraphInput //todo in the future more
+
+export type ParagraphInput = {
+    basicText : string,
+    advancedText : string | null
 }
 
 class LessonPartManager {
@@ -30,7 +37,7 @@ class LessonPartManager {
     public async push(seqNumber : number, args : lessonPartArgs) : Promise<number> {
         if(args.type === lessonPartTypes.PARAGRAPH)
         {
-            let output = await prisma.lessonparts.create({
+            let output = await prisma.lessonpart.create({
                 data : {
                     seqNumber : seqNumber,
                     paragraph: {
@@ -50,7 +57,7 @@ class LessonPartManager {
     }
 
     public async retrieve(id : number) : Promise<LessonPart> {
-        let output = await prisma.lessonparts.findUnique({
+        let output = await prisma.lessonpart.findUnique({
             where : {
                 LessonPartID : id
             },

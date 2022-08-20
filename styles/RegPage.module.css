@@ -1,7 +1,7 @@
 .fullPage{
     margin : 0;
     width: 100vw;
-    min-height: 95vh;
+    min-height: 100vh;
     --topPadd: 2.5em;
     --rightPadd: 18em;
 }
@@ -42,9 +42,10 @@
     right: 0;
     min-height: inherit;
     height: available;
-    background-color: rgba(0, 0, 0, 0.2);
+    background-color: var(--linen);
     display: flex;
     flex-direction: column;
+    overflow-y: scroll;
 }
 
 .courseMenuInline{
@@ -60,7 +61,7 @@
     min-height: 2.5em;
     top: 0;
     width: 100%;
-    background-color: #545454;
+    background-color: var(--international-orange-golden-gate-bridge);
     clear: both;
     z-index: 2;
 }
@@ -121,19 +122,24 @@
     margin-bottom: 0.3em;
     border-radius: 5px;
     box-shadow: 1px 1px black;
+    background-color: var(--linen);
 }
 
 .navbarMain .linkContainer .searchButton{
     position: relative;
     border: none;
     background: none;
-    color: black;
+    color: var(--international-orange-golden-gate-bridge);
     left: -1.5em;
 }
 
+.navbarMain .linkContainer .searchButton:hover{
+    color: var(--middle-blue);
+}
+
 .navbarMain .linkContainer a:hover{
-    background-color: white;
-    color: #545454;
+    background-color: var(--middle-blue);
+    color: var(--raisin-black);
     border-radius: 10px 10px 0 0;
 }
 
@@ -144,7 +150,7 @@
 
 .logoContainer:hover{
     cursor: pointer;
-    color: lightgrey;
+    color: var(--middle-blue);
 }
 
 
@@ -153,26 +159,29 @@
 }
 
 .addPadding{
-    padding-left: 1em;
-    font-size: 85%;
+    font-weight: normal;
+    font-size: 90%;
 }
 
 .addExtraPadding{
-    padding-left: 2em;
-    font-size: 70%;
+    font-weight: lighter;
+    font-size: 75%;
 }
 
 .navigationContainer{
     font-size: 70%;
+    font-weight: bold;
+    width: 100%;
+    text-align: left;
     padding: 0em 0.5em;
     border: none;
     border-radius: 3px;
     background: none;
-    color: black;
+    color: var(--raisin-black);
 }
 
 .navigationContainer:hover{
-    background-color: rgba(0, 0, 0, 0.45);
+    background-color: var(--middle-blue);
     text-decoration: none !important;
 }
 
@@ -181,8 +190,8 @@
 }
 
 .keyword{
-    background-color: #dcdcdc;
-    padding: 0.2em;
+    background-color: var(--middle-blue);
+    padding: 0.3em 0.6em;
     border-radius: 5px;
     margin-right: 0.2em;
 }
@@ -191,7 +200,7 @@
     z-index: 2;
     margin: 0.5em;
     font-size: 90%;
-    color: white;
+    color: var(--linen);
 }
 
 .hide{
