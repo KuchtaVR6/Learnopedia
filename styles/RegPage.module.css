@@ -171,9 +171,9 @@
 .navigationContainer{
     font-size: 70%;
     font-weight: bold;
-    width: 100%;
+    width: fit-content;
     text-align: left;
-    padding: 0em 0.5em;
+    padding: 0em 1em !important;
     border: none;
     border-radius: 3px;
     background: none;

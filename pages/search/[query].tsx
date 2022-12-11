@@ -5,6 +5,7 @@ import client from "../../apollo-client";
 import {gql} from "@apollo/client";
 import {MetaOutput} from "../../models/backEnd/contents/Content";
 import SearchDisplay from "../../models/frontEnd/navigational/searchDisplay";
+import Head from "next/head";
 
 const Search: NextPage<{data : {
         score: number,
@@ -15,6 +16,10 @@ const Search: NextPage<{data : {
 
     return (
         <RegularLayout enforceUser={false}>
+            <Head>
+                <title>Learnopedia</title>
+                <meta name={"robots"} content={"noindex, nofollow"}/>
+            </Head>
             <SearchDisplay array={data} query={(router.query.query as string)}/>
         </RegularLayout>
     )

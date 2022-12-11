@@ -9,6 +9,7 @@ import {gql, useMutation} from "@apollo/client";
 import {useRouter} from "next/router";
 import {lessonPartArgs, LessonPartInputs} from "../../../../models/backEnd/lessonParts/LessonPartManager";
 import LessonPartForm from "../../../../models/frontEnd/editForms/lessonpartForm";
+import Head from "next/head";
 
 const AddLessonPart: NextPage<{
     data: {
@@ -76,6 +77,9 @@ const AddLessonPart: NextPage<{
     if (data.mainMeta.type == 2) {
         return (
             <RegularLayout enforceUser={true} navigation={data.output}>
+                <Head>
+                    <meta name={"robots"} content={"noindex, nofollow"}/>
+                </Head>
                 <div className={styles.main}>
                     <LessonPartForm
                         setChanges={setChanges}

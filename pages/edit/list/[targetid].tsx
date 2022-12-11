@@ -9,6 +9,7 @@ import {gql, useMutation} from "@apollo/client";
 import {useRouter} from "next/router";
 import {AiFillDelete} from "react-icons/ai";
 import {displayableOutput} from "../../../models/backEnd/lessonParts/LessonPart";
+import Head from "next/head";
 
 
 const ModList: NextPage<{
@@ -202,6 +203,9 @@ const ModList: NextPage<{
 
     return (
         <RegularLayout enforceUser={true} navigation={data.output}>
+            <Head>
+                <meta name={"robots"} content={"noindex, nofollow"}/>
+            </Head>
             <div className={styles.main}>
                 <h1>List modifications on {data.mainMeta.name}</h1>
                 <hr/>

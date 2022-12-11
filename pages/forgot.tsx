@@ -8,6 +8,7 @@ import {useEffect, useRef, useState} from "react";
 import {useRouter} from "next/router";
 import {gql, useMutation} from "@apollo/client";
 import HCaptcha from "@hcaptcha/react-hcaptcha";
+import Head from "next/head";
 
 const Forgot: NextPage = () => {
 
@@ -62,6 +63,9 @@ const Forgot: NextPage = () => {
 
     return (
         <div>
+            <Head>
+                <title>Learnopedia</title>
+            </Head>
             <div className={visibility ? [styles.page, styles.hide].join(" ") : styles.page}>
                 <form className={styles.form} onSubmit={(e) => {
                     e.preventDefault()

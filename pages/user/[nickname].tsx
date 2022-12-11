@@ -9,6 +9,7 @@ import XpBar from "../../models/frontEnd/profileComponents/xpBar";
 import client from "../../apollo-client";
 import {UserDetails} from "../../models/backEnd/User";
 import {useRouter} from "next/router";
+import Head from "next/head";
 
 type args = {
     data: UserDetails
@@ -20,6 +21,9 @@ const UserView: NextPage<args> = ({data}) => {
 
     return (
         <RegularLayout enforceUser={false} noInlineNav={true}>
+            <Head>
+                <meta name={"robots"} content={"noindex, nofollow"}/>
+            </Head>
             <div>
                 <div className={styles.profile}>
                     <div className={styles.banner}>

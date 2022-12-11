@@ -242,11 +242,11 @@ class Content extends Expirable {
     }
 
     public getCreationDate() {
-        return Content.twoDigit(this.dateCreated.getDate())  + "." + Content.twoDigit(this.dateCreated.getMonth() + 1) + "." + this.dateCreated.getFullYear()
+        return this.dateCreated.getFullYear() + "." + Content.twoDigit(this.dateCreated.getMonth() + 1)  + "." +  Content.twoDigit(this.dateCreated.getDate())
     }
 
     public getModificationDate() {
-        return Content.twoDigit(this.dateModified.getDate()) + "." + Content.twoDigit(this.dateModified.getMonth() + 1) + "." + this.dateModified.getFullYear()
+        return this.dateModified.getFullYear() + "." + Content.twoDigit(this.dateModified.getMonth() + 1) + "." +  Content.twoDigit(this.dateModified.getDate())
     }
 
     public async getLDJSON(): Promise<LDNJSON> { //todo in the future remove

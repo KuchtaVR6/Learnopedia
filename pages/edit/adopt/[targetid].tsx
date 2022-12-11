@@ -9,6 +9,7 @@ import styles from "../../../styles/ContentDisplay.module.css";
 import {gql, useMutation} from "@apollo/client";
 import {useRouter} from "next/router";
 import EvaluatorInput from "../../../models/frontEnd/inputs/evaluatorInput";
+import Head from "next/head";
 
 const Adopt: NextPage<{
     data: {
@@ -109,6 +110,9 @@ const Adopt: NextPage<{
     if (data.mainMeta.type !== 0) {
         return (
             <RegularLayout enforceUser={true} navigation={data.output}>
+                <Head>
+                    <meta name={"robots"} content={"noindex, nofollow"}/>
+                </Head>
                 <div className={styles.main}>
                     <h1>Change parent</h1>
                     <p>Paste the new parents link or ID:</p>
@@ -143,6 +147,9 @@ const Adopt: NextPage<{
     else {
         return (
             <RegularLayout enforceUser={false} navigation={data.output}>
+                <Head>
+                    <meta name={"robots"} content={"noindex, nofollow"}/>
+                </Head>
                 <p>It is not possible to adopt a Course as it has no Parent.</p>
             </RegularLayout>
         )

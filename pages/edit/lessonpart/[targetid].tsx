@@ -10,6 +10,7 @@ import {useRouter} from "next/router";
 import {lessonPartArgs, LessonPartInputs} from "../../../models/backEnd/lessonParts/LessonPartManager";
 import LessonPartForm from "../../../models/frontEnd/editForms/lessonpartForm";
 import {displayableOutput} from "../../../models/backEnd/lessonParts/LessonPart";
+import Head from "next/head";
 
 const EditLessonPart: NextPage<{
     data: {
@@ -105,6 +106,9 @@ const EditLessonPart: NextPage<{
     if (data.mainMeta.type == 2) {
         return (
             <RegularLayout enforceUser={true} navigation={data.output}>
+                <Head>
+                    <meta name={"robots"} content={"noindex, nofollow"}/>
+                </Head>
                 <div className={styles.main}>
                     {extracted ?
                         <LessonPartForm

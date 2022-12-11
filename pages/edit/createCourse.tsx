@@ -5,6 +5,7 @@ import {useRouter} from "next/router";
 import {NextPage} from "next";
 import RegularLayout from "../../models/frontEnd/regularLayout";
 import MetaForm from "../../models/frontEnd/editForms/metaForm";
+import Head from "next/head";
 
 export type MetaChanges = {
     title: string | null,
@@ -68,6 +69,9 @@ const CreateCourse: NextPage = () => {
 
     return (
         <RegularLayout enforceUser={true}>
+            <Head>
+                <meta name={"robots"} content={"noindex, nofollow"}/>
+            </Head>
             <div className={styles.main}>
                 <MetaForm type={0}
                           setOutput={setChanges}

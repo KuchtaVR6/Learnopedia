@@ -8,6 +8,7 @@ import {useEffect, useState} from "react";
 import styles from "../../../styles/ContentDisplay.module.css";
 import {gql, useMutation} from "@apollo/client";
 import {useRouter} from "next/router";
+import Head from "next/head";
 
 export type MetaChanges = {
     title: string | null,
@@ -93,6 +94,9 @@ const AddChild: NextPage<{
     if (data.mainMeta.type !== 2) {
         return (
             <RegularLayout enforceUser={true} navigation={data.output}>
+                <Head>
+                    <meta name={"robots"} content={"noindex, nofollow"}/>
+                </Head>
                 <div className={styles.main}>
                     <MetaForm type={data.mainMeta.type + 1}
                               parentTitle={data.mainMeta.name}

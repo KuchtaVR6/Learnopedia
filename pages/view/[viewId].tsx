@@ -14,6 +14,34 @@ const View: NextPage<{data : {
 
     const router = useRouter()
 
+    const jsonLD = () => {
+        let creation = new Date(data.mainMeta.creation)
+        let modified = new Date(data.mainMeta.modification)
+
+        return (
+            {
+                "@context": "https://schema.org",
+                "@type": "Article",
+                "headline": data.mainMeta.name,
+                "description": data.mainMeta.description,
+                "author": {
+                    "@type": "Organization",
+                    "name": data.mainMeta.authors
+                },
+                "publisher": {
+                    "@type": "Organization",
+                    "name": "Learnopedia",
+                    "logo": {
+                        "@type": "ImageObject",
+                        "url": "https://learnopedia.org/images/logo.png"
+                    }
+                },
+                "datePublished": creation.getFullYear() + "-" + creation.getMonth() + "-" + creation.getDate(),
+                "dateModified": modified.getFullYear() + "-" + modified.getMonth() + "-" + modified.getDate()
+            }
+        )
+    }
+
     if(data) {
         return (
             <div>
@@ -23,6 +51,11 @@ const View: NextPage<{data : {
                     <meta name={"keywords"} content={(data.mainMeta.keywords.map((keyword) => {
                         return keyword.word
                     })).join(", ")}/>
+                    <script
+                        key="structured-data"
+                        type="application/ld+json"
+                        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLD()) }}
+                    />
                 </Head>
                 <RegularLayout enforceUser={false} navigation={data.output}>
                     <ContentDisplay meta={data.mainMeta} contents={data.output}/>
