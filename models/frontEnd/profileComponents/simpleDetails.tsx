@@ -3,6 +3,7 @@ import {gql, useMutation} from "@apollo/client";
 import styles from "/styles/Profile.module.css";
 import ModifyDisplayConstrained, {ConstrainedInputTypes} from "../inputs/modifyDisplayConstrained";
 import ModifyDisplay from "../inputs/modifyDisplay";
+import ImageUploader from "../inputs/imageUploader";
 
 type args = {
     data: any,
@@ -24,6 +25,7 @@ const SimpleDetails: FC<args> = ({data, loading, hideOptions}) => {
     const [nickname, setNickname] = useState("")
     const [fname, setFName] = useState("")
     const [lname, setLName] = useState("")
+    const [avatar, setAvatar] = useState<File | null>(null)
 
     const [displayNick, setDisplayNick] = useState(data.nickname)
     const [displayFName, setDisplayFName] = useState(data.fname)
@@ -62,15 +64,13 @@ const SimpleDetails: FC<args> = ({data, loading, hideOptions}) => {
         sendSimpleMod({
             variables: vars
         }).then(() => {
-            if(nickname){
+            if (nickname) {
                 setDisplayNick(nickname)
             }
-            if(lname)
-            {
+            if (lname) {
                 setDisplayLName(lname)
             }
-            if(fname)
-            {
+            if (fname) {
                 setDisplayFName(fname)
             }
             setUpdating(false)
@@ -79,25 +79,33 @@ const SimpleDetails: FC<args> = ({data, loading, hideOptions}) => {
 
     //updating is for simple re-rendering
     return (
-        <div className={styles.zone}>
-            <div className={styles.details}>
-                {updating ?
-                    <h1> Updating... </h1>
-                    :
-                    <>
-                        <ModifyDisplayConstrained desc={"Username: "} value={displayNick}
-                                                  setProp={setNickname}
-                                                  type={ConstrainedInputTypes.NICKNAME}
-                                                  hideOptions={hideOptions}
-                        />
-                        <ModifyDisplay desc={"Forename: "} value={displayFName} setProp={setFName} hideOption={hideOptions}/>
-                        <ModifyDisplay desc={"Surname: "} value={displayLName} setProp={setLName} hideOption={hideOptions}/>
-                    </>
-                }
+        <>
+            <div className={styles.zone}>
+                <div className={styles.details}>
+                    {updating ?
+                        <h1> Updating... </h1>
+                        :
+                        <>
+                            <ModifyDisplayConstrained desc={"Username: "} value={displayNick}
+                                                      setProp={setNickname}
+                                                      type={ConstrainedInputTypes.NICKNAME}
+                                                      hideOptions={hideOptions}
+                            />
+                            <ModifyDisplay desc={"Forename: "} value={displayFName} setProp={setFName}
+                                           hideOption={hideOptions}/>
+                            <ModifyDisplay desc={"Surname: "} value={displayLName} setProp={setLName}
+                                           hideOption={hideOptions}/>
+                        </>
+                    }
+                </div>
+                {hideOptions ? "" : <button disabled={(!simpleChanges || loading)} onClick={() => simpleMod()}
+                                            className={styles.save}>{loading ? "Loading..." : simpleChanges ? "Save the changes" : "No changes"}</button>}
             </div>
-            {hideOptions? "" : <button disabled={(!simpleChanges || loading)} onClick={() => simpleMod()}
-                    className={styles.save}>{loading ? "Loading..." : simpleChanges ? "Save the changes" : "No changes"}</button>}
-        </div>
+            <div className={styles.zone}>
+                <ImageUploader imageName={"Avatar"} enforceImage={true} fileSizeLimit={2*1024*1024} hideOptions={hideOptions}/>
+            </div>
+
+        </>
     )
 }
 

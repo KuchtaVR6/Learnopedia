@@ -9,8 +9,8 @@ type args = {
     desc?: string,
     value: string,
     setProp: Dispatch<SetStateAction<string>>,
-    type : ConstrainedInputTypes,
-    hideOptions? : boolean,
+    type: ConstrainedInputTypes,
+    hideOptions?: boolean,
 }
 
 const ModifyDisplayConstrained: FC<args> = ({desc, value, setProp, type, hideOptions}) => {
@@ -19,43 +19,51 @@ const ModifyDisplayConstrained: FC<args> = ({desc, value, setProp, type, hideOpt
 
     let checkQuery;
 
-    if(type === ConstrainedInputTypes.NICKNAME)
-    {
+    if (type === ConstrainedInputTypes.NICKNAME) {
         checkQuery = gql`
             query Nickname($query : String!)
             {
                 vacantNickname(nickname: $query) {
-                    continue
+                    query
+                    vacant
                 }
             }
         `
-    }
-    else if(type === ConstrainedInputTypes.EMAIL)
-    {
+    } else if (type === ConstrainedInputTypes.EMAIL) {
         checkQuery = gql`
             query Email($query : String!)
             {
                 vacantEmail(email: $query) {
-                    continue
+                    query
+                    vacant
                 }
             }
         `
-    }
-    else{
+    } else {
         return <>ERROR!</>
     }
 
     return (
         <div className={styles.userMod}>
-            {desc? <label>{desc}</label> : ""}
-            <SelfValidatingInput
-                type={type}
-                query={checkQuery}
-                setProp={setProp}
-                disable={!editable}
-                placeholder={value}
-            />
-            {hideOptions? "" : editable ?
+            {desc ? <label>{desc}</label> : ""}
+            {editable ?
+                <SelfValidatingInput
+                    type={type}
+                    query={checkQuery}
+                    setProp={setProp}
+                    disable={!editable}
+                    placeholder={value}
+                />
+                :
+                <SelfValidatingInput
+                    type={type}
+                    query={checkQuery}
+                    setProp={setProp}
+                    disable={!editable}
+                    placeholder={value}
+                />
+            }
+            {hideOptions ? "" : editable ?
                 <button onClick={() => {
                     setEditable(false)
                 }}><ImCross/></button>
@@ -69,7 +77,7 @@ const ModifyDisplayConstrained: FC<args> = ({desc, value, setProp, type, hideOpt
     )
 }
 
-export enum ConstrainedInputTypes{
+export enum ConstrainedInputTypes {
     EMAIL,
     NICKNAME
 }

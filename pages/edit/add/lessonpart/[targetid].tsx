@@ -7,7 +7,7 @@ import {useEffect, useState} from "react";
 import styles from "../../../../styles/ContentDisplay.module.css";
 import {gql, useMutation} from "@apollo/client";
 import {useRouter} from "next/router";
-import {lessonPartArgs, LessonPartInputs} from "../../../../models/backEnd/lessonParts/LessonPartManager";
+import {LessonPartInputs} from "../../../../models/backEnd/lessonParts/LessonPartManager";
 import LessonPartForm from "../../../../models/frontEnd/editForms/lessonpartForm";
 import Head from "next/head";
 
@@ -72,7 +72,7 @@ const AddLessonPart: NextPage<{
         } else {
             setValidity(false)
         }
-    }, [changes])
+    }, [changes, seqNumber])
 
     if (data.mainMeta.type == 2) {
         return (

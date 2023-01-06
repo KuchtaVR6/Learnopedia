@@ -21,6 +21,7 @@ export class User extends Expirable {
     private fname: string;
     private lname: string;
     private passHash: string;
+    private avatarPath: string | null;
     private amendments : Amendment[];
 
     /**
@@ -60,7 +61,7 @@ export class User extends Expirable {
      * @param lname         - user's lname
      * @param password      - password MUST BE ALREADY ENCRYPTED
      */
-    public constructor(id: number, nickname: string, email: string, fname: string, lname: string, password: string, amendments : Amendment[]) {
+    public constructor(id: number, nickname: string, email: string, fname: string, lname: string, password: string, amendments : Amendment[], avatarPath : string | null) {
         super(600) // 10 minutes
         this.id = id;
         this.passHash = password;
@@ -69,6 +70,7 @@ export class User extends Expirable {
         this.fname = fname;
         this.lname = lname;
         this.amendments = amendments;
+        this.avatarPath = avatarPath;
     }
 
     private async comparePasswordAttempt(attempt: string): Promise<boolean> {
@@ -214,10 +216,28 @@ export class User extends Expirable {
     }
 
     public async updateManager() {
-        await UserManager.getInstance().updateUserNonIdentifier(this.email, this.fname, this.lname, this.passHash)
+        await UserManager.getInstance().updateUserNonIdentifier(this.email, this.fname, this.lname, this.passHash, this.avatarPath)
     }
 
     public getID() {
         return this.id;
+    }
+
+    public getAvatarPath() {
+        return this.avatarPath;
+    }
+
+    public async setAvatarPath(newAvatarPath : string | null) {
+        super.refresh()
+
+        this.avatarPath = newAvatarPath;
+        await prisma.user.update({
+            where: {
+                ID: this.id
+            },
+            data: {
+                avatarFile: newAvatarPath
+            }
+        })
     }
 }

@@ -17,14 +17,24 @@ export const userResolvers = {
             }
             return thisUser.getAllDetails()
         },
-        vacantEmail: (parent: undefined, args: { email: string }, context: { user: User, agent: string, refreshToken: string, response: any, setCookies: any, setHeaders: any }) => {
+        vacantEmail: async (parent: undefined, args: { email: string }, context: { user: User, agent: string, refreshToken: string, response: any, setCookies: any, setHeaders: any }) => {
+            console.log({
+                query: args.email,
+                vacant: await UserManager.getInstance().validateEmail(args.email)
+            })
             return {
-                continue: UserManager.getInstance().validateEmail(args.email)
+                query: args.email,
+                vacant: await UserManager.getInstance().validateEmail(args.email)
             }
         },
-        vacantNickname: (parent: undefined, args: { nickname: string }, context: { user: User, agent: string, refreshToken: string, response: any, setCookies: any, setHeaders: any }) => {
+        vacantNickname: async (parent: undefined, args: { nickname: string }, context: { user: User, agent: string, refreshToken: string, response: any, setCookies: any, setHeaders: any }) => {
+            console.log({
+                query: args.nickname,
+                vacant: await UserManager.getInstance().validateNickname(args.nickname)
+            })
             return {
-                continue: UserManager.getInstance().validateNickname(args.nickname)
+                query: args.nickname,
+                vacant: await UserManager.getInstance().validateNickname(args.nickname)
             }
         }
     },
@@ -43,7 +53,7 @@ export const userResolvers = {
                 })
 
             if (args.email && args.nickname && args.lname && args.fname && args.password) {
-                if (UserManager.getInstance().validateEmail(args.email) && UserManager.getInstance().validateNickname(args.nickname)) {
+                if ((await UserManager.getInstance().validateEmail(args.email)) && (await UserManager.getInstance().validateNickname(args.nickname))) {
                     if (UserManager.getInstance().validatePassword(args.password)) {
                         let initialToken;
                         if (!context.initialToken) {

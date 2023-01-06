@@ -16,6 +16,11 @@ export const typeDefs = gql`
     type ContinueResponse{
         continue : Boolean!
     }
+    
+    type VacancyResponse{
+        query : String!
+        vacant : Boolean!
+    }
 
     #start of helper types
 
@@ -111,7 +116,7 @@ export const typeDefs = gql`
         score : Int!,
         content : MetaContent!
     }
-    
+
     #amendmentsOutput start
 
     type MetaAmendmentOutput {
@@ -124,7 +129,7 @@ export const typeDefs = gql`
     type ListAmendmentOutput {
         listChanges : [ChangesOutput!]
     }
-    
+
     type CreationAmendmentOutput {
         name : String!,
         description : String!,
@@ -142,16 +147,16 @@ export const typeDefs = gql`
         newParent : Int!,
         receiver : Boolean,
     }
-    
+
     #amendmentsOutput end
-    
-    union SpecificAmendmentOutput = 
-        MetaAmendmentOutput | 
-        ListAmendmentOutput | 
-        CreationAmendmentOutput | 
+
+    union SpecificAmendmentOutput =
+        MetaAmendmentOutput |
+        ListAmendmentOutput |
+        CreationAmendmentOutput |
         PartAddReplaceAmendmentOutput |
         AdoptionAmendmentOutput
-    
+
     type AmendmentOutput{
         id : Int!,
         creatorNickname : String!,
@@ -163,11 +168,17 @@ export const typeDefs = gql`
         otherDetails : SpecificAmendmentOutput
     }
 
+    #image types
+
+    type ForDeletion{
+        file : String
+    }
+
     type Query {
         logout : AuthResponse,
         getUser(nickname : String) : User,
-        vacantEmail(email : String!) : ContinueResponse,
-        vacantNickname(nickname : String!) : ContinueResponse,
+        vacantEmail(email : String!) : VacancyResponse,
+        vacantNickname(nickname : String!) : VacancyResponse,
 
         search(query : String!) : [searchResult],
         view(id : Int!) : viewOutput
@@ -175,6 +186,9 @@ export const typeDefs = gql`
 
         getUsersAmendments(nickname : String) : [AmendmentOutput],
         getContentAmendments(id : Int!) : [AmendmentOutput]
+
+        #image resolvers
+        avatarAuthorise : ForDeletion
     }
 
     type Mutation{
@@ -200,5 +214,8 @@ export const typeDefs = gql`
 
         listAmendment(targetID : Int!, changes : [Changes!]!) : ContinueResponse
         adoptionAmendment(targetID : Int!, newParent : Int!) : ContinueResponse
+
+        #image resolvers
+        avatarFinalise(newPath : String) : ContinueResponse
     }
 `;

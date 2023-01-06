@@ -167,7 +167,7 @@ const ModList: NextPage<{
         setExtractedModifiable(x);
 
         reset();
-    }, [extracted, listOfChanges])
+    }, [extracted, listOfChanges, data.mainMeta.type])
 
     const checkIfModded = (id: number) => {
         for (let child of listOfChanges) {

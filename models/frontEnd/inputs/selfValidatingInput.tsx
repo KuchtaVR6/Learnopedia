@@ -1,4 +1,4 @@
-import {Dispatch, FC, SetStateAction, useEffect, useState} from "react";
+import {Dispatch, FC, SetStateAction, useEffect, useRef, useState} from "react";
 import {DocumentNode, useLazyQuery} from "@apollo/client";
 import styles from "../../../styles/Forms.module.css";
 import {ConstrainedInputTypes} from "./modifyDisplayConstrained";
@@ -17,31 +17,70 @@ const SelfValidatingInput: FC<Args> = ({setProp, query, type, disable, placehold
 
     const [internal, setInternal] = useState("")
     const [message, setMessage] = useState("Must be unique 🤔")
+
     const [valid, setValid] = useState(false)
 
     const [inputState, setInputState] = useState(OSIStates.INSUFFICIENT_LETTERS)
 
-    const [validate, {loading, error, data}] = useLazyQuery(query);
+    const [validateInner, {loading, error, data}] = useLazyQuery(query);
+    const prevChecks = useRef(new Map<String, boolean>);
+    const prevSend = useRef<string>("")
+
+    const validate = (input : String, ver : number) => {
+        if (ver)
+        {
+            if (ver > verMax.current)
+            {
+                verMax.current = ver
+            }
+            else if (ver < verMax.current)
+            {
+                // stale request, will be ignored
+                return;
+            }
+        }
+
+        if(prevChecks.current.has(input))
+        {
+            if (prevChecks.current.get(input)) {
+                setProp(internal)
+                setCurrentState(OSIStates.ACCEPTED, ver)
+                setValid(true)
+            } else {
+                setCurrentState(OSIStates.TAKEN, ver)
+            }
+        }
+        else{
+            validateInner({variables: {query: input}})
+        }
+    }
 
     const checkData = () => {
         if (data) {
             if (data.vacantEmail) {
-                if (data.vacantEmail.continue) {
-                    setProp(internal)
-                    setMessage("Great choice! 😎")
-                    setValid(true)
-                } else {
-                    setMessage("Taken... 😞")
+                if (data.vacantEmail.query == internal) {
+                    if (data.vacantEmail.vacant) {
+                        setProp(internal)
+                        setMessage("Great choice! 😎")
+
+                        setValid(true)
+                    } else {
+                        setMessage("Taken... 😞")
+                    }
                 }
+                prevChecks.current.set(data.vacantEmail.query,data.vacantEmail.vacant)
             }
             if (data.vacantNickname) {
-                if (data.vacantNickname.continue) {
-                    setProp(internal)
-                    setMessage("Great choice! 😎")
-                    setValid(true)
-                } else {
-                    setMessage("Taken... 😞")
+                if (data.vacantNickname.query == internal) {
+                    if (data.vacantNickname.vacant) {
+                        setProp(internal)
+                        setMessage("Great choice! 😎")
+                        setValid(true)
+                    } else {
+                        setMessage("Taken... 😞")
+                    }
                 }
+                prevChecks.current.set(data.vacantNickname.query,data.vacantNickname.vacant)
             }
         }
     }
@@ -61,20 +100,52 @@ const SelfValidatingInput: FC<Args> = ({setProp, query, type, disable, placehold
         }
     }
 
-    const checkChange = (newInput: string) => {
+    const checkChange = (newInput: string, ver : number) => {
+
+        if(internal === newInput){
+            if(valid){
+                setCurrentState(OSIStates.ACCEPTED, ver)
+            }
+            else{
+                setCurrentState(OSIStates.TAKEN, ver)
+            }
+            return;
+        }
+
+        if (ver)
+        {
+            if (ver > verMax.current)
+            {
+                verMax.current = ver
+            }
+            // better to accept a stale request than confuse the user
+            // if its stale, and it makes it through:  it will be discarded in the next stage
+        }
+
         if (newInput.length > 3) {
+
             if (type === ConstrainedInputTypes.EMAIL && (newInput.indexOf("@") >= newInput.length - 1 || newInput.indexOf("@") < 0)) {
-                setMessage("Are you sure it's an email? 📧")
+                setCurrentState(OSIStates.INVALID_INPUT,ver)
             } else if (type === ConstrainedInputTypes.NICKNAME && newInput.indexOf("@") >= 0) {
-                setMessage("No @ signs allowed in nicknames 📧")
+                setCurrentState(OSIStates.INVALID_INPUT, ver)
             } else {
-                setInternal(newInput);
-                setMessage("Checking... 🤖")
-                validate({variables: {query: newInput}});
-                checkData()
+                if(prevSend.current !== newInput) {
+                    setInternal(newInput);
+                    prevSend.current = newInput;
+                    setCurrentState(OSIStates.EVALUATING, ver)
+                    validate(newInput, ver);
+                }
+                else{
+                    if(valid){
+                        setCurrentState(OSIStates.ACCEPTED, ver)
+                    }
+                    else{
+                        setCurrentState(OSIStates.TAKEN, ver)
+                    }
+                }
             }
         } else {
-            setMessage("Needs at least 4 letters 📏")
+            setCurrentState(OSIStates.INSUFFICIENT_LETTERS, ver)
         }
     }
 
@@ -99,43 +170,40 @@ const SelfValidatingInput: FC<Args> = ({setProp, query, type, disable, placehold
                 else{
                     setMessage("No @ signs allowed in nicknames 📧")
                 }
+                break;
             case OSIStates.EVALUATING:
                 setMessage("Checking... 🤖")
                 break;
             case OSIStates.ON_COOL_DOWN:
                 setMessage("Give me a second I can't keep-up 🥴")
                 break;
+            case OSIStates.TAKEN:
+                setMessage("Taken... 😞")
+                break;
+            case OSIStates.ACCEPTED:
+                setMessage("Great choice! 😎")
+                break;
 
         }
     },[inputState])
 
-    /**
-     *
-     *             <input
-     *                 className={valid ? "" : "invalid"}
-     *                 required={true}
-     *                 type={type === ConstrainedInputTypes.EMAIL ? "email" : "text"}
-     *                 autoComplete={type === ConstrainedInputTypes.EMAIL ? "email" : "username"}
-     *                 disabled={disable}
-     *                 placeholder={placeholder}
-     *
-     *                 onChange={(e) => {
-     *                     setValid(false)
-     *                     setProp("");
-     *                     setModified(true)
-     *                     if (e.target.value.length > 3) {
-     *                         setMessage("Click away and I will check... 🤖")
-     *                     } else {
-     *                         setMessage("Needs at least 4 letters 📏")
-     *                     }
-     *                 }}
-     *
-     *                 onBlur={(e) => {
-     *                     checkChange(e.target.value)
-     *                 }}
-     *             />
-     *
-     */
+    let verMax = useRef(0);
+
+    const setCurrentState = (inputRegistered : OSIStates, ver : number) => {
+        if (ver)
+        {
+            if (ver > verMax.current)
+            {
+                verMax.current = ver
+            }
+            else if (ver < verMax.current)
+            {
+                // stale request, will be ignored
+                return;
+            }
+        }
+        setInputState(inputRegistered)
+    }
 
     return (
         <div>
@@ -149,8 +217,9 @@ const SelfValidatingInput: FC<Args> = ({setProp, query, type, disable, placehold
                 evaluate={checkChange}
                 minLetters={4}
                 coolDown={5000}
-                setCurrentState={setInputState}
+                setCurrentState={setCurrentState}
                 basicValidator={basicValidator}
+                OnChange={()=>{setProp("")}}
             />
             <br/>
             {disable ? "" : <span className={styles.waring}>{message}</span>}

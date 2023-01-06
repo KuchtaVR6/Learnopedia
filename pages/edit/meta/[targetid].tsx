@@ -94,7 +94,7 @@ const EditChild: NextPage<{
         } else {
             setValidity(false)
         }
-    }, [changes])
+    }, [changes, calculateKeywords])
 
     return (
         <RegularLayout enforceUser={true} navigation={data.output}>

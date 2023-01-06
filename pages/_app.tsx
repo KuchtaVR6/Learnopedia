@@ -5,7 +5,7 @@ import {UserContext} from "../models/frontEnd/authentication/userContext";
 import Head from "next/head";
 
 export const client = new ApolloClient({
-    uri: "http://localhost:3000/api/graphql",
+    uri: "/api/graphql",
     cache: new InMemoryCache()
 });
 

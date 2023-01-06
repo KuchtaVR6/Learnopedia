@@ -238,6 +238,7 @@ model user {
   fname     String      @db.VarChar(255)
   lname     String      @db.VarChar(255)
   passHash  String      @db.VarChar(255)
+  avatarFile String?     @db.VarChar(255)
   amendment amendment[]
 }
 

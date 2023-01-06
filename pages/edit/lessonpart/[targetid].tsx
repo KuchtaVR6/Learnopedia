@@ -55,7 +55,7 @@ const EditLessonPart: NextPage<{
         }
 
         extractRelevant();
-    }, [])
+    }, [data.output.content, router.query.child])
 
     useEffect(() => {
         if (type === "PARAGRAPH") {
@@ -101,7 +101,7 @@ const EditLessonPart: NextPage<{
         } else {
             setValidity(false)
         }
-    }, [changes])
+    }, [changes, seqNumber])
 
     if (data.mainMeta.type == 2) {
         return (

@@ -29,11 +29,11 @@ export class UserManager {
     }
 
     public deletedUser() {
-        return new User(-1,"DELETED USER", "deleted@deleted", "DELETED", "DELETED", "===", [])
+        return new User(-1,"DELETED USER", "deleted@deleted", "DELETED", "DELETED", "===", [], null)
     }
 
     public async addUser(nickname: string, email: string, fname: string, lname: string, password: string): Promise<User> {
-        if (this.validateEmailRes(email) && this.validateNicknameRes(nickname)) {
+        if ((await this.validateEmailRes(email)) && (await this.validateNicknameRes(nickname))) {
             return this.userStore.push(nickname, email, fname, lname, password)
         }
         throw new CredentialsNotUnique();
@@ -43,26 +43,30 @@ export class UserManager {
         return this.userStore.delete(user)
     }
 
-    public validateEmail(email: string) {
-        return !this.userStore.emailTaken(email)
+    public async validateEmail(email: string) {
+        let x = !(await this.userStore.emailTaken(email))
+        return x
     }
 
     //difference is that it allows reserved emails
-    public validateEmailRes(email: string) {
-        return !this.userStore.emailTaken(email, true)
+    public async validateEmailRes(email: string) {
+        let x = !(await this.userStore.emailTaken(email,true))
+        return x
     }
 
-    public validateNickname(nickname: string) {
-        return !this.userStore.nicknameTaken(nickname)
+    public async validateNickname(nickname: string) {
+        let x = !(await this.userStore.nicknameTaken(nickname))
+        return x
     }
 
     //difference is that it allows reserved emails
-    public validateNicknameRes(email: string) {
-        return !this.userStore.nicknameTaken(email, true)
+    public async validateNicknameRes(nickname: string) {
+        let x = !(await this.userStore.nicknameTaken(nickname, true))
+        return x
     }
 
-    public async updateUserNonIdentifier(email: string, fname: string, lname: string, passHash: string) {
-        await this.userStore.updateDB(email, fname, lname, passHash);
+    public async updateUserNonIdentifier(email: string, fname: string, lname: string, passHash: string, avatarPath : string | null) {
+        await this.userStore.updateDB(email, fname, lname, passHash, avatarPath);
     }
 
     public async updateEmail(oldIdentifier: string, newIdentifier: string) {
@@ -108,6 +112,8 @@ class UserStore {
 
     private readonly idMap : SelfPurgingMap<number, User>;
 
+    private DBread : Promise<boolean> | null;
+
     public constructor() {
         this.mainMap = new SelfPurgingMap<String, User>();
         this.takenMap = new Map<String, boolean>();
@@ -116,10 +122,10 @@ class UserStore {
         this.takenMap.set("DELETED USER", true)
         this.takenMap.set("deleted@deleted", true)
 
-        this.getDBUnique()
+        this.DBread = this.getDBUnique()
     }
 
-    private async getDBUnique() {
+    private async getDBUnique() : Promise<boolean> {
         let rows = await prisma.user.findMany({
             select: {
                 email: true,
@@ -131,6 +137,7 @@ class UserStore {
             this.takenMap.set(value.email, true)
             this.takenMap.set(value.nickname, true)
         })
+        return true
     }
 
     private cache(newUser: User): User {
@@ -169,10 +176,19 @@ class UserStore {
             }
         })
 
-        return this.cache(new User(output.ID, nickname, email, fname, lname, passHash, []));
+        return this.cache(new User(output.ID, nickname, email, fname, lname, passHash, [], null));
+    }
+
+    private async dbScanFinished() {
+        if(this.DBread)
+        {
+            await this.DBread
+        }
     }
 
     public async delete(user: User): Promise<boolean> {
+        await this.dbScanFinished()
+
         this.mainMap.delete(user.getNickname())
         this.mainMap.delete(user.getEmail())
         this.takenMap.delete(user.getEmail())
@@ -188,6 +204,8 @@ class UserStore {
     }
 
     public async retrieve(query: string): Promise<User> {
+        await this.dbScanFinished()
+
         //check the cache
         let result = this.mainMap.get(query)
         if (result) {
@@ -214,13 +232,15 @@ class UserStore {
 
         if (dbUser) {
             let amendArray : Amendment[] = await AmendmentManager.getInstance().insertManyToCache(dbUser.amendment);
-            return this.cache(new User(dbUser.ID, dbUser.nickname, dbUser.email, dbUser.fname, dbUser.lname, dbUser.passHash, amendArray))
+            return this.cache(new User(dbUser.ID, dbUser.nickname, dbUser.email, dbUser.fname, dbUser.lname, dbUser.passHash, amendArray, dbUser.avatarFile))
         }
 
         throw new UserNotFoundException(query)
     }
 
     public async retrieveID(id: number): Promise<User> {
+        await this.dbScanFinished()
+
         let result = this.idMap.get(id)
         if (result) {
             return result
@@ -240,7 +260,7 @@ class UserStore {
         if(dbUser)
         {
             let amendArray : Amendment[] = await AmendmentManager.getInstance().insertManyToCache(dbUser.amendment);
-            let newUser = new User(dbUser.ID,dbUser.nickname, dbUser.email, dbUser.fname, dbUser.lname, dbUser.passHash, amendArray);
+            let newUser = new User(dbUser.ID,dbUser.nickname, dbUser.email, dbUser.fname, dbUser.lname, dbUser.passHash, amendArray, dbUser.avatarFile);
             this.idMap.set(id, newUser)
             return newUser;
         }
@@ -248,7 +268,9 @@ class UserStore {
     }
 
     // will return true if the email is invalid
-    public emailTaken(email: string, allowReserved?: boolean): boolean {
+    public async emailTaken(email: string, allowReserved?: boolean): Promise<boolean> {
+        await this.dbScanFinished()
+
         if (email.indexOf("@") >= 0 && email.indexOf("@") <= email.length - 2) {
             if (email.length > 3) {
                 if (allowReserved) {
@@ -262,20 +284,23 @@ class UserStore {
     }
 
     // will return true if the nickname is invalid
-    public nicknameTaken(nickname: string, allowReserved?: boolean): boolean {
+    public async nicknameTaken(nickname: string, allowReserved?: boolean): Promise<boolean> {
+        await this.dbScanFinished()
+
         if (nickname.indexOf("@") < 0) {
             if (nickname.length > 3) {
                 if (allowReserved) {
                     let result = this.takenMap.get(nickname)
                     return result === undefined;
                 }
-                return this.takenMap.has(nickname)
+                let x = this.takenMap.has(nickname)
+                return x
             }
         }
         return true
     }
 
-    public async updateDB(email: string, fname: string, lname: string, passHash: string) {
+    public async updateDB(email: string, fname: string, lname: string, passHash: string, avatarPath: string | null) {
 
         await prisma.user.update({
             where: {
@@ -284,7 +309,8 @@ class UserStore {
             data: {
                 lname: lname,
                 fname: fname,
-                passHash: passHash
+                passHash: passHash,
+                avatarFile : avatarPath
             },
         })
     }

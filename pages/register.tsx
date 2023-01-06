@@ -53,7 +53,8 @@ const Register: NextPage = () => {
         query Nickname($query : String!)
         {
             vacantNickname(nickname: $query) {
-                continue
+                query
+                vacant
             }
         }
     `
@@ -62,7 +63,8 @@ const Register: NextPage = () => {
         query Email($query : String!)
         {
             vacantEmail(email: $query) {
-                continue
+                query
+                vacant
             }
         }
     `
