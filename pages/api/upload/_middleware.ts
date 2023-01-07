@@ -1,11 +1,8 @@
 
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
-import {resolveUser} from "../graphql";
-import {gql} from "@apollo/client";
 
 export async function middleware(req : NextRequest) {
-    //let user = resolveUser(req.cookies.accessToken, req.headers.get("user-agent"));
 
     // find the link of the other API
     const protocol = req.headers.get('x-forwarded-proto') || 'http'
@@ -30,8 +27,6 @@ export async function middleware(req : NextRequest) {
     })
 
     let response = (JSON.parse(await resp.text()))
-
-    console.log(response)
 
     if (response.errors)
     {

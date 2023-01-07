@@ -2,7 +2,7 @@ import nc from 'next-connect';
 import {NextApiRequest, NextApiResponse} from "next";
 import multer from 'multer';
 
-const MAX_IMAGE_SIZE=2 * 1024 * 1024; // 2 MB
+const MAX_IMAGE_SIZE = 2 * 1024 * 1024; // 2 MB
 
 const index = multer({
     storage: multer.diskStorage({
@@ -13,8 +13,8 @@ const index = multer({
 });
 
 const apiRoute = nc({
-    onNoMatch(req : NextApiRequest, res : NextApiResponse) {
-        res.status(405).json({ error: `Method '${req.method}' Not Allowed` });
+    onNoMatch(req: NextApiRequest, res: NextApiResponse) {
+        res.status(405).json({error: `Method '${req.method}' Not Allowed`});
     },
 });
 const uploadMiddleware = index.single('avatar');
@@ -22,8 +22,42 @@ const uploadMiddleware = index.single('avatar');
 apiRoute.use(uploadMiddleware);
 
 // Process a POST request
-apiRoute.post((req : NextApiRequest, res: NextApiResponse) => {
-    res.status(200).json({data: 'success'});
+apiRoute.post(async (req: NextApiRequest & {file : {filename : string}}, res: NextApiResponse) => {
+
+    // find the link of the other API
+    const protocol = req.headers['x-forwarded-proto'] || 'http'
+    const baseUrl = `${protocol}://${req.headers['host']}`
+
+
+    const resp = await fetch(baseUrl + '/api/graphql', {
+        method: 'POST',
+
+        headers: {
+            "Content-Type": "application/json",
+            Cookie: `accessToken=${req.cookies.accessToken};refreshToken=${req.cookies.refreshToken};initialToken=${req.cookies.initialToken};`,
+            "User-Agent": req.headers["user-agent"]!
+        },
+
+        body: JSON.stringify({
+            query: `mutation Mutation($newPath: String) {
+                        avatarFinalise(newPath: $newPath) {
+                            continue
+                            }
+                        }`,
+            variables : {
+                newPath : req.file.filename
+            }
+        })
+    })
+
+    let response = (JSON.parse(await resp.text()))
+
+    if (response.errors)
+    {
+        res.status(200).json({success: false, message: 'Unexpected Error'})
+    }
+
+    res.status(200).json({success: true, file: req.file.filename});
 })
 
 export default apiRoute;

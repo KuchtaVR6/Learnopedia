@@ -86,7 +86,7 @@ const ImageUploader: FC<args> = ({enforceImage, imageName, fileSizeLimit,hideOpt
 
                 console.log(response.data)
 
-                if(response.data.data==="success")
+                if(response.data.success)
                 {
                     setWaiting(false)
                     setError(imageName + " uploaded 😻")
@@ -107,30 +107,39 @@ const ImageUploader: FC<args> = ({enforceImage, imageName, fileSizeLimit,hideOpt
     }
 
     return (
-        <div className={styles.userMod}>
-            <div style={{display: hideOptions? "none" : "inherit"}}>
-                <div style={{display: "flex", flexDirection: "row"}}>
-                    {imageName ? <label>{imageName}:&nbsp;</label> : ""}
-                    <div>
-                        <input ref={inputRef} type="file" id="avatar" name="filename" onChange={(e) => {
-                            handler(e.target)
-                        }} disabled={!editable}/>
-                        <div className={styles.waring}>{error}</div><br/>
-                    </div>
+        <>
+            <div className={styles.userMod}>
+                <div style={{display: hideOptions? "none" : "inherit"}}>
+                    <div style={{display: "flex", flexDirection: "row"}}>
+                        {imageName ? <label>{imageName}:&nbsp;</label> : ""}
+                        <div>
+                            <input ref={inputRef} type="file" id="avatar" name="filename" onChange={(e) => {
+                                handler(e.target)
+                            }} disabled={!editable}/>
+                            <div className={styles.waring}>{error}</div><br/>
+                        </div>
 
-                    {hideOptions ? "" : editable ?
-                        <button onClick={() => {
-                            setEditable(false)
-                        }}><ImCross/></button>
-                        :
-                        <button onClick={() => {
-                            setEditable(true)
-                        }}><MdModeEditOutline/></button>
-                    }
+
+                    </div>
                 </div>
-            </div> &nbsp;
-            <button onClick={upload} disabled={!image || waiting}>Submit the image</button>
-        </div>
+
+            </div>
+            <div className={styles.userMod}>
+                {hideOptions ? "" : editable ?
+                    <button onClick={() => {
+                        setEditable(false)
+                    }}><ImCross/></button>
+                    :
+                    <button onClick={() => {
+                        setEditable(true)
+                    }}><MdModeEditOutline/></button>
+                } &nbsp;
+
+                <button onClick={upload} disabled={!image || waiting}>Submit the image</button>
+            </div>
+
+        </>
+
     )
 }
 

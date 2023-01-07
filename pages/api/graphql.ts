@@ -22,7 +22,7 @@ console.log("Reinitialized")
 export const resolveUser = async (cookie : string | undefined, agent : string | undefined | null) => {
     if(cookie && agent)
     {
-        let user = await SessionRegistryInstance.getSession(cookie,agent)
+        let user = await (await SessionRegistryInstance).getSession(cookie,agent)
         if(user)
         {
             return user;

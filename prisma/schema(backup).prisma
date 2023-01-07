@@ -8,11 +8,11 @@ datasource db {
 }
 
 model adoptionamendment {
-  AmendmentID       Int       @id
-  newParent         Int?
+  AmendmentID Int       @id
+  newParent   Int?
   receiverAmendment Int?
-  amendment         amendment @relation(fields: [AmendmentID], references: [ID], onDelete: Cascade, map: "FKAdoptionAm923671")
-  content           content?  @relation(fields: [newParent], references: [ID], map: "FKAdoptionAm410338")
+  amendment   amendment @relation(fields: [AmendmentID], references: [ID], onDelete: Cascade, map: "FKAdoptionAm923671")
+  content     content?  @relation(fields: [newParent], references: [ID], map: "FKAdoptionAm410338")
 
   @@index([newParent], map: "FKAdoptionAm410338")
 }
@@ -23,8 +23,8 @@ model amendment {
   timestamp           DateTime             @db.DateTime(0)
   ContentID           Int?
   significance        Int                  @default(0)
-  applied             Boolean
   tariff              Int                  @default(100)
+  applied             Boolean
   content             content?             @relation(fields: [ContentID], references: [ID], map: "FKAmendment887662")
   user                user?                @relation(fields: [CreatorID], references: [ID], map: "FKAmendment140140")
   adoptionamendment   adoptionamendment?
@@ -71,10 +71,10 @@ model content {
 model contentlistmod {
   ID            Int            @id @default(autoincrement())
   AmendmentID   Int?
+  ChildID     Int?
   LessonPartID  Int?
   newSeqNumber  Int?
   delete        Boolean?       @db.Bit(1)
-  ChildID       Int?
   listamendment listamendment? @relation(fields: [AmendmentID], references: [AmendmentID], onDelete: Cascade, map: "FKContentLis156423")
   content       content?       @relation(fields: [ChildID], references: [ID], map: "FKContentLis689679")
   lessonpart    lessonpart?    @relation(fields: [LessonPartID], references: [LessonPartID], map: "FKContentLis770552")
@@ -95,9 +95,9 @@ model creationamendment {
   AmendmentID         Int                 @id
   newName             String              @db.VarChar(255)
   newDescription      String              @db.VarChar(255)
+  type                String              @db.VarChar(255)
   newParent           Int?
   seqNumber           Int
-  type                String              @db.VarChar(255)
   keywordmodamendment keywordmodamendment @relation(fields: [AmendmentID], references: [AmendmentID], onDelete: Cascade, map: "FKCreationAm946974")
   content             content?            @relation(fields: [newParent], references: [ID], map: "FKCreationAm315379")
 
@@ -193,8 +193,8 @@ model paragraph {
 
 model partaddreplaceamendment {
   AmendmentID   Int           @id
-  seqNumber     Int
   OldPartID     Int?
+  seqNumber     Int
   partamendment partamendment @relation(fields: [AmendmentID], references: [AmendmentID], onDelete: Cascade, map: "FKPartAddRep747054")
   lessonpart    lessonpart?   @relation(fields: [OldPartID], references: [LessonPartID], map: "FKPartAddRep928829")
 
@@ -218,20 +218,6 @@ model protocolsnippet {
   lessonpart   lessonpart @relation(fields: [LessonPartID], references: [LessonPartID], onDelete: Cascade, map: "FKProtocolSn123813")
 }
 
-model session {
-  UserID       Int
-  timestamp    DateTime      @db.DateTime(0)
-  invalidated  Boolean       @db.Bit(1)
-  TTL          Int
-  agent        String        @db.VarChar(255)
-  refreshToken String        @db.VarChar(255)
-  user         user          @relation(fields: [UserID], references: [ID], onDelete: Cascade, map: "FKSession82632")
-  accesstoken  accesstoken[]
-
-  @@id([UserID, timestamp])
-  @@index([UserID], map: "FKSession82632")
-}
-
 model subfigure {
   ID          Int     @id @default(autoincrement())
   FigureID    Int
@@ -246,31 +232,18 @@ model subfigure {
 }
 
 model user {
-  ID         Int         @id @default(autoincrement())
-  nickname   String      @unique(map: "nickname") @db.VarChar(255)
-  email      String      @unique(map: "email") @db.VarChar(255)
-  fname      String      @db.VarChar(255)
-  lname      String      @db.VarChar(255)
-  passHash   String      @db.VarChar(255)
+  ID        Int         @id @default(autoincrement())
+  nickname  String      @unique(map: "nickname") @db.VarChar(255)
+  email     String      @unique(map: "email") @db.VarChar(255)
+  fname     String      @db.VarChar(255)
+  lname     String      @db.VarChar(255)
+  passHash  String      @db.VarChar(255)
   avatarFile String?     @db.VarChar(255)
-  amendment  amendment[]
-  session    session[]
+  amendment amendment[]
 }
 
 model video {
   LessonPartID Int        @id
   url          String     @db.VarChar(255)
   lessonpart   lessonpart @relation(fields: [LessonPartID], references: [LessonPartID], onDelete: Cascade, map: "FKVideo763583")
-}
-
-model accesstoken {
-  token            String   @id @db.VarChar(255)
-  SessionUserID    Int
-  Sessiontimestamp DateTime @db.DateTime(0)
-  timestamp        DateTime @db.DateTime(0)
-  TTL              Int
-  sequence         Int
-  session          session  @relation(fields: [SessionUserID, Sessiontimestamp], references: [UserID, timestamp], onDelete: Cascade, map: "FKAccessToken78212")
-
-  @@index([SessionUserID, Sessiontimestamp], map: "FKAccessToken78212")
 }

@@ -22,7 +22,7 @@ export class User extends Expirable {
     private lname: string;
     private passHash: string;
     private avatarPath: string | null;
-    private amendments : Amendment[];
+    private readonly amendments : Amendment[];
 
     /**
      * Bcrypt only allows to check strings up to 72 bytes so these methods

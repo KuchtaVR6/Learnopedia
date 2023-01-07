@@ -138,7 +138,7 @@ export const userResolvers = {
             let thisUser = await enforceUser(context)
             MailManager.getInstance().verificationRequest(ActionType.DELETE_ACCOUNT, async () => {
                 UserManager.getInstance().deleteUser(thisUser);
-                SessionRegistry.getInstance().removeSession(context.refreshToken);
+                (await SessionRegistry.getInstance()).removeSession(context.refreshToken);
                 return thisUser
             }, thisUser)
             return {

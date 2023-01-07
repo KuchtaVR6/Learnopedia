@@ -11,7 +11,7 @@ export const enforceUser = async (context: { user: User, agent: string, refreshT
     if (context.user) {
         return context.user;
     }
-    const newAccessToken = SessionRegistry.getInstance().accessTokenRequest(context.refreshToken, context.agent);
+    const newAccessToken = await (await SessionRegistry.getInstance()).accessTokenRequest(context.refreshToken, context.agent);
 
     const newUser = await resolveUser(newAccessToken, context.agent)
     if (newUser) {
@@ -32,8 +32,8 @@ export const enforceUser = async (context: { user: User, agent: string, refreshT
 export const verificationResolvers = {
     Query: {
         logout: async (parent: undefined, args: any, context: { user: User, agent: string, refreshToken: string, response: any, setCookies: any, setHeaders: any }) => {
-            await enforceUser(context)
-            SessionRegistry.getInstance().removeSession(context.refreshToken)
+            let thisUser = await enforceUser(context);
+            (await SessionRegistry.getInstance()).removeSession(context.refreshToken)
             return {
                 authorisation: true
             }
@@ -52,7 +52,7 @@ export const verificationResolvers = {
             let result = await consideredUser.checkCredentials(args.login, args.password)
 
             if (result) {
-                let refreshToken = SessionRegistry.getInstance().addSession(consideredUser, context.agent);
+                let refreshToken = await (await SessionRegistry.getInstance()).addSession(consideredUser, context.agent);
                 context.setCookies.push({
                     name: "refreshToken",
                     value: refreshToken,
@@ -72,7 +72,10 @@ export const verificationResolvers = {
             }
         },
         requestAccessToken: async (parent: undefined, args: { RefreshToken: string }, context: { user: User, agent: string, refreshToken: string, response: any, setCookies: any, setHeaders: any }) => {
-            let accessToken = SessionRegistry.getInstance().accessTokenRequest(context.refreshToken, context.agent)
+            //console.log("requesting token user")
+            let accessToken : string;
+            accessToken = await (await SessionRegistry.getInstance()).accessTokenRequest(context.refreshToken, context.agent)
+
 
             context.setCookies.push({
                 name: "accessToken",
@@ -101,6 +104,8 @@ export const verificationResolvers = {
                     method: 'POST',
                     body: JSON.stringify(data)
                 })
+
+            console.log(response)
 
             let user = await UserManager.getInstance().getUser(args.email)
 
@@ -142,7 +147,7 @@ export const verificationResolvers = {
                                      args: { code: number },
                                      context: { user: User, agent: string, refreshToken: string, initialToken: string, response: any, setCookies: any, setHeaders: any }) => {
             let user = await MailManager.getInstance().verifyUnverified(context.initialToken, args.code)
-            let refreshToken = SessionRegistry.getInstance().addSession(user, context.agent);
+            let refreshToken = (await SessionRegistry.getInstance()).addSession(user, context.agent);
             context.setCookies.push({
                 name: "refreshToken",
                 value: refreshToken,

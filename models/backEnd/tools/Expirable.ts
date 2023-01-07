@@ -3,9 +3,14 @@ export class Expirable{
     private timestamp : Date;
     private readonly timeToLive : number | undefined;
 
-    public constructor(TTL? : number) //ttl in seconds
+    public constructor(TTL? : number, timestamp? : Date) //ttl in seconds
     {
-        this.timestamp = new Date();
+        if(timestamp){
+            this.timestamp = timestamp;
+        }
+        else{
+            this.timestamp = new Date();
+        }
         if(TTL) {
             this.timeToLive = TTL;
         }
@@ -29,6 +34,19 @@ export class Expirable{
     public onDeath(){
     }
 
+    public async asyncOnDeath(){
+    }
+
     public onNudge(){
+    }
+
+    public getTimestamp() : Date {
+        return this.timestamp
+    }
+
+    public getTTL() : number {
+        if(this.timeToLive)
+            return this.timeToLive
+        return -1
     }
 }

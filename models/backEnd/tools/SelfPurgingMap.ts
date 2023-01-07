@@ -25,6 +25,8 @@ export class Purgeable{
      */
     protected purge(){}
 
+    protected purgeAsync(){}
+
     /**
      * calculate if this is a time for a purge
      */
@@ -46,12 +48,13 @@ export class Purgeable{
      * method for reporting actions taken. It will check if
      * a purge is due and perform it in that case.
      */
-    protected notify()
+    protected async notify()
     {
         if(this.checkPurge())
         {
             this.timestamp = new Date();
             this.purge();
+            await this.purgeAsync();
         }
     }
 }
