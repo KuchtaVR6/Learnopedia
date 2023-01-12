@@ -35,7 +35,6 @@ const ImageUploader: FC<args> = ({enforceImage, imageName, fileSizeLimit,hideOpt
                 {
                     let split = theFile.name.split(".")
                     let extension = split[split.length-1]
-                    console.log(extension)
                     let allowedExtensions = ["apng","gif","ico","cur","jpg","jpeg","jfif","pjpeg","pjp","png","svg"]
 
                     if(allowedExtensions.indexOf(extension) < 0)
@@ -84,7 +83,6 @@ const ImageUploader: FC<args> = ({enforceImage, imageName, fileSizeLimit,hideOpt
                 setWaiting(true)
                 const response = await axios.post('/api/upload/'+imageName.toLowerCase(), formData, config);
 
-                console.log(response.data)
 
                 if(response.data.success)
                 {
@@ -107,9 +105,9 @@ const ImageUploader: FC<args> = ({enforceImage, imageName, fileSizeLimit,hideOpt
     }
 
     return (
-        <>
+        <div style={{display: hideOptions? "none" : "inherit"}}>
             <div className={styles.userMod}>
-                <div style={{display: hideOptions? "none" : "inherit"}}>
+                <div>
                     <div style={{display: "flex", flexDirection: "row"}}>
                         {imageName ? <label>{imageName}:&nbsp;</label> : ""}
                         <div>
@@ -135,10 +133,10 @@ const ImageUploader: FC<args> = ({enforceImage, imageName, fileSizeLimit,hideOpt
                     }}><MdModeEditOutline/></button>
                 } &nbsp;
 
-                <button onClick={upload} disabled={!image || waiting}>Submit the image</button>
+                <button onClick={upload} disabled={!image || waiting}>Submit {editable? "the" : "an"} image</button>
             </div>
 
-        </>
+        </div>
 
     )
 }

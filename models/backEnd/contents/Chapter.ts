@@ -80,9 +80,13 @@ class Chapter extends Content {
     }
 
     public async fullRead(): Promise<FullOutput> {
+        return this.parent.fullRead();
+    }
+
+    public view() {
         super.view()
 
-        return this.parent.fullRead();
+        this.parent.view()
     }
 
     public async getChapterOutput() : Promise<ChapterOutput>{

@@ -11,6 +11,6 @@ export type genericContext = {
 
 export const resolvers = {
     Query: Object.assign(verificationResolvers.Query, userResolvers.Query,contentAccessResolvers.Query, imageResolvers.Query),
-    Mutation: Object.assign(verificationResolvers.Mutation, userResolvers.Mutation,contentModificationResolvers.Mutation, imageResolvers.Mutation)
+    Mutation: Object.assign(verificationResolvers.Mutation, userResolvers.Mutation,contentModificationResolvers.Mutation, contentAccessResolvers.Mutation, imageResolvers.Mutation)
 };
 

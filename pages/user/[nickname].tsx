@@ -10,6 +10,7 @@ import client from "../../apollo-client";
 import {UserDetails} from "../../models/backEnd/User";
 import {useRouter} from "next/router";
 import Head from "next/head";
+import {MutableRefObject, useEffect, useRef, useState} from "react";
 
 type args = {
     data: UserDetails
@@ -17,7 +18,21 @@ type args = {
 
 const UserView: NextPage<args> = ({data}) => {
 
+    const imageRef = useRef<HTMLImageElement>() as MutableRefObject<HTMLImageElement>
+    const [isPortrait, setIsPortrait] = useState(true)
+
+    const checkImage = () => {
+        if(imageRef.current)
+            if(imageRef.current.height < imageRef.current.width) {
+                setIsPortrait(false)
+            }
+    }
+
     const router = useRouter();
+
+    useEffect(() => {
+        checkImage()
+    }, [])
 
     return (
         <RegularLayout enforceUser={false} noInlineNav={true}>
@@ -26,10 +41,15 @@ const UserView: NextPage<args> = ({data}) => {
             </Head>
             <div>
                 <div className={styles.profile}>
-                    <div className={styles.banner}>
+                    <div className={styles.banner} style={{backgroundImage: `linear-gradient(90deg, ${data.colorA}, ${data.colorB})`}}>
                         <div className={styles.imageContainer}>
-                            <Image src={defaultImage} objectFit={"contain"}
-                                   alt={data.nickname + " profile image"}/>
+                            <img
+                                src={data.avatarPath}
+                                ref={imageRef}
+                                alt={data.nickname + " profile image"}
+                                style={{width: isPortrait? "100%" : "unset", height: isPortrait? "unset" : "100%"}}
+                                onLoad={() => checkImage()}
+                            />
                         </div>
                     </div>
 
@@ -88,6 +108,9 @@ const getUser = gql`
             lname
             fname
             XP
+            avatarPath
+            colorA
+            colorB
         }
     }
 `

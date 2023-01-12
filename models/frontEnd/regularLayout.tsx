@@ -30,6 +30,9 @@ const RegularLayout: FC<args> = ({children, enforceUser, navigation, noInlineNav
                 lname
                 fname
                 XP
+                avatarPath
+                colorB
+                colorA
             }
         }
     `

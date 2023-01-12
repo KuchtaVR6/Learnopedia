@@ -62,6 +62,8 @@ class ContentManager {
                     lesson : true,
                     course : true,
                     chapter : true,
+
+                    contentopinion : true
                 }
             })
 
@@ -77,6 +79,14 @@ class ContentManager {
                     let amendmentsArray: Amendment[] = []
                     value.amendment.map((amendment) => {
                         amendmentsArray.push(new Amendment(amendment.ID, amendment.CreatorID, amendment.ContentID!, amendment.significance, amendment.tariff, amendment.timestamp))
+                    })
+                    let upVotes = 0;
+                    let downVotes = 0;
+                    value.contentopinion.map((opinion) => {
+                        if(opinion.positive)
+                            upVotes += 1;
+                        else
+                            downVotes += 1;
                     })
 
                     let type: ContentType;
@@ -104,8 +114,8 @@ class ContentManager {
                             description: value.description,
                             dateCreated: value.dateCreated,
                             dateModified: value.dateModified,
-                            downVotes: value.downVotes,
-                            upVotes: value.upVotes,
+                            downVotes: downVotes,
+                            upVotes: upVotes,
                             views: value.views,
                             seqNumber: value.seqNumber,
                             amendments: amendmentsArray,
@@ -176,7 +186,9 @@ class ContentManager {
 
                 lesson: true,
                 chapter: true,
-                course: true
+                course: true,
+
+                contentopinion: true
             }
         })
         if (dbResult) {
@@ -187,6 +199,15 @@ class ContentManager {
                 })
 
                 let amendmentsArray: Amendment[] = AmendmentManager.getInstance().insertManyToCachePartial(dbResult.amendment);
+
+                let upVotes = 0;
+                let downVotes = 0;
+                dbResult.contentopinion.map((opinion) => {
+                    if(opinion.positive)
+                        upVotes += 1;
+                    else
+                        downVotes += 1;
+                })
 
                 let type: ContentType;
                 let specificID : number;
@@ -212,8 +233,8 @@ class ContentManager {
                         description: dbResult.description,
                         dateCreated: dbResult.dateCreated,
                         dateModified: dbResult.dateModified,
-                        downVotes: dbResult.downVotes,
-                        upVotes: dbResult.upVotes,
+                        downVotes: downVotes,
+                        upVotes: upVotes,
                         views: dbResult.views,
                         seqNumber: dbResult.seqNumber,
                         amendments: amendmentsArray,
@@ -295,6 +316,7 @@ class ContentManager {
                         amendment: {
                             include : prismaInclusions
                         },
+                        contentopinion : true,
 
                         course: {
                             include: {
@@ -306,16 +328,18 @@ class ContentManager {
                                                 amendment: {
                                                     include : prismaInclusions
                                                 },
+                                                contentopinion : true
                                             }
                                         },
                                         lesson: {
                                             include: {
                                                 content: {
                                                     include: {
+                                                        contentopinion : true,
                                                         keyword: true,
                                                         amendment: {
                                                             include : prismaInclusions
-                                                        },
+                                                        }
                                                     }
                                                 }
                                             }
@@ -332,13 +356,22 @@ class ContentManager {
                     let KeywordsArray = this.interpretKeywords(dbFull.keyword, dbFull.ID);
                     let AmendmentsArray = await AmendmentManager.getInstance().insertManyToCache(dbFull.amendment);
 
+                    let upVotes = 0;
+                    let downVotes = 0;
+                    dbFull.contentopinion.map((opinion) => {
+                        if(opinion.positive)
+                            upVotes += 1;
+                        else
+                            downVotes += 1;
+                    })
+
                     let host = new Course(dbFull.ID, dbFull.course.CourseID, {
                         name: dbFull.name,
                         description: dbFull.description,
                         keywords: KeywordsArray,
                         views: dbFull.views,
-                        upVotes: dbFull.upVotes,
-                        downVotes: dbFull.downVotes,
+                        upVotes: upVotes,
+                        downVotes: downVotes,
                         dateModified: dbFull.dateModified,
                         dateCreated: dbFull.dateCreated,
                         amendments: AmendmentsArray,
@@ -354,6 +387,14 @@ class ContentManager {
 
                             let KeywordsArray = this.interpretKeywords(row.keyword, row.ID);
                             let AmendmentsArray = await AmendmentManager.getInstance().insertManyToCache(row.amendment);
+                            let upVotes = 0;
+                            let downVotes = 0;
+                            row.contentopinion.map((opinion) => {
+                                if(opinion.positive)
+                                    upVotes += 1;
+                                else
+                                    downVotes += 1;
+                            })
 
                             let newChapter = new Chapter(row.ID, chapter.ChapterID,
                                 {
@@ -361,8 +402,8 @@ class ContentManager {
                                     description: row.description,
                                     keywords: KeywordsArray,
                                     views: row.views,
-                                    upVotes: row.upVotes,
-                                    downVotes: row.downVotes,
+                                    upVotes: upVotes,
+                                    downVotes: downVotes,
                                     dateModified: row.dateModified,
                                     dateCreated: row.dateCreated,
                                     amendments: AmendmentsArray,
@@ -381,6 +422,14 @@ class ContentManager {
 
                                     let KeywordsArray = this.interpretKeywords(row.keyword, row.ID);
                                     let AmendmentsArray = await AmendmentManager.getInstance().insertManyToCache(row.amendment);
+                                    let upVotes = 0;
+                                    let downVotes = 0;
+                                    row.contentopinion.map((opinion) => {
+                                        if(opinion.positive)
+                                            upVotes += 1;
+                                        else
+                                            downVotes += 1;
+                                    })
 
                                     let newLesson = new Lesson(row.ID, lesson.LessonID,
                                         {
@@ -388,8 +437,8 @@ class ContentManager {
                                             description: row.description,
                                             keywords: KeywordsArray,
                                             views: row.views,
-                                            upVotes: row.upVotes,
-                                            downVotes: row.downVotes,
+                                            upVotes: upVotes,
+                                            downVotes: downVotes,
                                             dateModified: row.dateModified,
                                             dateCreated: row.dateCreated,
                                             amendments: AmendmentsArray,
@@ -452,6 +501,8 @@ class ContentManager {
                 chapter: true,
                 course: true,
                 lesson: true,
+
+                contentopinion: true
             }
         })
 
@@ -466,6 +517,18 @@ class ContentManager {
                 value.amendment.map((amendment) => {
                     amendmentsArray.push(new Amendment(amendment.ID, amendment.CreatorID, amendment.ContentID!, amendment.significance, amendment.tariff, amendment.timestamp))
                 })
+
+                let upVotes = 0;
+                let downVotes = 0;
+
+                value.contentopinion.map((opinion) => {
+                    if(opinion.positive)
+                        upVotes += 1;
+                    else
+                        downVotes += 1;
+                })
+
+
 
                 let type: ContentType;
 
@@ -492,8 +555,8 @@ class ContentManager {
                         description: value.description,
                         dateCreated: value.dateCreated,
                         dateModified: value.dateModified,
-                        downVotes: value.downVotes,
-                        upVotes: value.upVotes,
+                        downVotes: downVotes,
+                        upVotes: upVotes,
                         views: value.views,
                         seqNumber: value.seqNumber,
                         amendments: amendmentsArray,
@@ -980,8 +1043,6 @@ class ContentManager {
                         name: amendment.name,
                         description: amendment.description,
                         views: 0,
-                        upVotes: 0,
-                        downVotes: 0,
                         dateModified: new Date(),
                         dateCreated: amendment.getCreationDate(),
                         seqNumber: amendment.seqNumber,
@@ -1001,8 +1062,6 @@ class ContentManager {
                         name: amendment.name,
                         description: amendment.description,
                         views: 0,
-                        upVotes: 0,
-                        downVotes: 0,
                         dateModified: new Date(),
                         dateCreated: amendment.getCreationDate(),
                         seqNumber: amendment.seqNumber,
@@ -1020,8 +1079,6 @@ class ContentManager {
                         name: amendment.name,
                         description: amendment.description,
                         views: 0,
-                        upVotes: 0,
-                        downVotes: 0,
                         dateModified: new Date(),
                         dateCreated: amendment.getCreationDate(),
                         seqNumber: amendment.seqNumber,

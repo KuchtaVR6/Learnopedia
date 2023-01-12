@@ -73,14 +73,15 @@ export default class MailManager {
         // Message sent: <b658f8ca-6296-ccf4-8306-87d57a0b4321@example.com>
 
         // Preview only available when sending through an Ethereal account
-        console.log("email:", text);
     }
 
     private static generateCode(): number {
-        return Math.floor(Math.random() * 89999 + 10000)
+        let x = Math.floor(Math.random() * 89999 + 10000)
+        console.log(x)
+        return x
     }
 
-    public unverifiedRequest(action: ActionType, actionDefinition: (() => Promise<User>), fname: string, lname: string, emailAddress: string, nickname: string, token: string) {
+    public async unverifiedRequest(action: ActionType, actionDefinition: (() => Promise<User>), fname: string, lname: string, emailAddress: string, nickname: string, token: string) {
         let email;
         let text;
 
@@ -140,13 +141,13 @@ export default class MailManager {
         }
 
         if (email && text) {
-            MailManager.send(emailAddress, email, text)
+            await MailManager.send(emailAddress, email, text)
         } else {
             throw ActionNotDefined;
         }
     }
 
-    public verificationRequest(action: ActionType, actionDefinition: (() => Promise<User>), user: User) {
+    public async verificationRequest(action: ActionType, actionDefinition: (() => Promise<User>), user: User) {
 
         let email;
         let text;
@@ -203,7 +204,7 @@ export default class MailManager {
         }
 
         if (email && text) {
-            MailManager.send(user.getEmail(), email, text)
+            await MailManager.send(user.getEmail(), email, text)
         } else {
             throw ActionNotDefined;
         }

@@ -7,6 +7,9 @@ export const typeDefs = gql`
         lname: String!
         fname: String!
         XP : Int!
+        avatarPath: String!
+        colorA: String!
+        colorB: String!
     }
 
     type AuthResponse{
@@ -39,7 +42,9 @@ export const typeDefs = gql`
         seqNumber : Int!,
         creation: String!,
         modification: String!,
-        authors: String!
+        authors: String!,
+        upVotes: Int!,
+        downVotes: Int!
     }
 
     union unionisedOutput = ParagraphOutput | VideoOutput
@@ -173,6 +178,10 @@ export const typeDefs = gql`
     type ForDeletion{
         file : String
     }
+    
+    type voteOutput {
+        vote : Boolean
+    }
 
     type Query {
         logout : AuthResponse,
@@ -182,6 +191,8 @@ export const typeDefs = gql`
 
         search(query : String!) : [searchResult],
         view(id : Int!) : viewOutput
+        countMyView(id : Int!, loggedIn : Boolean!) : voteOutput
+        
         getRecommended : [MetaContent]
 
         getUsersAmendments(nickname : String) : [AmendmentOutput],
@@ -193,7 +204,7 @@ export const typeDefs = gql`
 
     type Mutation{
         addUser(nickname : String!, email : String!, lname : String!, fname : String!, password : String!, captchaToken : String!) : ContinueResponse
-        modifyUser(nickname : String, lname : String, fname : String) : User
+        modifyUser(nickname : String, lname : String, fname : String, colorA : String, colorB : String) : User
         deleteUser : ContinueResponse
         forgotPassword(email : String!, captchaToken : String!) : ContinueResponse
 
@@ -214,6 +225,9 @@ export const typeDefs = gql`
 
         listAmendment(targetID : Int!, changes : [Changes!]!) : ContinueResponse
         adoptionAmendment(targetID : Int!, newParent : Int!) : ContinueResponse
+        
+        #upVote downVote
+        vote(contentID : Int!, positive : Boolean!) : ContinueResponse
 
         #image resolvers
         avatarFinalise(newPath : String) : ContinueResponse

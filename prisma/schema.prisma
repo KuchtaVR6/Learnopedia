@@ -28,6 +28,7 @@ model amendment {
   content             content?             @relation(fields: [ContentID], references: [ID], map: "FKAmendment887662")
   user                user?                @relation(fields: [CreatorID], references: [ID], map: "FKAmendment140140")
   adoptionamendment   adoptionamendment?
+  amendmentopinion    amendmentopinion[]
   keywordmodamendment keywordmodamendment?
   listamendment       listamendment?
   partamendment       partamendment?
@@ -52,8 +53,6 @@ model content {
   name              String              @db.VarChar(255)
   description       String              @db.VarChar(255)
   views             Int
-  upVotes           Int
-  downVotes         Int
   dateModified      DateTime            @db.DateTime(0)
   dateCreated       DateTime            @db.DateTime(0)
   seqNumber         Int
@@ -62,6 +61,7 @@ model content {
   amendment         amendment[]
   chapter           chapter?
   contentlistmod    contentlistmod[]
+  contentopinion    contentopinion[]
   course            course?
   creationamendment creationamendment[]
   keyword           keyword[]
@@ -246,15 +246,19 @@ model subfigure {
 }
 
 model user {
-  ID         Int         @id @default(autoincrement())
-  nickname   String      @unique(map: "nickname") @db.VarChar(255)
-  email      String      @unique(map: "email") @db.VarChar(255)
-  fname      String      @db.VarChar(255)
-  lname      String      @db.VarChar(255)
-  passHash   String      @db.VarChar(255)
-  avatarFile String?     @db.VarChar(255)
-  amendment  amendment[]
-  session    session[]
+  ID               Int                @id @default(autoincrement())
+  nickname         String             @unique(map: "nickname") @db.VarChar(255)
+  email            String             @unique(map: "email") @db.VarChar(255)
+  fname            String             @db.VarChar(255)
+  lname            String             @db.VarChar(255)
+  passHash         String             @db.VarChar(255)
+  avatarFile       String?            @db.VarChar(255)
+  colorA           String?            @db.VarChar(255)
+  colorB           String?            @db.VarChar(255)
+  amendment        amendment[]
+  amendmentopinion amendmentopinion[]
+  contentopinion   contentopinion[]
+  session          session[]
 }
 
 model video {
@@ -273,4 +277,28 @@ model accesstoken {
   session          session  @relation(fields: [SessionUserID, Sessiontimestamp], references: [UserID, timestamp], onDelete: Cascade, map: "FKAccessToken78212")
 
   @@index([SessionUserID, Sessiontimestamp], map: "FKAccessToken78212")
+}
+
+model amendmentopinion {
+  userID      Int
+  amendmentID Int
+  positive    Boolean   @db.Bit(1)
+  amendment   amendment @relation(fields: [amendmentID], references: [ID], onDelete: Cascade, map: "FKAmendmentOpinion43242")
+  user        user      @relation(fields: [userID], references: [ID], onDelete: Cascade, map: "FKAmendmentOpinion34263")
+
+  @@id([userID, amendmentID])
+  @@index([userID], map: "FKAmendmentOpinion34263")
+  @@index([amendmentID], map: "FKAmendmentOpinion43242")
+}
+
+model contentopinion {
+  userID    Int
+  contentID Int
+  positive  Boolean @db.Bit(1)
+  content   content @relation(fields: [contentID], references: [ID], onDelete: Cascade, map: "FKContentOpinion43242")
+  user      user    @relation(fields: [userID], references: [ID], onDelete: Cascade, map: "FKContentOpinion34263")
+
+  @@id([userID, contentID])
+  @@index([userID], map: "FKContentOpinion34263")
+  @@index([contentID], map: "FKContentOpinion43242")
 }

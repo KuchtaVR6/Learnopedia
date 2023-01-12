@@ -84,6 +84,12 @@ class Lesson extends Content {
         this.partsFetched = true;
     }
 
+    public view() {
+        super.view()
+
+        this.parent.view()
+    }
+
     private sortChildern() {
         this.children = new Map(Array.from(this.children.entries()).sort((a, b) => {
             if (a[0] < b[0]) {
@@ -97,7 +103,7 @@ class Lesson extends Content {
     }
 
     public async fullRead(): Promise<FullOutput> {
-        this.view()
+
 
         if (!this.partsFetched) {
             await this.fetchParts()

@@ -12,7 +12,7 @@ const UsersAmendments: NextPage<{ data: AmendmentOutput[] }> = ({data}) => {
     if (data) {
         return (
             <div>
-                <RegularLayout enforceUser={false} noInlineNav={true}>
+                <RegularLayout enforceUser={false}>
                     <AmendmentDisplay input={data}/>
                 </RegularLayout>
             </div>

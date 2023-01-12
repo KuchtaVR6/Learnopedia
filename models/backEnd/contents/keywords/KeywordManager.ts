@@ -15,6 +15,7 @@ import {
     partaddreplaceamendment,
     partamendment
 } from "@prisma/client";
+import {User} from "../../User";
 
 class KeywordManager {
     private static instance: KeywordManager | null = null;
@@ -107,7 +108,7 @@ class KeywordManager {
         });
     }
 
-    public async resolveSearch(query: String): Promise<{ score: number, content: MetaOutput }[]> {
+    public async resolveSearch(query: String, user? : User): Promise<{ score: number, content: MetaOutput }[]> {
         let words = query.split(" ");
 
         let contentIDs = new Map<number, number>;
@@ -135,7 +136,7 @@ class KeywordManager {
             let score = contentIDs.get(fetchedContent.getID())
             if (score) {
                 let overall = score * fetchedContent.getSignificance();
-                resultingMap.push({score: overall, content: await fetchedContent.getMeta()});
+                resultingMap.push({score: overall, content: await fetchedContent.getMeta(user)});
             }
         }
 

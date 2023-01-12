@@ -1,27 +1,43 @@
-import {FC, useContext, useEffect} from "react";
+import {FC, MutableRefObject, useContext, useEffect, useRef, useState} from "react";
 import styles from "/styles/Profile.module.css";
 import SimpleDetails from "./simpleDetails";
 import ComplexActions from "./complexActions";
 import {UserContext} from "../authentication/userContext";
-import Image from "next/image";
-import defaultImage from "../../../public/images/defProfile.png"
 import XpBar from "./xpBar";
 import {useRouter} from "next/router";
 
 const ProfileComponent: FC = () => {
 
+    const imageRef = useRef<HTMLImageElement>() as MutableRefObject<HTMLImageElement>
+    const [isPortrait, setIsPortrait] = useState(true)
+
+    const checkImage = () => {
+        if(imageRef.current)
+            if(imageRef.current.height < imageRef.current.width) {
+                setIsPortrait(false)
+            }
+    }
+
     const userContext = useContext(UserContext)
 
     const router = useRouter();
+    useEffect(() => {
+        checkImage()
+    }, [])
 
     if (userContext.user() && userContext.request) {
         return (
             <div>
                 <div className={styles.profile}>
-                    <div className={styles.banner}>
+                    <div className={styles.banner} style={{backgroundImage: `linear-gradient(90deg, ${userContext.user()?.colorA}, ${userContext.user()?.colorB})`}}>
                         <div className={styles.imageContainer}>
-                            <Image src={defaultImage} objectFit={"contain"}
-                                   alt={userContext.user()?.nickname + " profile image"}/>
+                            <img
+                                src={userContext.user()?.avatarPath}
+                                ref={imageRef}
+                                alt={userContext.user()?.nickname + " profile image"}
+                                style={{width: isPortrait? "100%" : "unset", height: isPortrait? "unset" : "100%"}}
+                                onLoad={() => checkImage()}
+                            />
                         </div>
                     </div>
 

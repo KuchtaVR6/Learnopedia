@@ -17,8 +17,6 @@ const ContentManagerInstance = ContentManager.getInstance()
 UserManagerInstance.validateNickname("")
 ContentManagerInstance.getRecommendations()
 
-console.log("Reinitialized")
-
 export const resolveUser = async (cookie : string | undefined, agent : string | undefined | null) => {
     if(cookie && agent)
     {

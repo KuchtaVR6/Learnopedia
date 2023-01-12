@@ -22,19 +22,22 @@ const uploadMiddleware = index.single('avatar');
 apiRoute.use(uploadMiddleware);
 
 // Process a POST request
-apiRoute.post(async (req: NextApiRequest & {file : {filename : string}}, res: NextApiResponse) => {
+apiRoute.post(async (req: NextApiRequest & { file: { filename: string } }, res: NextApiResponse) => {
 
     // find the link of the other API
     const protocol = req.headers['x-forwarded-proto'] || 'http'
     const baseUrl = `${protocol}://${req.headers['host']}`
 
+    console.log(req.file.filename)
+
+    console.log(req.cookies)
 
     const resp = await fetch(baseUrl + '/api/graphql', {
         method: 'POST',
 
         headers: {
             "Content-Type": "application/json",
-            Cookie: `accessToken=${req.cookies.accessToken};refreshToken=${req.cookies.refreshToken};initialToken=${req.cookies.initialToken};`,
+            Cookie: `initialToken=${req.cookies.initialToken};accessToken=${req.cookies.accessToken};refreshToken=${req.cookies.refreshToken};`,
             "User-Agent": req.headers["user-agent"]!
         },
 
@@ -44,16 +47,19 @@ apiRoute.post(async (req: NextApiRequest & {file : {filename : string}}, res: Ne
                             continue
                             }
                         }`,
-            variables : {
-                newPath : req.file.filename
+            variables: {
+                newPath: req.file.filename
             }
         })
     })
 
+    console.log("finished")
+
     let response = (JSON.parse(await resp.text()))
 
-    if (response.errors)
-    {
+    console.log(response)
+
+    if (response.errors) {
         res.status(200).json({success: false, message: 'Unexpected Error'})
     }
 

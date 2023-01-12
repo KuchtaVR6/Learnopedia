@@ -4,7 +4,7 @@ import {resolveUser} from "../../graphql";
 import {SessionRegistry} from "../../../../models/backEnd/managers/SessionRegistry";
 import {UserManager} from "../../../../models/backEnd/managers/UserManager";
 import MailManager, {ActionType} from "../../../../models/backEnd/managers/MailManager";
-import {UserNotFoundException} from "../../../../models/backEnd/tools/Errors";
+import {UserNotFoundException, UserRobot} from "../../../../models/backEnd/tools/Errors";
 
 //function that will check if the user has been found and if not will attempt at refreshing the token and accessing them again
 export const enforceUser = async (context: { user: User, agent: string, refreshToken: string, response: any, setCookies: any, setHeaders: any }) => {
@@ -26,14 +26,14 @@ export const enforceUser = async (context: { user: User, agent: string, refreshT
         });
         return newUser
     }
+
     throw new AuthenticationError("Refresh Token is Invalid");
 }
 
 export const verificationResolvers = {
     Query: {
         logout: async (parent: undefined, args: any, context: { user: User, agent: string, refreshToken: string, response: any, setCookies: any, setHeaders: any }) => {
-            let thisUser = await enforceUser(context);
-            (await SessionRegistry.getInstance()).removeSession(context.refreshToken)
+            await (await SessionRegistry.getInstance()).removeSession(context.refreshToken)
             return {
                 authorisation: true
             }
@@ -72,7 +72,6 @@ export const verificationResolvers = {
             }
         },
         requestAccessToken: async (parent: undefined, args: { RefreshToken: string }, context: { user: User, agent: string, refreshToken: string, response: any, setCookies: any, setHeaders: any }) => {
-            //console.log("requesting token user")
             let accessToken : string;
             accessToken = await (await SessionRegistry.getInstance()).accessTokenRequest(context.refreshToken, context.agent)
 
@@ -95,41 +94,50 @@ export const verificationResolvers = {
                        context: { user: User, agent: string, refreshToken: string, initialToken: string, response: any, setCookies: any, setHeaders: any }) => {
 
             let data = {
-                secret: process.env.NODE_ENV === "production"? process.env.CAPTCHA_SECRET : process.env.CAPTCHA_SECRET_TEST,
+                secret: process.env.NODE_ENV === "production"? process.env["CAPTCHA_SECRET"] : process.env["CAPTCHA_SECRET_TEST"],
                 response: args.captchaToken
             }
+
 
             let response = await fetch("https://hcaptcha.com/siteverify",
                 {
                     method: 'POST',
-                    body: JSON.stringify(data)
+                    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                    body: `secret=${data.secret}&response=${data.response}`
                 })
 
-            console.log(response)
+            let response_json = JSON.parse(await response.text())
+            let success = response_json['success']
 
-            let user = await UserManager.getInstance().getUser(args.email)
+            if (success) {
+                let user = await UserManager.getInstance().getUser(args.email)
 
-            if(user) {
-                let initialToken;
-                if (!context.initialToken) {
-                    initialToken = SessionRegistry.generateToken(8);
-                    context.setCookies.push({
-                        name: "initialToken",
-                        value: initialToken,
-                        options: {
-                            httpOnly: true,
-                            sameSite: 'none',
-                            secure: true
-                        }
-                    });
+                if (user) {
+                    let initialToken;
+                    if (!context.initialToken) {
+                        initialToken = SessionRegistry.generateToken(8);
+                        context.setCookies.push({
+                            name: "initialToken",
+                            value: initialToken,
+                            options: {
+                                httpOnly: true,
+                                sameSite: 'none',
+                                secure: true
+                            }
+                        });
+                    } else {
+                        initialToken = context.initialToken
+                    }
+
+                    MailManager.getInstance().unverifiedRequest(ActionType.FORGOT_PASSWORD, async () => {
+                        return user
+                    }, user.getFName(), user.getLName(), args.email, user.getNickname(), initialToken)
                 } else {
-                    initialToken = context.initialToken
+                    throw UserNotFoundException
                 }
-
-                MailManager.getInstance().unverifiedRequest(ActionType.FORGOT_PASSWORD, async () => { return user }, user.getFName(), user.getLName(), args.email, user.getNickname(), initialToken)
             }
-            else{
-                throw UserNotFoundException
+            else {
+                throw UserRobot
             }
         },
 
@@ -147,7 +155,7 @@ export const verificationResolvers = {
                                      args: { code: number },
                                      context: { user: User, agent: string, refreshToken: string, initialToken: string, response: any, setCookies: any, setHeaders: any }) => {
             let user = await MailManager.getInstance().verifyUnverified(context.initialToken, args.code)
-            let refreshToken = (await SessionRegistry.getInstance()).addSession(user, context.agent);
+            let refreshToken = await (await SessionRegistry.getInstance()).addSession(user, context.agent);
             context.setCookies.push({
                 name: "refreshToken",
                 value: refreshToken,

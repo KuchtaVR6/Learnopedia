@@ -11,7 +11,10 @@ export type UserDetails = {
     email: string,
     fname: string,
     lname: string,
-    XP : number
+    XP: number,
+    avatarPath: string,
+    colorA: string,
+    colorB: string
 }
 
 export class User extends Expirable {
@@ -22,7 +25,11 @@ export class User extends Expirable {
     private lname: string;
     private passHash: string;
     private avatarPath: string | null;
-    private readonly amendments : Amendment[];
+    private readonly amendments: Amendment[];
+    private colorA: string;
+    private colorB: string;
+
+    private opinions : Map<number, boolean>;
 
     /**
      * Bcrypt only allows to check strings up to 72 bytes so these methods
@@ -61,7 +68,19 @@ export class User extends Expirable {
      * @param lname         - user's lname
      * @param password      - password MUST BE ALREADY ENCRYPTED
      */
-    public constructor(id: number, nickname: string, email: string, fname: string, lname: string, password: string, amendments : Amendment[], avatarPath : string | null) {
+    public constructor
+        (id: number,
+         nickname: string,
+         email: string,
+         fname: string,
+         lname: string,
+         password: string,
+         amendments: Amendment[],
+         opinions : Map<number, boolean>,
+         avatarPath: string | null,
+         colorA?: string | null,
+         colorB?: string | null
+        ) {
         super(600) // 10 minutes
         this.id = id;
         this.passHash = password;
@@ -71,6 +90,47 @@ export class User extends Expirable {
         this.lname = lname;
         this.amendments = amendments;
         this.avatarPath = avatarPath;
+        this.colorA = colorA || "#099978"
+        this.colorB = colorB || "#023189"
+        this.opinions = opinions;
+    }
+
+    /**
+     *
+     * returns 1 is the opinion is positive
+     * 0 if the opinion is negative
+     * -1 if there is no opinion
+     *
+     */
+    public checkOpinion(contentId : number) : number {
+        const fetched = this.opinions.get(contentId);
+        if(fetched===true || fetched===false)
+        {
+            return Number(fetched)
+        }
+        return -1
+    }
+
+    /**
+     *
+     * returns 1 is a new opinion was saved
+     * 0 if the old opinion was changed
+     * -1 if an old opinion was deleted
+     *
+     */
+    public changeOpinion(contentId : number, positive: boolean) : number{
+        if(this.opinions.has(contentId))
+        {
+            if(this.opinions.get(contentId) === positive)
+            {
+                this.opinions.delete(contentId)
+                return -1
+            }
+            this.opinions.set(contentId, positive)
+            return 0
+        }
+        this.opinions.set(contentId, positive)
+        return 1
     }
 
     private async comparePasswordAttempt(attempt: string): Promise<boolean> {
@@ -91,41 +151,47 @@ export class User extends Expirable {
 
     public async getAllDetails(): Promise<UserDetails> {
         super.refresh()
+        let finalPath = "/images/defProfile.png";
+        if (this.avatarPath) {
+            finalPath = "/uploads/avatars/" + this.avatarPath
+        }
         return {
             nickname: this.nickname,
             email: this.email,
             fname: this.fname,
             lname: this.lname,
-            XP: await this.getXP()
+            XP: await this.getXP(),
+            avatarPath: finalPath,
+            colorA: this.colorA,
+            colorB: this.colorB
         }
     }
 
-    public async getXP() : Promise<number> {
+    public async getXP(): Promise<number> {
         let totalXP = 0;
 
-        for(let amend of this.amendments) {
+        for (let amend of this.amendments) {
             let content = await ContentManager.getInstance().getContentByID(amend.getTargetID());
 
-            if(content) {
+            if (content) {
                 totalXP += amend.getSignificance() * content.getSignificance()
             }
         }
 
-        return Math.floor(totalXP/10000);
+        return Math.floor(totalXP / 10000);
     }
 
-    public async getAmendments() : Promise<AmendmentOutput[]>{
-        let result : AmendmentOutput[] = []
+    public async getAmendments(): Promise<AmendmentOutput[]> {
+        let result: AmendmentOutput[] = []
 
-        for(let amendment of this.amendments)
-        {
+        for (let amendment of this.amendments) {
             result.push(await amendment.getFullAmendmentOutput())
         }
 
         return result;
     }
 
-    public addAmendment(amendment : Amendment) {
+    public addAmendment(amendment: Amendment) {
         this.amendments.push(amendment)
     }
 
@@ -227,16 +293,43 @@ export class User extends Expirable {
         return this.avatarPath;
     }
 
-    public async setAvatarPath(newAvatarPath : string | null) {
+    public async setAvatarPath(newAvatarPath: string | null) {
         super.refresh()
 
         this.avatarPath = newAvatarPath;
+
         await prisma.user.update({
             where: {
                 ID: this.id
             },
             data: {
                 avatarFile: newAvatarPath
+            }
+        })
+    }
+
+    public async setColorA(newColor: string) {
+        this.colorA = newColor
+
+        await prisma.user.update({
+            where: {
+                ID: this.id
+            },
+            data: {
+                colorA: this.colorA
+            }
+        })
+    }
+
+    public async setColorB(newColor: string) {
+        this.colorB = newColor
+
+        await prisma.user.update({
+            where: {
+                ID: this.id
+            },
+            data: {
+                colorB: this.colorB
             }
         })
     }

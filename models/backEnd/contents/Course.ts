@@ -76,8 +76,6 @@ export class Course extends Content {
     }
 
     public async fullRead(): Promise<FullOutput> {
-        super.view()
-
         let childrenResults: ChapterOutput[] = [];
 
         for (let child of Array.from(this.children.values())) {

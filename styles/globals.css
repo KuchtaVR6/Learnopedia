@@ -12,7 +12,7 @@ html {
 }
 
 a {
-    color: inherit;
+    color: white;
     text-decoration: none;
 }
 
@@ -59,7 +59,7 @@ input:disabled.invalid {
 /* palette */
 body{
     --raisin-black: #231f20ff;
-    --international-orange-golden-gate-bridge: rgba(187, 68, 48, 0.58);
+    --international-orange-golden-gate-bridge: rgb(192, 113, 99);
     --middle-blue: #7ebdc2ff;
     --medium-champagne: #f3dfa2ff;
     --linen: #efe6ddff;
@@ -91,17 +91,21 @@ body{
     animation-name: showingShadow;
     animation-duration: 0.2s;
 
-    box-shadow: 10px 10px 2px 0px;
+    box-shadow: 5px 5px 2px 0px;
+}
+
+.buttonNice:disabled{
+    opacity: 50%;
 }
 
 @keyframes hidingShadow {
-    0% {box-shadow: 10px 10px 2px 0px;}
+    0% {box-shadow: 5px 5px 2px 0px;}
     100% {box-shadow: 0 0 0 0;}
 }
 
 @keyframes showingShadow {
     0% {box-shadow: 0 0 0 0;}
-    100% {box-shadow: 10px 10px 2px 0px;}
+    100% {box-shadow: 5px 5px 2px 0px;}
 }
 
 .buttonNice:hover {

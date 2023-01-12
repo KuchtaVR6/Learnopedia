@@ -11,18 +11,21 @@ export class Expirable{
         else{
             this.timestamp = new Date();
         }
+
         if(TTL) {
             this.timeToLive = TTL;
         }
     }
 
     public checkValidity() : boolean {
-        return new Date().getTime() < this.expiryTime()
+        let outcome =  new Date().getTime() < this.expiryTime()
+        return outcome
     }
 
     private expiryTime() : number {
-        if(this.timeToLive)
-            return this.timestamp.getTime() + this.timeToLive*1000
+        if(this.timeToLive) {
+            return this.timestamp.getTime() + this.timeToLive * 1000
+        }
         else
             return Infinity
     }
@@ -35,6 +38,9 @@ export class Expirable{
     }
 
     public async asyncOnDeath(){
+    }
+
+    public async asyncOnNudge(){
     }
 
     public onNudge(){

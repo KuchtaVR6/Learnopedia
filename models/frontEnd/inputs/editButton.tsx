@@ -14,7 +14,7 @@ const EditButton: FC<args> = ({loggedIn, label, path}) => {
 
     return (
         <div style={{float : "right"}}>
-            <button className={styles.modifyButton+" buttonNice"} onClick={() =>{if(loggedIn){router.push(path)} else {router.push("/login")}}}>
+            <button className={styles.modifyButton+" buttonNice"} disabled={!loggedIn} onClick={() =>{if(loggedIn){router.push(path)} else {router.push("/login")}}}>
                 <AiTwotoneEdit/> {loggedIn? label : "Log in to edit"}
             </button>
         </div>

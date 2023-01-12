@@ -84,17 +84,20 @@ export default class SelfPurgingMap<key, value extends Expirable> extends Map<ke
      * check all the entries and delete expired ones
      * and reset the timestamp (for the next purge)
      */
-    private purge(){
+    private async purge(){
         this.timestamp = new Date();
 
-        super.forEach((value: value, key : key) => {
+        for ( let key of Array.from<key>(super.keys())) {
+            let value : value = super.get(key)!
             value.onNudge()
+            await value.asyncOnNudge()
             if(!value.checkValidity())
             {
                 value.onDeath()
+                await value.asyncOnDeath()
                 super.delete(key)
             }
-        })
+        }
     }
 
     /**
@@ -118,11 +121,11 @@ export default class SelfPurgingMap<key, value extends Expirable> extends Map<ke
      * method for reporting actions taken. It will check if
      * a purge is due and perform it in that case.
      */
-    private notify()
+    private async notify()
     {
         if(this.checkPurge())
         {
-            this.purge();
+            await this.purge();
         }
     }
 

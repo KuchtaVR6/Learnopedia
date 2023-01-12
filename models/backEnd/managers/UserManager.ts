@@ -29,7 +29,7 @@ export class UserManager {
     }
 
     public deletedUser() {
-        return new User(-1,"DELETED USER", "deleted@deleted", "DELETED", "DELETED", "===", [], null)
+        return new User(-1,"DELETED USER", "deleted@deleted", "DELETED", "DELETED", "===", [], new Map<number, boolean>(), null)
     }
 
     public async addUser(nickname: string, email: string, fname: string, lname: string, password: string): Promise<User> {
@@ -176,7 +176,7 @@ class UserStore {
             }
         })
 
-        return this.cache(new User(output.ID, nickname, email, fname, lname, passHash, [], null));
+        return this.cache(new User(output.ID, nickname, email, fname, lname, passHash, [], new Map<number, boolean>(), null));
     }
 
     private async dbScanFinished() {
@@ -224,7 +224,8 @@ class UserStore {
             include:{
                 amendment : {
                     include : prismaInclusions
-                }
+                },
+                contentopinion : true
             }
         })
 
@@ -232,7 +233,13 @@ class UserStore {
 
         if (dbUser) {
             let amendArray : Amendment[] = await AmendmentManager.getInstance().insertManyToCache(dbUser.amendment);
-            return this.cache(new User(dbUser.ID, dbUser.nickname, dbUser.email, dbUser.fname, dbUser.lname, dbUser.passHash, amendArray, dbUser.avatarFile))
+
+            let opMap : Map<number, boolean> = new Map<number, boolean>();
+            dbUser.contentopinion.map((row) => {
+                opMap.set(row.contentID, row.positive)
+            })
+
+            return this.cache(new User(dbUser.ID, dbUser.nickname, dbUser.email, dbUser.fname, dbUser.lname, dbUser.passHash, amendArray, opMap, dbUser.avatarFile, dbUser.colorA, dbUser.colorB))
         }
 
         throw new UserNotFoundException(query)
@@ -253,14 +260,21 @@ class UserStore {
             include : {
                 amendment: {
                     include : prismaInclusions
-                }
+                },
+                contentopinion: true
             }
         })
 
         if(dbUser)
         {
             let amendArray : Amendment[] = await AmendmentManager.getInstance().insertManyToCache(dbUser.amendment);
-            let newUser = new User(dbUser.ID,dbUser.nickname, dbUser.email, dbUser.fname, dbUser.lname, dbUser.passHash, amendArray, dbUser.avatarFile);
+
+            let opMap : Map<number, boolean> = new Map<number, boolean>();
+            dbUser.contentopinion.map((row) => {
+                opMap.set(row.contentID, row.positive)
+            })
+
+            let newUser = new User(dbUser.ID,dbUser.nickname, dbUser.email, dbUser.fname, dbUser.lname, dbUser.passHash, amendArray, opMap, dbUser.avatarFile, dbUser.colorA, dbUser.colorB);
             this.idMap.set(id, newUser)
             return newUser;
         }

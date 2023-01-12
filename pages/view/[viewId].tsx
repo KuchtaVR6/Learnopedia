@@ -12,8 +12,6 @@ const View: NextPage<{data : {
         output: FullOutput
     }}> = ({data}) => {
 
-    const router = useRouter()
-
     const jsonLD = () => {
         let creation = new Date(data.mainMeta.creation)
         let modified = new Date(data.mainMeta.modification)
@@ -72,6 +70,7 @@ const View: NextPage<{data : {
 export async function getServerSideProps(context : GetServerSidePropsContext) {
 
     const id = parseInt(context.query.viewId as string)
+
     if(id) {
 
         // Fetch data from external API
@@ -112,6 +111,8 @@ export const fetchquery = gql`
                 creation
                 modification
                 authors
+                upVotes
+                downVotes
             }
             output {
                 metas {

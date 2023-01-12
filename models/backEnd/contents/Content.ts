@@ -27,7 +27,9 @@ export type MetaOutput = {
     modification: string,
     type: ContentType,
     seqNumber: number,
-    authors: string
+    authors: string,
+    upVotes: number,
+    downVotes: number
 }
 
 export type LDNJSON = {
@@ -209,12 +211,56 @@ class Content extends Expirable {
         this.amendments.push(amendment);
     }
 
-    public upVote() {
-        this.upVotes += 1;
-    }
-
-    public downVote() {
-        this.downVotes += 1;
+    public async vote(user: User, positive: boolean) {
+        let ans = user.changeOpinion(this.id, positive);
+        if (ans === 1) {
+            if (positive) {
+                this.upVotes += 1;
+            } else {
+                this.downVotes += 1;
+            }
+            await prisma.contentopinion.create({
+                data: {
+                    userID: user.getID(),
+                    contentID: this.id,
+                    positive: positive
+                }
+            })
+        } else if (ans === 0) {
+            if (positive) {
+                this.upVotes += 1;
+                this.downVotes -= 1;
+            } else {
+                this.downVotes += 1;
+                this.upVotes -= 1;
+            }
+            await prisma.contentopinion.update({
+                where: {
+                    userID_contentID: {
+                        userID: user.getID(),
+                        contentID: this.id
+                    }
+                },
+                data: {
+                    positive: positive
+                }
+            })
+        } else {
+            if (positive) {
+                this.upVotes -= 1;
+            } else {
+                this.downVotes -= 1;
+            }
+            await prisma.contentopinion.delete({
+                where: {
+                    userID_contentID: {
+                        userID: user.getID(),
+                        contentID: this.id
+                    }
+                }
+            }
+            )
+        }
     }
 
     public getOverallScore() {
@@ -242,40 +288,14 @@ class Content extends Expirable {
     }
 
     public getCreationDate() {
-        return this.dateCreated.getFullYear() + "." + Content.twoDigit(this.dateCreated.getMonth() + 1)  + "." +  Content.twoDigit(this.dateCreated.getDate())
+        return this.dateCreated.getFullYear() + "." + Content.twoDigit(this.dateCreated.getMonth() + 1) + "." + Content.twoDigit(this.dateCreated.getDate())
     }
 
     public getModificationDate() {
-        return this.dateModified.getFullYear() + "." + Content.twoDigit(this.dateModified.getMonth() + 1) + "." +  Content.twoDigit(this.dateModified.getDate())
+        return this.dateModified.getFullYear() + "." + Content.twoDigit(this.dateModified.getMonth() + 1) + "." + Content.twoDigit(this.dateModified.getDate())
     }
 
-    public async getLDJSON(): Promise<LDNJSON> { //todo in the future remove
-        return (
-            {
-                "@context": "https://schema.org",
-                "@type": "Article",
-                "headline": this.name,
-                "description": this.description,
-                "image": "",
-                "author": {
-                    "@type": "Organization",
-                    "name": await this.getAuthorsFormatted()
-                },
-                "publisher": {
-                    "@type": "Organization",
-                    "name": "Learnopedia",
-                    "logo": {
-                        "@type": "ImageObject",
-                        "url": "https://learnopedia.org/images/logo.png"
-                    }
-                },
-                "datePublished": this.getCreationDate(),
-                "dateModified": this.getModificationDate()
-            }
-        )
-    }
-
-    public async getMeta(): Promise<MetaOutput> {
+    public async getMeta(user? : User): Promise<MetaOutput> {
         let outputKeywords: { ID: number, Score: number, word: string }[] = [];
         this.keywords.map((keyword) => {
             outputKeywords.push({ID: keyword.getID(), Score: keyword.getScore(), word: keyword.getWord()})
@@ -290,7 +310,9 @@ class Content extends Expirable {
             seqNumber: this.seqNumber,
             creation: this.getCreationDate(),
             modification: this.getModificationDate(),
-            authors: await this.getAuthorsFormatted()
+            authors: await this.getAuthorsFormatted(),
+            upVotes: this.upVotes,
+            downVotes: this.downVotes,
         }
     }
 
@@ -301,7 +323,7 @@ class Content extends Expirable {
 
         let num = this.authorsCache?.size
 
-        if (num === 1 || num==0) {
+        if (num === 1 || num == 0) {
             return "Created by one author"
         }
         return "Created by " + this.authorsCache?.size + " authors"
@@ -313,7 +335,7 @@ class Content extends Expirable {
         if (!this.authorsCache) {
             this.authorsCache = new Map<User, number>();
 
-            for(let amendment of this.amendments) {
+            for (let amendment of this.amendments) {
                 let author = await amendment.getAuthor()
 
                 let initNum = this.authorsCache?.get(author)
@@ -329,15 +351,13 @@ class Content extends Expirable {
     public getSignificance() {
         if (this.downVotes === 0) {
             let x = this.upVotes * this.views
-            if(x < 1)
-            {
+            if (x < 1) {
                 return 1;
             }
             return x;
         }
         let x = (((this.upVotes - this.downVotes) / this.downVotes) + 1) * this.views
-        if(x < 1)
-        {
+        if (x < 1) {
             return 1;
         }
         return x;
@@ -383,10 +403,9 @@ class Content extends Expirable {
     }
 
     public async getAmendmentsOutput() {
-        let outputs : AmendmentOutput[] = [];
+        let outputs: AmendmentOutput[] = [];
 
-        for(let amendment of this.amendments)
-        {
+        for (let amendment of this.amendments) {
             outputs.push(await amendment.getFullAmendmentOutput())
         }
 
@@ -397,15 +416,15 @@ class Content extends Expirable {
         this.seqNumber = seqNumber;
     }
 
-    protected view() {
+    public view() {
         this.viewsChanged = true;
         this.views += 1;
     }
 
-    private saveViews() {
+    private async saveViews() {
         if (this.viewsChanged) {
             this.viewsChanged = false;
-            prisma.content.update({
+            await prisma.content.update({
                 where: {
                     ID: this.id
                 },
@@ -416,12 +435,8 @@ class Content extends Expirable {
         }
     }
 
-    public onDeath() {
-        this.saveViews()
-    }
-
-    public onNudge() {
-        this.saveViews()
+    public async asyncOnNudge(): Promise<void> {
+        await this.saveViews()
     }
 
     public checkSeqNumberVacant(newSeqNumber: number): boolean {
@@ -436,11 +451,11 @@ class Content extends Expirable {
         throw new UnsupportedOperation("Non-Lesson Content", "applyPartAddReplaceAmendment")
     }
 
-    public checkPaternity(ids: { ChildID?: number, LessonPartID? : number, newSeqNumber?: number, delete: boolean }[]): boolean {
+    public checkPaternity(ids: { ChildID?: number, LessonPartID?: number, newSeqNumber?: number, delete: boolean }[]): boolean {
         throw ContentNotFetched
     }
 
-    public checkIfFullyFetched() : boolean{
+    public checkIfFullyFetched(): boolean {
         return false;
     }
 }

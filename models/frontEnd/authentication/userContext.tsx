@@ -4,7 +4,7 @@ import {ApolloQueryResult, OperationVariables} from "@apollo/client";
 export type userContextArgs = {
     loggedIn : () => boolean,
     logout: () => void,
-    user: () => { nickname: string, email: string, lname : string, fname : string, XP : number } | undefined,
+    user: () => { nickname: string, email: string, lname : string, fname : string, XP : number, avatarPath : string, colorA : string, colorB : string } | undefined,
     request: ((variables?: Partial<OperationVariables> | undefined) => Promise<ApolloQueryResult<any>>) | undefined
     loading: () => boolean
 }

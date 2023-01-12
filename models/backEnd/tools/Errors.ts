@@ -1,3 +1,4 @@
+
 export class UserNotFoundException extends Error{
     public constructor(query : string) {
         super("User with the: " + query + ", doesn't exist in the system.")
@@ -128,5 +129,11 @@ export class InvalidArgument extends Error{
 export class LegacyAmendment extends Error{
     public constructor() {
         super("Provided Amendment was created on Content that doesn't exist anymore.");
+    }
+}
+
+export class UserRobot extends Error{
+    public constructor() {
+        super("Hcaptcha verification failed");
     }
 }
