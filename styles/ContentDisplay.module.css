@@ -89,5 +89,10 @@
 }
 
 .lessonPart{
-    font-size: 2em;
+    font-size: 1.3em;
+}
+
+.votesTable td{
+    padding-right: 15px;
+    padding-bottom: 5px;
 }

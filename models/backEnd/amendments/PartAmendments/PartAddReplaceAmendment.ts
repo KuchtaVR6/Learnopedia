@@ -1,6 +1,6 @@
 import PartAmendment from "./PartAmendment";
 import {displayableOutput} from "../../lessonParts/LessonPart";
-import {SpecificAmendmentOutput} from "../Amendment";
+import {AmendmentOpinionValues, SpecificAmendmentOutput} from "../Amendment";
 import LessonPartManager from "../../lessonParts/LessonPartManager";
 
 export type PartAddReplaceAmendmentOutput = {
@@ -20,7 +20,9 @@ class PartAddReplaceAmendment extends PartAmendment{
         targetID : number,
         lessonPartID : number | undefined,
         seqNumber : number,
-        secondary : {dbInput : false} | {dbInput : true, creationDate : Date, significance : number, tariff : number, applied : boolean},
+        secondary :
+            {dbInput : false} |
+            {dbInput : true, creationDate : Date, significance : number, tariff : number, applied : boolean, opinions?: Map<number,AmendmentOpinionValues>, vetoed : boolean},
         oldID? : number)
     {
         if(!secondary.dbInput){
@@ -35,7 +37,7 @@ class PartAddReplaceAmendment extends PartAmendment{
             super(id, authorID, targetID, lessonPartID, 100000, tariff);
         }
         else{
-            super(id, authorID, targetID, lessonPartID, secondary.significance, secondary.tariff, secondary.creationDate, secondary.applied)
+            super(id, authorID, targetID, lessonPartID, secondary.significance, secondary.tariff, secondary.vetoed, secondary.creationDate, secondary.applied, secondary.opinions)
         }
 
         this.oldID = oldID;

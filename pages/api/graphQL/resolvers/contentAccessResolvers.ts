@@ -2,7 +2,7 @@ import KeywordManager from "../../../../models/backEnd/contents/keywords/Keyword
 import {genericContext} from "../resolvers";
 import ContentManager from "../../../../models/backEnd/contents/ContentManager";
 import Content, {FullOutput, LDNJSON, MetaOutput} from "../../../../models/backEnd/contents/Content";
-import {AmendmentOutput} from "../../../../models/backEnd/amendments/Amendment";
+import {AmendmentOutput, VotingSupport} from "../../../../models/backEnd/amendments/Amendment";
 import {User} from "../../../../models/backEnd/User";
 import {UserManager} from "../../../../models/backEnd/managers/UserManager";
 import {enforceUser} from "./verificationResolvers";
@@ -86,6 +86,11 @@ export const contentAccessResolvers = {
 
             return content.getAmendmentsOutput();
         },
+        checkAmendmentVotes: async (parent: undefined, args: { amendmentIds: number[] }, context: genericContext): Promise<VotingSupport[]> => {
+            let user = await enforceUser(context)
+
+            return await user.getVoteData(args.amendmentIds);
+        }
     },
     Mutation: {
         vote: async (parent: undefined, args: { contentID: number, positive: boolean }, context: genericContext) => {

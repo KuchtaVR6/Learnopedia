@@ -43,6 +43,12 @@ export type LDNJSON = {
     datePublished: string, dateModified: string
 }
 
+export type contentShareOutput = {
+    level : ContentType,
+    maximum : number,
+    owned : number,
+}
+
 
 class Content extends Expirable {
 
@@ -64,7 +70,12 @@ class Content extends Expirable {
 
     private seqNumber: number;
 
-    private readonly amendments: Array<Amendment>;
+    protected readonly amendments: Array<Amendment>;
+
+    /** first number is user id second is significance */
+    protected authorsCache: Map<number, number> | null = null;
+
+    protected numberAuthorsFromDB : number;
 
     public constructor(
         id: number,
@@ -83,7 +94,8 @@ class Content extends Expirable {
                 dateCreated: Date,
                 amendments: Array<Amendment>,
                 seqNumber: number,
-                type: ContentType
+                type: ContentType,
+                numberAuthors : number
             }) {
 
         super();
@@ -105,6 +117,7 @@ class Content extends Expirable {
             this.dateCreated = new Date();
             this.dateModified = new Date();
             this.amendments = [data];
+            this.numberAuthorsFromDB = 1;
         } else {
             this.views = data.views;
             this.upVotes = data.upVotes;
@@ -112,6 +125,7 @@ class Content extends Expirable {
             this.dateCreated = data.dateCreated;
             this.dateModified = data.dateModified;
             this.amendments = data.amendments;
+            this.numberAuthorsFromDB = data.numberAuthors;
         }
     }
 
@@ -263,11 +277,8 @@ class Content extends Expirable {
         }
     }
 
-    public getOverallScore() {
-        return this.upVotes - this.downVotes
-    }
-
     public async modification() {
+        this.authorsCache = null;
         this.dateModified = new Date();
 
         await prisma.content.update({
@@ -316,12 +327,8 @@ class Content extends Expirable {
         }
     }
 
-    private async getAuthorsFormatted() {
-        if (!this.authorsCache) {
-            await this.getAuthors()
-        }
-
-        let num = this.authorsCache?.size
+    protected async getAuthorsFormatted() {
+        let num = await this.getNumberOfAuthors()
 
         if (num === 1 || num == 0) {
             return "Created by one author"
@@ -329,38 +336,33 @@ class Content extends Expirable {
         return "Created by " + this.authorsCache?.size + " authors"
     }
 
-    private authorsCache: Map<User, number> | null = null;
-
-    public async getAuthors() {
-        if (!this.authorsCache) {
-            this.authorsCache = new Map<User, number>();
+    public async getAuthors() : Promise<Map<number, number>> {
+        if (!this.authorsCache || this.authorsCache.size === 0) {
+            this.authorsCache = new Map<number, number>();
 
             for (let amendment of this.amendments) {
                 let author = await amendment.getAuthor()
 
-                let initNum = this.authorsCache?.get(author)
+                let initNum = this.authorsCache?.get(author.getID())
                 if (initNum) {
-                    this.authorsCache?.set(author, initNum + amendment.getSignificance())
+                    this.authorsCache?.set(author.getID(), initNum + amendment.getSignificance())
                 } else {
-                    this.authorsCache?.set(author, amendment.getSignificance())
+                    this.authorsCache?.set(author.getID(), amendment.getSignificance())
                 }
             }
         }
+        return this.authorsCache
+    }
+
+    protected async getNumberOfAuthors() : Promise<number> {
+        return this.numberAuthorsFromDB
     }
 
     public getSignificance() {
-        if (this.downVotes === 0) {
-            let x = this.upVotes * this.views
-            if (x < 1) {
-                return 1;
-            }
-            return x;
-        }
-        let x = (((this.upVotes - this.downVotes) / this.downVotes) + 1) * this.views
-        if (x < 1) {
-            return 1;
-        }
-        return x;
+        let delta = this.upVotes - this.downVotes
+        let sum = this.upVotes + this.downVotes
+        let multiplier = ( (delta+1) / (sum+1) ) + 1
+        return (this.views) * multiplier
     }
 
     public getID() {
@@ -419,6 +421,10 @@ class Content extends Expirable {
     public view() {
         this.viewsChanged = true;
         this.views += 1;
+
+        if(!(process.env.NODE_ENV === "production")) {
+            this.saveViews()
+        }
     }
 
     private async saveViews() {
@@ -457,6 +463,14 @@ class Content extends Expirable {
 
     public checkIfFullyFetched(): boolean {
         return false;
+    }
+
+    public getContentShareOfUser(userID : number) : contentShareOutput[] {
+        throw ContentNotFetched
+    }
+
+    public getContentShareOfUserOneLevel(userID : number) : [number, number]{
+        throw ContentNotFetched
     }
 }
 

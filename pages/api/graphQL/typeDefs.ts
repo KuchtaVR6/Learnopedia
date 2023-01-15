@@ -19,7 +19,7 @@ export const typeDefs = gql`
     type ContinueResponse{
         continue : Boolean!
     }
-    
+
     type VacancyResponse{
         query : String!
         vacant : Boolean!
@@ -169,8 +169,21 @@ export const typeDefs = gql`
         significance : Int!,
         tariff : Int!,
         targetMeta : MetaContent,
-        applied : Int!,
+        applied : Boolean!,
+        vetoed : Boolean!,
         otherDetails : SpecificAmendmentOutput
+    }
+
+    type VotingSupport {
+        amendmentID : Int!,
+        individualSupports : [LevelSupport]
+        userOP: Int
+    }
+    
+    type LevelSupport {
+        negatives : Int!,
+        positives : Int!,
+        max : Int!,
     }
 
     #image types
@@ -178,7 +191,7 @@ export const typeDefs = gql`
     type ForDeletion{
         file : String
     }
-    
+
     type voteOutput {
         vote : Boolean
     }
@@ -192,7 +205,7 @@ export const typeDefs = gql`
         search(query : String!) : [searchResult],
         view(id : Int!) : viewOutput
         countMyView(id : Int!, loggedIn : Boolean!) : voteOutput
-        
+
         getRecommended : [MetaContent]
 
         getUsersAmendments(nickname : String) : [AmendmentOutput],
@@ -200,6 +213,8 @@ export const typeDefs = gql`
 
         #image resolvers
         avatarAuthorise : ForDeletion
+
+        checkAmendmentVotes(amendmentIds : [Int!]!): [VotingSupport]
     }
 
     type Mutation{
@@ -225,11 +240,13 @@ export const typeDefs = gql`
 
         listAmendment(targetID : Int!, changes : [Changes!]!) : ContinueResponse
         adoptionAmendment(targetID : Int!, newParent : Int!) : ContinueResponse
-        
+
         #upVote downVote
         vote(contentID : Int!, positive : Boolean!) : ContinueResponse
 
         #image resolvers
         avatarFinalise(newPath : String) : ContinueResponse
+        
+        voteOnAmendment(amendmentID : Int!, positive: Boolean, negative: Boolean, report: Boolean) : VotingSupport
     }
 `;

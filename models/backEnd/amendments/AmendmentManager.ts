@@ -1,4 +1,4 @@
-import Amendment from "./Amendment";
+import Amendment, {AmendmentOpinionValues} from "./Amendment";
 import SelfPurgingMap from "../tools/SelfPurgingMap";
 import prisma from "../../../prisma/prisma";
 import {
@@ -12,7 +12,8 @@ import {
     listamendment,
     metaamendment,
     partaddreplaceamendment,
-    partamendment
+    partamendment,
+    amendmentopinion
 } from "@prisma/client";
 import {LegacyAmendment, NotFoundException} from "../tools/Errors";
 import CreationAmendment from "./CreationAmendment";
@@ -46,7 +47,8 @@ export const prismaInclusions = {
         include: {
             partaddreplaceamendment: true
         }
-    }
+    },
+    amendmentopinion: true
 }
 
 export type fullAmendFetchType = (amendment & {
@@ -64,6 +66,7 @@ export type fullAmendFetchType = (amendment & {
     partamendment: (partamendment & {
         partaddreplaceamendment: partaddreplaceamendment | null;
     }) | null;
+    amendmentopinion: amendmentopinion[] | null;
 })
 
 class AmendmentManager {
@@ -139,6 +142,27 @@ class AmendmentManager {
         }
     }
 
+    private handleOpinions(input : amendmentopinion[]) : Map<number, AmendmentOpinionValues> {
+        let map = new Map<number, AmendmentOpinionValues>()
+        input.map((row) => {
+            let val;
+            if(row.positive)
+            {
+                val = AmendmentOpinionValues.Positive
+            }
+            else if(row.negative)
+            {
+                val = AmendmentOpinionValues.Negative
+            }
+            else
+            {
+                val = AmendmentOpinionValues.Report
+            }
+            map.set(row.userID, val)
+        })
+        return map
+    }
+
     public async insertToCache(input: fullAmendFetchType): Promise<Amendment> {
         if (input.ContentID) {
             let result: Amendment | null = null;
@@ -164,7 +188,9 @@ class AmendmentManager {
                             creationDate: input.timestamp,
                             significance: input.significance,
                             tariff: input.tariff,
-                            applied: input.applied
+                            applied: input.applied,
+                            vetoed: input.vetoed,
+                            opinions: (input.amendmentopinion)? this.handleOpinions(input.amendmentopinion) : undefined
                         })
                 } else if (input.keywordmodamendment.metaamendment) {
                     let add: Keyword[] = keywordMan.interpretKeywordAdditions(input.keywordmodamendment.keywordentrymod)
@@ -185,7 +211,9 @@ class AmendmentManager {
                             creationDate: input.timestamp,
                             significance: input.significance,
                             tariff: input.tariff,
-                            applied: input.applied
+                            applied: input.applied,
+                            vetoed: input.vetoed,
+                            opinions: (input.amendmentopinion)? this.handleOpinions(input.amendmentopinion) : undefined
                         })
                 }
             }
@@ -201,7 +229,9 @@ class AmendmentManager {
                         creationDate: input.timestamp,
                         significance: input.significance,
                         tariff: input.tariff,
-                        applied: input.applied
+                        applied: input.applied,
+                        vetoed: input.vetoed,
+                        opinions: (input.amendmentopinion)? this.handleOpinions(input.amendmentopinion) : undefined
                     })
 
                 if(input.adoptionamendment.receiverAmendment)
@@ -240,7 +270,9 @@ class AmendmentManager {
                         creationDate: input.timestamp,
                         significance: input.significance,
                         tariff: input.tariff,
-                        applied: input.applied
+                        applied: input.applied,
+                        vetoed: input.vetoed,
+                        opinions: (input.amendmentopinion)? this.handleOpinions(input.amendmentopinion) : undefined
                     }
                 )
             }
@@ -258,9 +290,11 @@ class AmendmentManager {
                             creationDate: input.timestamp,
                             significance: input.significance,
                             tariff: input.tariff,
-                            applied: input.applied
+                            applied: input.applied,
+                            vetoed: input.vetoed,
+                            opinions: (input.amendmentopinion)? this.handleOpinions(input.amendmentopinion) : undefined
                         },
-                        input.partamendment.partaddreplaceamendment.OldPartID ? input.partamendment.partaddreplaceamendment.OldPartID : undefined
+                        input.partamendment.partaddreplaceamendment.OldPartID ? input.partamendment.partaddreplaceamendment.OldPartID : undefined,
                     )
                 }
             }
@@ -289,7 +323,7 @@ class AmendmentManager {
 
     public insertToCachePartial(input: amendment): Amendment {
         if (input.ContentID) {
-            let result = new Amendment(input.ID, input.CreatorID, input.ContentID, input.significance, input.tariff, input.timestamp, input.applied)
+            let result = new Amendment(input.ID, input.CreatorID, input.ContentID, input.significance, input.tariff, input.vetoed, input.timestamp, input.applied)
             this.cache.set(input.ID, result)
             return result
         } else {

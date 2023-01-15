@@ -1,4 +1,4 @@
-import Content, {ContentType, FullOutput} from "./Content";
+import Content, {contentShareOutput, ContentType, FullOutput} from "./Content";
 import CreationAmendment from "../amendments/CreationAmendment";
 import {ActiveKeyword} from "./keywords/Keyword";
 import Amendment from "../amendments/Amendment";
@@ -42,7 +42,8 @@ class Lesson extends Content {
                 dateCreated: Date,
                 amendments: Array<Amendment>,
                 seqNumber: number,
-                type: ContentType
+                type: ContentType,
+                numberAuthors : number
             },
         parent: Chapter,
     ) {
@@ -88,6 +89,29 @@ class Lesson extends Content {
         super.view()
 
         this.parent.view()
+    }
+
+    protected async getNumberOfAuthors() : Promise<number> {
+        if(!this.authorsCache)
+        {
+            await this.getAuthors()
+        }
+
+        let newNum = this.authorsCache!.size
+
+        if (newNum != this.numberAuthorsFromDB){
+            this.numberAuthorsFromDB = newNum
+            await prisma.content.update({
+                where : {
+                    ID : this.getID()
+                },
+                data : {
+                    numberOfAuthors : this.numberAuthorsFromDB
+                }
+            })
+        }
+
+        return this.numberAuthorsFromDB
     }
 
     private sortChildern() {
@@ -377,6 +401,31 @@ class Lesson extends Content {
 
     public checkIfFullyFetched(): boolean {
         return true;
+    }
+
+    public getContentShareOfUser(userID : number) : contentShareOutput[]{
+        let output = this.getContentShareOfUserOneLevel(userID);
+
+        return this.parent.getContentShareOfUser(userID).concat([{
+            level: ContentType.LESSON,
+            maximum: output[1],
+            owned: output[0]
+        }])
+    }
+
+    public getContentShareOfUserOneLevel(userID : number) : [number, number]{
+        let total = 0;
+        let totalOverall = 0;
+
+        this.amendments.forEach((amendment) => {
+            if(amendment.getAuthorID() === userID)
+            {
+                total += amendment.getSignificance();
+            }
+            totalOverall += amendment.getSignificance();
+        })
+
+        return [total, totalOverall]
     }
 }
 

@@ -1,4 +1,4 @@
-import Amendment, {SpecificAmendmentOutput} from "./Amendment";
+import Amendment, {AmendmentOpinionValues, SpecificAmendmentOutput} from "./Amendment";
 import prisma from "../../../prisma/prisma";
 
 export type AdoptionAmendmentOutput = {
@@ -17,7 +17,9 @@ class AdoptionAmendment extends Amendment{
         authorID : number | null,
         targetID : number,
         newParent : number,
-        secondary : {dbInput : false, otherSignificance : number} | {dbInput : true, creationDate : Date, significance : number, tariff : number, applied : boolean})
+        secondary :
+            {dbInput : false, otherSignificance : number} |
+            {dbInput : true, creationDate : Date, significance : number, tariff : number, applied : boolean, opinions?: Map<number,AmendmentOpinionValues>, vetoed : boolean})
     {
         super(
             id,
@@ -25,10 +27,11 @@ class AdoptionAmendment extends Amendment{
             targetID,
             secondary.dbInput? secondary.significance : 1,
             secondary.dbInput? secondary.tariff : secondary.otherSignificance,
+            secondary.dbInput? secondary.vetoed : undefined,
             secondary.dbInput? secondary.creationDate : undefined,
-            secondary.dbInput? secondary.applied : undefined
+            secondary.dbInput? secondary.applied : undefined,
+            secondary.dbInput? secondary.opinions : undefined
             )
-
         this.newParent = newParent;
     }
 

@@ -1,10 +1,21 @@
-import Amendment from "../Amendment";
+import Amendment, {AmendmentOpinionValues} from "../Amendment";
 
 class PartAmendment extends Amendment {
     private readonly lessonPartID : number | undefined;
 
-    public constructor(id : number, authorID : number | null, targetID : number, lessonPartID : number | undefined, significance : number, tariff : number, creationDate? : Date, applied? : boolean) {
-        super(id, authorID, targetID, significance, tariff, creationDate, applied);
+    public constructor(
+        id : number,
+        authorID : number | null,
+        targetID : number,
+        lessonPartID : number | undefined,
+        significance : number,
+        tariff : number,
+        vetoed? : boolean,
+        creationDate? : Date,
+        applied? : boolean,
+        opinions?: Map<number,AmendmentOpinionValues>
+        ) {
+        super(id, authorID, targetID, significance, tariff, vetoed, creationDate, applied, opinions);
         this.lessonPartID = lessonPartID;
     }
 

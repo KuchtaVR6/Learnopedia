@@ -7,7 +7,6 @@ import styles from "../styles/Home.module.css"
 const Home: NextPage = () => {
 
     const router = useRouter();
-    //todo head
     return (
         <>
             <Head>

@@ -1,4 +1,4 @@
-import Amendment, {SpecificAmendmentOutput} from "./Amendment";
+import Amendment, {AmendmentOpinionValues, SpecificAmendmentOutput} from "./Amendment";
 import {EmptyModification} from "../tools/Errors";
 import Keyword from "../contents/keywords/Keyword";
 import {ContentType} from "../contents/Content";
@@ -23,7 +23,9 @@ class MetaAmendment extends Amendment{
         authorID : number | null,
         targetID : number,
         args : {newName? : string, newDescription? : string, addedKeywords? : Keyword[], deletedKeywords? : Keyword[]},
-        secondary : {dbInput : false, targetType: ContentType} | {dbInput : true, creationDate : Date, significance : number, tariff : number, applied : boolean},
+        secondary :
+            {dbInput : false, targetType: ContentType} |
+            {dbInput : true, creationDate : Date, significance : number, tariff : number, applied : boolean, opinions?: Map<number,AmendmentOpinionValues>, vetoed : boolean},
     ) {
         if(!secondary.dbInput){
             if (!args.newName && !args.newDescription && !args.addedKeywords && !args.deletedKeywords) {
@@ -62,7 +64,7 @@ class MetaAmendment extends Amendment{
             super(id, authorID, targetID, significance, tariff);
         }
         else{
-            super(id, authorID, targetID, secondary.significance, secondary.tariff, secondary.creationDate)
+            super(id, authorID, targetID, secondary.significance, secondary.tariff, secondary.vetoed, secondary.creationDate, secondary.applied, secondary.opinions)
         }
 
         this.newName = args.newName;

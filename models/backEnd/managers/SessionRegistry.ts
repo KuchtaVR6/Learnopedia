@@ -293,7 +293,7 @@ class AccessToken extends Expirable {
             super(TTL, timestamp)
         }
         else{
-            super(10) // todo set back to 5 minutes
+            super(300)
         }
         this.session = session;
         this.token = token;

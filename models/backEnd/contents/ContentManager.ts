@@ -9,7 +9,6 @@ import {
     NoChanges,
     OrphanedContent,
     SequenceNumberTaken,
-    UnsupportedOperation,
     WrongParent
 } from "../tools/Errors";
 import Keyword, {ActiveKeyword} from "./keywords/Keyword";
@@ -20,7 +19,7 @@ import CreationAmendment from "../amendments/CreationAmendment";
 import KeywordManager from "./keywords/KeywordManager";
 import AdoptionAmendment from "../amendments/AdoptionAmendment";
 import ListAmendment from "../amendments/ListAmendment";
-import {amendment, keyword} from "@prisma/client";
+import {keyword} from "@prisma/client";
 import {Course} from "./Course";
 import Chapter from "./Chapter";
 import Lesson from "./Lesson";
@@ -78,7 +77,7 @@ class ContentManager {
 
                     let amendmentsArray: Amendment[] = []
                     value.amendment.map((amendment) => {
-                        amendmentsArray.push(new Amendment(amendment.ID, amendment.CreatorID, amendment.ContentID!, amendment.significance, amendment.tariff, amendment.timestamp))
+                        amendmentsArray.push(new Amendment(amendment.ID, amendment.CreatorID, amendment.ContentID!, amendment.significance, amendment.tariff, amendment.vetoed,amendment.timestamp))
                     })
                     let upVotes = 0;
                     let downVotes = 0;
@@ -120,7 +119,8 @@ class ContentManager {
                             seqNumber: value.seqNumber,
                             amendments: amendmentsArray,
                             keywords: keywordsArray,
-                            type: type
+                            type: type,
+                            numberAuthors : value.numberOfAuthors
                         })
                     this.cache.set(value.ID, content)
 
@@ -239,7 +239,8 @@ class ContentManager {
                         seqNumber: dbResult.seqNumber,
                         amendments: amendmentsArray,
                         keywords: keywordsArray,
-                        type: type
+                        type: type,
+                        numberAuthors : dbResult.numberOfAuthors
                     })
                 this.cache.set(dbResult.ID, content)
 
@@ -376,7 +377,8 @@ class ContentManager {
                         dateCreated: dbFull.dateCreated,
                         amendments: AmendmentsArray,
                         seqNumber: dbFull.seqNumber,
-                        type: ContentType.COURSE
+                        type: ContentType.COURSE,
+                        numberAuthors : dbFull.numberOfAuthors
                     })
 
                     this.cache.set(dbFull.ID, host)
@@ -408,7 +410,8 @@ class ContentManager {
                                     dateCreated: row.dateCreated,
                                     amendments: AmendmentsArray,
                                     seqNumber: row.seqNumber,
-                                    type: ContentType.CHAPTER
+                                    type: ContentType.CHAPTER,
+                                    numberAuthors : row.numberOfAuthors
                                 }, host)
 
                             host.addChild(row.seqNumber, newChapter)
@@ -443,7 +446,8 @@ class ContentManager {
                                             dateCreated: row.dateCreated,
                                             amendments: AmendmentsArray,
                                             seqNumber: row.seqNumber,
-                                            type: ContentType.LESSON
+                                            type: ContentType.LESSON,
+                                            numberAuthors : row.numberOfAuthors
                                         }, newChapter)
 
                                     newChapter.addChild(row.seqNumber, newLesson)
@@ -464,6 +468,22 @@ class ContentManager {
             }
         } else {
             throw new ContentNotFoundException(where.ID)
+        }
+    }
+
+    public returnDeletedMeta() : MetaOutput{
+        return {
+            id : -1,
+            upVotes: 0,
+            type : ContentType.LESSON,
+            downVotes: 0,
+            seqNumber : 0,
+            name : "This content has been deleted... :(",
+            keywords: [],
+            creation: "unknown",
+            modification: "unknown",
+            description: "",
+            authors: ""
         }
     }
 
@@ -515,7 +535,7 @@ class ContentManager {
 
                 let amendmentsArray: Amendment[] = []
                 value.amendment.map((amendment) => {
-                    amendmentsArray.push(new Amendment(amendment.ID, amendment.CreatorID, amendment.ContentID!, amendment.significance, amendment.tariff, amendment.timestamp))
+                    amendmentsArray.push(new Amendment(amendment.ID, amendment.CreatorID, amendment.ContentID!, amendment.significance, amendment.tariff, amendment.vetoed,amendment.timestamp))
                 })
 
                 let upVotes = 0;
@@ -561,7 +581,8 @@ class ContentManager {
                         seqNumber: value.seqNumber,
                         amendments: amendmentsArray,
                         keywords: keywordsArray,
-                        type: type
+                        type: type,
+                        numberAuthors : value.numberOfAuthors
                     })
                 this.cache.set(value.ID, content)
 
@@ -1047,6 +1068,7 @@ class ContentManager {
                         dateCreated: amendment.getCreationDate(),
                         seqNumber: amendment.seqNumber,
                         public: true,
+                        numberOfAuthors: 1,
 
                         chapter: {
                             create: {
@@ -1066,6 +1088,7 @@ class ContentManager {
                         dateCreated: amendment.getCreationDate(),
                         seqNumber: amendment.seqNumber,
                         public: true,
+                        numberOfAuthors: 1,
 
                         course: {
                             create: {}
@@ -1083,6 +1106,7 @@ class ContentManager {
                         dateCreated: amendment.getCreationDate(),
                         seqNumber: amendment.seqNumber,
                         public: true,
+                        numberOfAuthors: 1,
 
                         lesson: {
                             create: {

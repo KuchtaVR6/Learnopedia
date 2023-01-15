@@ -2,7 +2,7 @@ import {User} from "../User";
 import {CredentialsNotUnique, UserNotFoundException} from "../tools/Errors";
 import SelfPurgingMap from "../tools/SelfPurgingMap";
 import prisma from "../../../prisma/prisma";
-import Amendment from "../amendments/Amendment";
+import Amendment, {AmendmentOpinionValues} from "../amendments/Amendment";
 import AmendmentManager, {prismaInclusions} from "../amendments/AmendmentManager";
 
 export class UserManager {
@@ -29,7 +29,7 @@ export class UserManager {
     }
 
     public deletedUser() {
-        return new User(-1,"DELETED USER", "deleted@deleted", "DELETED", "DELETED", "===", [], new Map<number, boolean>(), null)
+        return new User(-1,"DELETED USER", "deleted@deleted", "DELETED", "DELETED", "===", [], new Map<number, boolean>(), new Map<number, number>(), null)
     }
 
     public async addUser(nickname: string, email: string, fname: string, lname: string, password: string): Promise<User> {
@@ -176,7 +176,7 @@ class UserStore {
             }
         })
 
-        return this.cache(new User(output.ID, nickname, email, fname, lname, passHash, [], new Map<number, boolean>(), null));
+        return this.cache(new User(output.ID, nickname, email, fname, lname, passHash, [], new Map<number, boolean>(), new Map<number, number>(), null));
     }
 
     private async dbScanFinished() {
@@ -225,7 +225,8 @@ class UserStore {
                 amendment : {
                     include : prismaInclusions
                 },
-                contentopinion : true
+                contentopinion : true,
+                amendmentopinion: true
             }
         })
 
@@ -239,7 +240,23 @@ class UserStore {
                 opMap.set(row.contentID, row.positive)
             })
 
-            return this.cache(new User(dbUser.ID, dbUser.nickname, dbUser.email, dbUser.fname, dbUser.lname, dbUser.passHash, amendArray, opMap, dbUser.avatarFile, dbUser.colorA, dbUser.colorB))
+            let AmendOpMap : Map<number, number> = new Map<number, number>();
+            dbUser.amendmentopinion.map((row) => {
+                let val : AmendmentOpinionValues;
+                if(row.positive)
+                {
+                    val = AmendmentOpinionValues.Positive
+                } else if (row.negative)
+                {
+                    val = AmendmentOpinionValues.Negative
+                } else {
+                    val = AmendmentOpinionValues.Report
+                }
+
+                AmendOpMap.set(row.amendmentID, val)
+            })
+
+            return this.cache(new User(dbUser.ID, dbUser.nickname, dbUser.email, dbUser.fname, dbUser.lname, dbUser.passHash, amendArray, opMap, AmendOpMap, dbUser.avatarFile, dbUser.colorA, dbUser.colorB))
         }
 
         throw new UserNotFoundException(query)
@@ -261,7 +278,8 @@ class UserStore {
                 amendment: {
                     include : prismaInclusions
                 },
-                contentopinion: true
+                contentopinion: true,
+                amendmentopinion: true
             }
         })
 
@@ -274,7 +292,23 @@ class UserStore {
                 opMap.set(row.contentID, row.positive)
             })
 
-            let newUser = new User(dbUser.ID,dbUser.nickname, dbUser.email, dbUser.fname, dbUser.lname, dbUser.passHash, amendArray, opMap, dbUser.avatarFile, dbUser.colorA, dbUser.colorB);
+            let AmendOpMap : Map<number, number> = new Map<number, number>();
+            dbUser.amendmentopinion.map((row) => {
+                let val : AmendmentOpinionValues;
+                if(row.positive)
+                {
+                    val = AmendmentOpinionValues.Positive
+                } else if (row.negative)
+                {
+                    val = AmendmentOpinionValues.Negative
+                } else {
+                    val = AmendmentOpinionValues.Report
+                }
+
+                AmendOpMap.set(row.amendmentID, val)
+            })
+
+            let newUser = new User(dbUser.ID,dbUser.nickname, dbUser.email, dbUser.fname, dbUser.lname, dbUser.passHash, amendArray, opMap, AmendOpMap, dbUser.avatarFile, dbUser.colorA, dbUser.colorB);
             this.idMap.set(id, newUser)
             return newUser;
         }

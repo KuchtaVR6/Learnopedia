@@ -1,4 +1,4 @@
-import Amendment, {SpecificAmendmentOutput} from "./Amendment";
+import Amendment, {AmendmentOpinionValues, SpecificAmendmentOutput} from "./Amendment";
 import {ContentType} from "../contents/Content";
 
 export type ListAmendmentOutput = {
@@ -14,7 +14,9 @@ class ListAmendment extends Amendment {
         authorID: number | null,
         targetID: number,
         changes: { ChildID?: number, LessonPartID?: number, newSeqNumber?: number, delete?: boolean }[],
-        secondary : {dbInput : false, targetType: ContentType} | {dbInput : true, creationDate : Date, significance : number, tariff : number, applied : boolean})
+        secondary :
+            {dbInput : false, targetType: ContentType} |
+            {dbInput : true, creationDate : Date, significance : number, tariff : number, applied : boolean, opinions?: Map<number,AmendmentOpinionValues>, vetoed : boolean})
     {
         if(!secondary.dbInput){
             let significance = 0;
@@ -44,7 +46,7 @@ class ListAmendment extends Amendment {
             super(id, authorID, targetID, significance, 100);
         }
         else{
-            super(id, authorID, targetID, secondary.significance, secondary.tariff, secondary.creationDate, secondary.applied)
+            super(id, authorID, targetID, secondary.significance, secondary.tariff, secondary.vetoed, secondary.creationDate, secondary.applied, secondary.opinions)
         }
         this.changes = changes;
     }

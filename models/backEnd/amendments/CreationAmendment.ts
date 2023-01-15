@@ -1,4 +1,4 @@
-import Amendment, {SpecificAmendmentOutput} from "./Amendment";
+import Amendment, {AmendmentOpinionValues, SpecificAmendmentOutput} from "./Amendment";
 import Keyword from "../contents/keywords/Keyword";
 import {ContentType} from "../contents/Content";
 import {ContentNeedsParent} from "../tools/Errors";
@@ -23,7 +23,9 @@ class CreationAmendment extends Amendment{
     public constructor(
         id : number,
         args : {authorID : number | null, targetID : number, name : string, description : string, keywords : Keyword[], seqNumber : number, type : ContentType, parentID? : number},
-        secondary : {dbInput : false} | {dbInput : true, creationDate : Date, significance : number, tariff : number, applied : boolean})
+        secondary :
+            {dbInput : false} |
+            {dbInput : true, creationDate : Date, significance : number, tariff : number, applied : boolean, opinions?: Map<number,AmendmentOpinionValues>, vetoed : boolean})
     {
         if(!secondary.dbInput){
             if (!args.parentID && args.type !== ContentType.COURSE) {
@@ -47,7 +49,7 @@ class CreationAmendment extends Amendment{
             super(id, args.authorID, args.targetID, significance, 1);
         }
         else{
-            super(id, args.authorID, args.targetID, secondary.significance, secondary.tariff, secondary.creationDate, secondary.applied)
+            super(id, args.authorID, args.targetID, secondary.significance, secondary.tariff, secondary.vetoed, secondary.creationDate, secondary.applied, secondary.opinions)
         }
 
         this.name = args.name;

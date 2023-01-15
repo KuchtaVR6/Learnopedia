@@ -6,6 +6,9 @@ import Keyword from "../../../../models/backEnd/contents/keywords/Keyword";
 import {lessonPartTypes} from "../../../../models/backEnd/lessonParts/LessonPartManager";
 import {genericContext} from "../resolvers";
 import {ParagraphOutput} from "../../../../models/backEnd/lessonParts/Paragraph";
+import {AmendmentOpinionValues, VotingSupport} from "../../../../models/backEnd/amendments/Amendment";
+import AmendmentManager from "../../../../models/backEnd/amendments/AmendmentManager";
+import {InvalidArgument} from "../../../../models/backEnd/tools/Errors";
 
 export const contentModificationResolvers = {
     Mutation: {
@@ -77,6 +80,26 @@ export const contentModificationResolvers = {
             })
 
             return {continue: true}
+        },
+        voteOnAmendment : async (
+            parent : undefined,
+            args : {amendmentID : number, positive?: boolean, negative?: boolean, report?: boolean},
+            context: genericContext
+            ) : Promise<VotingSupport> => {
+            let user = await enforceUser(context)
+            let amendment = await AmendmentManager.getInstance().retrieve(args.amendmentID)
+
+            let vote : AmendmentOpinionValues;
+
+            if(args.positive) {vote = AmendmentOpinionValues.Positive}
+            else if(args.negative) {vote = AmendmentOpinionValues.Negative}
+            else if(args.report) {vote = AmendmentOpinionValues.Report}
+            else {throw InvalidArgument}
+
+            await amendment.vote(user, vote)
+
+            return await amendment.getSupports()
         }
+
     }
 }

@@ -28,10 +28,6 @@ apiRoute.post(async (req: NextApiRequest & { file: { filename: string } }, res: 
     const protocol = req.headers['x-forwarded-proto'] || 'http'
     const baseUrl = `${protocol}://${req.headers['host']}`
 
-    console.log(req.file.filename)
-
-    console.log(req.cookies)
-
     const resp = await fetch(baseUrl + '/api/graphql', {
         method: 'POST',
 
@@ -53,11 +49,7 @@ apiRoute.post(async (req: NextApiRequest & { file: { filename: string } }, res: 
         })
     })
 
-    console.log("finished")
-
     let response = (JSON.parse(await resp.text()))
-
-    console.log(response)
 
     if (response.errors) {
         res.status(200).json({success: false, message: 'Unexpected Error'})

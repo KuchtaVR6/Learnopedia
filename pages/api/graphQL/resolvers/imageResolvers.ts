@@ -34,11 +34,7 @@ export const imageResolvers = {
     Mutation : {
         avatarFinalise : async (parent : undefined, args : {newPath : string}, context: genericContext) => {
 
-            console.log(context)
-
             let thisUser = await enforceUser(context)
-
-            console.log(args.newPath)
 
             await thisUser.setAvatarPath(args.newPath)
 

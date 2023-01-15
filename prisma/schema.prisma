@@ -23,8 +23,9 @@ model amendment {
   timestamp           DateTime             @db.DateTime(0)
   ContentID           Int?
   significance        Int                  @default(0)
-  applied             Boolean
+  applied             Boolean              @default(false)
   tariff              Int                  @default(100)
+  vetoed              Boolean              @default(false)
   content             content?             @relation(fields: [ContentID], references: [ID], map: "FKAmendment887662")
   user                user?                @relation(fields: [CreatorID], references: [ID], map: "FKAmendment140140")
   adoptionamendment   adoptionamendment?
@@ -57,6 +58,7 @@ model content {
   dateCreated       DateTime            @db.DateTime(0)
   seqNumber         Int
   public            Boolean             @db.Bit(1)
+  numberOfAuthors   Int
   adoptionamendment adoptionamendment[]
   amendment         amendment[]
   chapter           chapter?
@@ -283,6 +285,8 @@ model amendmentopinion {
   userID      Int
   amendmentID Int
   positive    Boolean   @db.Bit(1)
+  negative    Boolean   @db.Bit(1)
+  report      Boolean   @db.Bit(1)
   amendment   amendment @relation(fields: [amendmentID], references: [ID], onDelete: Cascade, map: "FKAmendmentOpinion43242")
   user        user      @relation(fields: [userID], references: [ID], onDelete: Cascade, map: "FKAmendmentOpinion34263")
 

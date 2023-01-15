@@ -3,12 +3,9 @@ import RegularLayout from "../../models/frontEnd/regularLayout";
 import client from "../../apollo-client";
 import {gql} from "@apollo/client";
 import {AmendmentOutput} from "../../models/backEnd/amendments/Amendment";
-import styles from "../../styles/ContentDisplay.module.css";
 import AmendmentDisplay from "../../models/frontEnd/amendmentDisplay";
 
 const ContentsAmendments: NextPage<{ data: AmendmentOutput[] }> = ({data}) => {
-
-    let x = 0;
 
     if (data) {
         return (
@@ -17,7 +14,6 @@ const ContentsAmendments: NextPage<{ data: AmendmentOutput[] }> = ({data}) => {
                     <AmendmentDisplay input={data}/>
                 </RegularLayout>
             </div>
-
         )
     } else {
         return <></>;

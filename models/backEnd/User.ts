@@ -3,8 +3,14 @@ import {Expirable} from "./tools/Expirable";
 import {MaxPasswordLengthExceeded} from "./tools/Errors";
 import {UserManager} from "./managers/UserManager";
 import prisma from "../../prisma/prisma";
-import Amendment, {AmendmentOutput, SpecificAmendmentOutput} from "./amendments/Amendment";
+import Amendment, {
+    AmendmentOpinionValues,
+    AmendmentOutput,
+    SpecificAmendmentOutput,
+    VotingSupport
+} from "./amendments/Amendment";
 import ContentManager from "./contents/ContentManager";
+import AmendmentManager from "./amendments/AmendmentManager";
 
 export type UserDetails = {
     nickname: string,
@@ -30,6 +36,8 @@ export class User extends Expirable {
     private colorB: string;
 
     private opinions : Map<number, boolean>;
+
+    private votes : Map<number, AmendmentOpinionValues>;
 
     /**
      * Bcrypt only allows to check strings up to 72 bytes so these methods
@@ -77,6 +85,7 @@ export class User extends Expirable {
          password: string,
          amendments: Amendment[],
          opinions : Map<number, boolean>,
+         votes : Map<number, AmendmentOpinionValues>,
          avatarPath: string | null,
          colorA?: string | null,
          colorB?: string | null
@@ -93,6 +102,7 @@ export class User extends Expirable {
         this.colorA = colorA || "#099978"
         this.colorB = colorB || "#023189"
         this.opinions = opinions;
+        this.votes = votes;
     }
 
     /**
@@ -133,6 +143,51 @@ export class User extends Expirable {
         return 1
     }
 
+    public checkVote(amendmentId : number) : AmendmentOpinionValues {
+        const fetched = this.votes.get(amendmentId);
+        if(fetched)
+        {
+            return fetched
+        }
+        return 0
+    }
+
+    /**
+     *
+     * returns 1 is a new vote was saved
+     * 0 if the old vote was changed
+     * -1 if an old vote was deleted
+     *
+     */
+    public changeVote(amendmentId : number, newValue : AmendmentOpinionValues) : number{
+        if(this.votes.has(amendmentId))
+        {
+            if(this.votes.get(amendmentId) === newValue)
+            {
+                this.votes.delete(amendmentId)
+                return -1
+            }
+            this.votes.set(amendmentId, newValue)
+            return 0
+        }
+        this.votes.set(amendmentId, newValue)
+        return 1
+    }
+
+    public async getVoteData(requestedAmendmentsIDs : number[]) : Promise<VotingSupport[]>
+    {
+        let finalArray : VotingSupport[] = new Array<VotingSupport>();
+        let amendmentManagerInstance = AmendmentManager.getInstance();
+        for(let id of requestedAmendmentsIDs) {
+            if(this.votes.has(id))
+            {
+                let amendment = await amendmentManagerInstance.retrieve(id)
+                finalArray.push(await amendment.getSupports(this.id))
+            }
+        }
+        return finalArray
+    }
+
     private async comparePasswordAttempt(attempt: string): Promise<boolean> {
         if (this.passHash.length > 0) {
             return await bcrypt.compare(attempt, this.passHash)
@@ -171,14 +226,18 @@ export class User extends Expirable {
         let totalXP = 0;
 
         for (let amend of this.amendments) {
-            let content = await ContentManager.getInstance().getContentByID(amend.getTargetID());
+            let content;
+            try {
+                content = await ContentManager.getInstance().getContentByID(amend.getTargetID());
+            }
+            catch {}
 
             if (content) {
                 totalXP += amend.getSignificance() * content.getSignificance()
             }
         }
 
-        return Math.floor(totalXP / 10000);
+        return Math.floor(totalXP / 100);
     }
 
     public async getAmendments(): Promise<AmendmentOutput[]> {

@@ -4,11 +4,12 @@ import client from "../../../apollo-client";
 import {fetchquery} from "../../view/[viewId]";
 import {FullOutput, MetaOutput} from "../../../models/backEnd/contents/Content";
 import MetaForm from "../../../models/frontEnd/editForms/metaForm";
-import {useEffect, useState} from "react";
+import {useContext, useEffect, useState} from "react";
 import styles from "../../../styles/ContentDisplay.module.css";
 import {gql, useMutation} from "@apollo/client";
 import {useRouter} from "next/router";
 import Head from "next/head";
+import {UserContext} from "../../../models/frontEnd/authentication/userContext";
 
 export type MetaChanges = {
     title: string | null,
@@ -24,7 +25,6 @@ const AddChild: NextPage<{
         output: FullOutput
     }
 }> = ({data}) => {
-    //todo enforce user
     const extractRelevant = (): MetaOutput[] => {
         if (data.mainMeta.id === data.output.metas.meta.id) {
             return data.output.metas.chapters.map((chapter) => {
@@ -48,6 +48,13 @@ const AddChild: NextPage<{
     }`
 
     const router = useRouter();
+    const userContext = useContext(UserContext)
+
+    useEffect(()=>{
+        if(userContext.loggedIn()===false){
+            router.push("login?red=" + router.asPath)
+        }
+    },[])
 
     const [changes, setChanges] = useState<MetaChanges>({
         title: null,

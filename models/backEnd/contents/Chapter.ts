@@ -1,4 +1,4 @@
-import Content, {ContentType, FullOutput, MetaOutput} from "./Content";
+import Content, {contentShareOutput, ContentType, FullOutput, MetaOutput} from "./Content";
 import Lesson from "./Lesson";
 import {Course} from "./Course";
 import CreationAmendment from "../amendments/CreationAmendment";
@@ -9,6 +9,7 @@ import AdoptionAmendment from "../amendments/AdoptionAmendment";
 import prisma from "../../../prisma/prisma";
 import ListAmendment from "../amendments/ListAmendment";
 import ContentManager from "./ContentManager";
+import {User} from "../User";
 
 export type ChapterOutput = {
     meta : MetaOutput,
@@ -37,7 +38,8 @@ class Chapter extends Content {
                 dateCreated: Date,
                 amendments: Array<Amendment>,
                 seqNumber: number,
-                type: ContentType
+                type: ContentType,
+                numberAuthors : number
             },
         parent: Course,
         children?: Map<number, Lesson> | Lesson[]
@@ -87,6 +89,55 @@ class Chapter extends Content {
         super.view()
 
         this.parent.view()
+    }
+
+    protected async getNumberOfAuthors() : Promise<number> {
+        if(!this.authorsCache)
+        {
+            await this.getAuthors()
+        }
+
+        let newNum = this.authorsCache!.size
+
+        if (newNum != this.numberAuthorsFromDB){
+            this.numberAuthorsFromDB = newNum
+            await prisma.content.update({
+                where : {
+                    ID : this.getID()
+                },
+                data : {
+                    numberOfAuthors : this.numberAuthorsFromDB
+                }
+            })
+        }
+
+        return this.numberAuthorsFromDB
+    }
+
+    public async getAuthors() : Promise<Map<number, number>> {
+        this.authorsCache = await super.getAuthors()
+
+        for(let childKey of Array.from(this.children.keys()))
+        {
+            let child = this.children.get(childKey)!
+            let fromChild = await child.getAuthors()
+
+            fromChild.forEach((elem, key) => {
+                if(this.authorsCache)
+                {
+                    let initNum = this.authorsCache.get(key)
+                    if(initNum)
+                    {
+                        this.authorsCache.set(key,elem + initNum)
+                    }
+                    else{
+                        this.authorsCache.set(key,elem)
+                    }
+                }
+            })
+        }
+
+        return this.authorsCache
     }
 
     public async getChapterOutput() : Promise<ChapterOutput>{
@@ -255,6 +306,37 @@ class Chapter extends Content {
 
     public checkIfFullyFetched() : boolean{
         return true;
+    }
+
+    public getContentShareOfUser(userID : number) : contentShareOutput[]{
+        let output = this.getContentShareOfUserOneLevel(userID);
+
+        return this.parent.getContentShareOfUser(userID).concat([{
+            level: ContentType.CHAPTER,
+            maximum: output[1],
+            owned: output[0]
+        }])
+    }
+
+    public getContentShareOfUserOneLevel(userID : number) : [number, number]{
+        let total = 0;
+        let totalOverall = 0;
+
+        this.amendments.forEach((amendment) => {
+            if(amendment.getAuthorID() === userID)
+            {
+                total += amendment.getSignificance();
+            }
+            totalOverall += amendment.getSignificance();
+        })
+
+        this.children.forEach((child) => {
+            let output = child.getContentShareOfUserOneLevel(userID)
+            total += output[0]
+            totalOverall += output[1]
+        })
+
+        return [total, totalOverall]
     }
 }
 
