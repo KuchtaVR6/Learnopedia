@@ -98,7 +98,7 @@ export const contentModificationResolvers = {
 
             await amendment.vote(user, vote)
 
-            return await amendment.getSupports()
+            return await amendment.checkFulfillmentAndReturn()
         }
 
     }

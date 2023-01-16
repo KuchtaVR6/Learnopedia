@@ -731,7 +731,7 @@ class ContentManager {
         amendment.setID(parent.ID)
         author.addAmendment(amendment);
 
-        await content.applyMetaAmendment(amendment);
+        //await content.applyMetaAmendment(amendment);
     }
 
     public async createCreationAmendment(authorID: number, name: string, description: string, keywords: Keyword[], seqNumber: number, type: ContentType, parentID?: number) {
@@ -952,7 +952,7 @@ class ContentManager {
 
         await AmendmentManager.getInstance().push(amendment);
 
-        await content.getAdopted(amendment)
+        //await content.getAdopted(amendment)
     }
 
     public async createListAmendment(authorID: number, targetID: number, changes: { ChildID?: number, newSeqNumber?: number, LessonPartID? : number, delete: boolean }[]) {
@@ -991,7 +991,7 @@ class ContentManager {
 
         await AmendmentManager.getInstance().push(amendment);
 
-        await content.applyListAmendment(amendment);
+        //await content.applyListAmendment(amendment);
     }
 
     public async createAddReplaceAmendment(authorID: number, targetID: number, seqNumber : number, arg : { oldID? : number, newArgs : lessonPartArgs }) {
@@ -1037,7 +1037,7 @@ class ContentManager {
 
         await AmendmentManager.getInstance().push(amendment);
 
-        await content.applyPartAddReplaceAmendment(amendment);
+        //await content.applyPartAddReplaceAmendment(amendment);
     }
 
     public async applyContentCreation(amendment: CreationAmendment) {

@@ -3,6 +3,7 @@ import {EmptyModification} from "../tools/Errors";
 import Keyword from "../contents/keywords/Keyword";
 import {ContentType} from "../contents/Content";
 import KeywordManager from "../contents/keywords/KeywordManager";
+import ContentManager from "../contents/ContentManager";
 
 export type MetaAmendmentOutput = {
     __typename: "MetaAmendmentOutput",
@@ -86,6 +87,12 @@ class MetaAmendment extends Amendment{
     public fullyFetched()
     {
         return true;
+    }
+
+    public async applyThisAmendment() {
+        let content = await ContentManager.getInstance().getSpecificByID(this.getTargetID())
+
+        await content.applyMetaAmendment(this)
     }
 }
 

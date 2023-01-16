@@ -48,13 +48,6 @@ const AddChild: NextPage<{
     }`
 
     const router = useRouter();
-    const userContext = useContext(UserContext)
-
-    useEffect(()=>{
-        if(userContext.loggedIn()===false){
-            router.push("login?red=" + router.asPath)
-        }
-    },[])
 
     const [changes, setChanges] = useState<MetaChanges>({
         title: null,

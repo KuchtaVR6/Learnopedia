@@ -1,5 +1,6 @@
 import Amendment, {AmendmentOpinionValues, SpecificAmendmentOutput} from "./Amendment";
 import {ContentType} from "../contents/Content";
+import ContentManager from "../contents/ContentManager";
 
 export type ListAmendmentOutput = {
     __typename: "ListAmendmentOutput",
@@ -61,6 +62,12 @@ class ListAmendment extends Amendment {
     public fullyFetched()
     {
         return true;
+    }
+
+    public async applyThisAmendment() {
+        let content = await ContentManager.getInstance().getSpecificByID(this.getTargetID())
+
+        await content.applyListAmendment(this)
     }
 }
 

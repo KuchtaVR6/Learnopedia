@@ -2,6 +2,7 @@ import PartAmendment from "./PartAmendment";
 import {displayableOutput} from "../../lessonParts/LessonPart";
 import {AmendmentOpinionValues, SpecificAmendmentOutput} from "../Amendment";
 import LessonPartManager from "../../lessonParts/LessonPartManager";
+import ContentManager from "../../contents/ContentManager";
 
 export type PartAddReplaceAmendmentOutput = {
     __typename: "PartAddReplaceAmendmentOutput"
@@ -70,6 +71,12 @@ class PartAddReplaceAmendment extends PartAmendment{
                 oldID: this.oldID
             }
         }
+    }
+
+    public async applyThisAmendment() {
+        let content = await ContentManager.getInstance().getSpecificByID(this.getTargetID())
+
+        await content.applyPartAddReplaceAmendment(this)
     }
 }
 

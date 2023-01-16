@@ -1,15 +1,15 @@
 import {UserManager} from "../managers/UserManager";
 import prisma from "../../../prisma/prisma";
-import {AdoptionAmendmentOutput} from "./AdoptionAmendment";
-import {PartAddReplaceAmendmentOutput} from "./PartAmendments/PartAddReplaceAmendment";
-import {CreationAmendmentOutput} from "./CreationAmendment";
-import {ListAmendmentOutput} from "./ListAmendment";
-import {MetaAmendmentOutput} from "./MetaAmendment";
+import  {AdoptionAmendmentOutput} from "./AdoptionAmendment";
+import  {PartAddReplaceAmendmentOutput} from "./PartAmendments/PartAddReplaceAmendment";
+import  {CreationAmendmentOutput} from "./CreationAmendment";
+import  {ListAmendmentOutput} from "./ListAmendment";
+import  {MetaAmendmentOutput} from "./MetaAmendment";
 import ContentManager from "../contents/ContentManager";
 import {contentShareOutput, ContentType, MetaOutput} from "../contents/Content";
 import {Expirable} from "../tools/Expirable";
-import {Level} from "chalk";
 import {User} from "../User";
+import {ContentNotFetched} from "../tools/Errors";
 
 export type AmendmentOutput = {
     id : number,
@@ -271,8 +271,7 @@ class Amendment extends Expirable{
         throw new Error("Amendment not fetched")
     }
 
-    public async getApplied()
-    {
+    public async getApplied() {
         this.applied = true;
         await prisma.amendment.update({
             where : {
@@ -284,13 +283,11 @@ class Amendment extends Expirable{
         })
     }
 
-    public getTargetID()
-    {
+    public getTargetID() {
         return this.targetID
     }
 
-    public fullyFetched()
-    {
+    public fullyFetched() {
         return false;
     }
 
@@ -330,6 +327,54 @@ class Amendment extends Expirable{
                 }
             })
         }
+    }
+
+    public async veto() {
+        this.vetoed = true
+
+        await prisma.amendment.update({
+            where : {
+                ID: this.id
+            },
+            data : {
+                vetoed: true
+            }
+        })
+    }
+
+    public getVeto() {
+        return this.vetoed
+    }
+
+    public async applyThisAmendment() {
+        throw ContentNotFetched
+    }
+
+    public async checkFulfillmentAndReturn() : Promise<VotingSupport>
+    {
+        let output = await this.getSupports()
+
+        let multiplication = 2**(output.individualSupports.length-1)
+
+        if(!this.getVeto()) {
+            for (let thisLevel of output.individualSupports) {
+                let required = this.getCost() * multiplication
+                if (required > thisLevel.max) {
+                    required = thisLevel.max
+                }
+
+                if (required <= thisLevel.negatives) {
+                    await this.veto()
+                } else if (required <= thisLevel.positives) {
+                    if(this.applied === false)
+                        await this.applyThisAmendment()
+                }
+
+                multiplication = multiplication / 2;
+            }
+        }
+
+        return output
     }
 }
 

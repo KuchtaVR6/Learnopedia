@@ -1,5 +1,6 @@
 import Amendment, {AmendmentOpinionValues, SpecificAmendmentOutput} from "./Amendment";
 import prisma from "../../../prisma/prisma";
+import ContentManager from "../contents/ContentManager";
 
 export type AdoptionAmendmentOutput = {
     __typename: "AdoptionAmendmentOutput",
@@ -73,6 +74,12 @@ class AdoptionAmendment extends Amendment{
     public fullyFetched()
     {
         return true;
+    }
+
+    public async applyThisAmendment() {
+        let content = await ContentManager.getInstance().getSpecificByID(this.getTargetID())
+
+        await content.getAdopted(this)
     }
 }
 

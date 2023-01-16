@@ -3,6 +3,7 @@ import Keyword from "../contents/keywords/Keyword";
 import {ContentType} from "../contents/Content";
 import {ContentNeedsParent} from "../tools/Errors";
 import KeywordManager from "../contents/keywords/KeywordManager";
+import ContentManager from "../contents/ContentManager";
 
 export type CreationAmendmentOutput = {
     __typename: "CreationAmendmentOutput",
