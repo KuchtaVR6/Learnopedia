@@ -350,6 +350,10 @@ class Amendment extends Expirable{
         throw ContentNotFetched
     }
 
+    public getValueOfApplied() {
+        return this.applied;
+    }
+
     public async checkFulfillmentAndReturn() : Promise<VotingSupport>
     {
         let output = await this.getSupports()

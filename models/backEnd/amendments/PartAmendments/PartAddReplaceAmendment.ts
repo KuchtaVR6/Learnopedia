@@ -13,7 +13,7 @@ export type PartAddReplaceAmendmentOutput = {
 
 class PartAddReplaceAmendment extends PartAmendment{
     private readonly oldID? : number;
-    private readonly seqNumber : number;
+    private seqNumber : number;
 
     public constructor(
         id : number,
@@ -53,6 +53,10 @@ class PartAddReplaceAmendment extends PartAmendment{
         return this.seqNumber
     }
 
+    public moveNewSeqNum(){
+        this.seqNumber += 1;
+    }
+
     protected async getSpecificOutput() : Promise<SpecificAmendmentOutput> {
         let lessonPartID = super.getLessonPartID()
         if(lessonPartID) {
@@ -77,6 +81,8 @@ class PartAddReplaceAmendment extends PartAmendment{
         let content = await ContentManager.getInstance().getSpecificByID(this.getTargetID())
 
         await content.applyPartAddReplaceAmendment(this)
+
+        await content.purgeListEdits()
     }
 }
 

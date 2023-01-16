@@ -283,8 +283,8 @@ class Lesson extends Content {
 
     public async applyPartAddReplaceAmendment(amendment: PartAddReplaceAmendment) {
 
-        if (!amendment.getOldID() && this.children.has(amendment.getNewSeqNum())) {
-            throw new SequenceNumberTaken();
+        while (!amendment.getOldID() && this.children.has(amendment.getNewSeqNum())) {
+            amendment.moveNewSeqNum();
         }
 
         if (!amendment.getLessonPartID()) {

@@ -68,6 +68,8 @@ class ListAmendment extends Amendment {
         let content = await ContentManager.getInstance().getSpecificByID(this.getTargetID())
 
         await content.applyListAmendment(this)
+
+        await content.purgeListEdits()
     }
 }
 

@@ -127,6 +127,7 @@ const query = gql`
                 authors
             }
             applied
+            vetoed
         }
     }
 `

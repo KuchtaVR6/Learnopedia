@@ -80,6 +80,10 @@ class AdoptionAmendment extends Amendment{
         let content = await ContentManager.getInstance().getSpecificByID(this.getTargetID())
 
         await content.getAdopted(this)
+
+        let parent = await ContentManager.getInstance().getSpecificByID(this.newParent)
+
+        await parent.purgeListEdits()
     }
 }
 

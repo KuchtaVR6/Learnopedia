@@ -472,6 +472,19 @@ class Content extends Expirable {
     public getContentShareOfUserOneLevel(userID : number) : [number, number]{
         throw ContentNotFetched
     }
+
+    public async purgeListEdits() {
+        for(let amendment of this.amendments) {
+            if (amendment instanceof ListAmendment) {
+                if (!amendment.getValueOfApplied()) {
+                    if(!amendment.getVeto())
+                    {
+                        await amendment.veto()
+                    }
+                }
+            }
+        }
+    }
 }
 
 

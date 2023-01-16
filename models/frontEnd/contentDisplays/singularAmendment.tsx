@@ -29,8 +29,7 @@ const SingularAmendment: FC<args> = (args) => {
     },[args.voteOutputMap])
 
     return (
-        <div>
-            <hr/>
+        <div style={{opacity: row.vetoed? "70%" : "100%"}}>
             <i>{row.creationDate}</i>
             <h1>
                 <button style={{borderRadius: "10px"}} onClick={() => {
@@ -46,7 +45,7 @@ const SingularAmendment: FC<args> = (args) => {
                 {
                     userContext.loggedIn() ?
                         <VotingPanel
-                            applied={row.applied}
+                            applied={row.applied || row.vetoed}
                             cost={row.significance * row.tariff}
                             votingOutput={voteOutput}
                             disableVotes={args.disableVotes}
@@ -145,7 +144,7 @@ const SingularAmendment: FC<args> = (args) => {
                                         </>
                 }
             </div>
-            {row.applied ? "" : <i>This amendment has not been yet applied</i>}
+            {row.applied ? "" : row.vetoed? <i>This amendment has been vetoed</i> : <i>This amendment has not been yet applied</i>}
             <hr/>
         </div>
     )

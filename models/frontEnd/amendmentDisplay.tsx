@@ -12,9 +12,9 @@ const AmendmentDisplay: FC<args> = ({input}) => {
 
     let x = 0;
 
-    const userContext = useContext(UserContext)
-
     const [numberUnapproved, setNumberUnapproved] = useState(0)
+    const [numberVetoed, setNumberVetoed] = useState(0)
+
     const [fetchedVotingData, setFetchedVotingData] = useState<Map<number,VotingSupport> | undefined>(undefined)
 
     const [fetch, {data, loading, error}] = useLazyQuery(gql`
@@ -34,7 +34,7 @@ const AmendmentDisplay: FC<args> = ({input}) => {
     useEffect(() => {
         let array : number[] = new Array();
         input.map((amend) => {
-            if (amend.applied === false && amend.id) {
+            if (amend.applied === false && amend.vetoed===false && amend.id) {
                 array.push(amend.id);
             }
         })
@@ -43,6 +43,13 @@ const AmendmentDisplay: FC<args> = ({input}) => {
             fetch({variables : { amendmentIds : array}})
         }
         setNumberUnapproved(array.length)
+        let array2 : number[] = new Array();
+        input.map((amend) => {
+            if (amend.vetoed === true && amend.id) {
+                array2.push(amend.id);
+            }
+        })
+        setNumberVetoed(array2.length)
     }, [])
 
     useEffect(() => {
@@ -64,7 +71,7 @@ const AmendmentDisplay: FC<args> = ({input}) => {
                 <h3 style={{display: numberUnapproved===0? "none" : "inherit"}}>Amendments that are awaiting approval:</h3>
                 {
                     input.map((row) => {
-                        if (row.applied === false) {
+                        if (row.applied === false && row.vetoed === false) {
                             x += 1;
                             return (
                                 <SingularAmendment row={row} key={x} disableVotes={loading} voteOutputMap={fetchedVotingData}/>
@@ -75,7 +82,18 @@ const AmendmentDisplay: FC<args> = ({input}) => {
                 <h3>Amendments applied:</h3>
                 {
                     input.map((row) => {
-                        if (row.applied === true) {
+                        if (row.applied === true && row.vetoed === false) {
+                            x += 1;
+                            return (
+                                <SingularAmendment row={row} key={x} disableVotes={loading} voteOutputMap={fetchedVotingData}/>
+                            )
+                        }
+                    })
+                }
+                <h3 style={{display: numberVetoed===0? "none" : "inherit"}}>Amendments that have been vetoed:</h3>
+                {
+                    input.map((row) => {
+                        if (row.vetoed === true) {
                             x += 1;
                             return (
                                 <SingularAmendment row={row} key={x} disableVotes={loading} voteOutputMap={fetchedVotingData}/>
