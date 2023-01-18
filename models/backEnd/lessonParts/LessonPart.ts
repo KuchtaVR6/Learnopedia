@@ -2,13 +2,15 @@ import {UnsupportedOperation} from "../tools/Errors";
 import {ParagraphOutput} from "./Paragraph";
 import {Expirable} from "../tools/Expirable";
 import prisma from "../../../prisma/prisma";
+import {QuizQuestionOutput} from "./QuizQuestion";
+import {EmbeddableOutput} from "./Embeddable";
 
 export type displayableOutput = {
     id : number,
     seqNumber : number,
-    output : {
-        __typename: "ParagraphOutput"
-    } & ParagraphOutput
+    output : { __typename: "ParagraphOutput" } & ParagraphOutput |
+        { __typename : "QuizQuestionOutput"} & QuizQuestionOutput |
+        { __typename : "EmbeddableOutput" } & EmbeddableOutput
 }
 
 abstract class LessonPart extends Expirable{

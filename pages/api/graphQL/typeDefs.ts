@@ -47,7 +47,7 @@ export const typeDefs = gql`
         downVotes: Int!
     }
 
-    union unionisedOutput = ParagraphOutput | VideoOutput
+    union unionisedOutput = ParagraphOutput | EmbeddableOutput | QuizQuestionOutput
 
     type displayableOutput{
         id : Int!
@@ -60,8 +60,22 @@ export const typeDefs = gql`
         advancedText : String
     }
 
-    type VideoOutput {
-        url : String
+    type EmbeddableOutput {
+        uri : String!
+        type : String!
+    }
+    
+    type QuizQuestionOutput {
+        question : String!
+        type : String!
+        answer : [Answer!]!
+    }
+    
+    type Answer {
+        answerID : Int!,
+        content : String!,
+        correct : Boolean!,
+        feedback : String
     }
 
     input ParagraphInput {

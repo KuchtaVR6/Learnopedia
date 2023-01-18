@@ -7,7 +7,7 @@ import {useEffect, useState} from "react";
 import styles from "../../../styles/ContentDisplay.module.css";
 import {gql, useMutation} from "@apollo/client";
 import {useRouter} from "next/router";
-import {lessonPartArgs, LessonPartInputs} from "../../../models/backEnd/lessonParts/LessonPartManager";
+import {lessonPartArgs} from "../../../models/backEnd/lessonParts/LessonPartManager";
 import LessonPartForm from "../../../models/frontEnd/editForms/lessonpartForm";
 import {displayableOutput} from "../../../models/backEnd/lessonParts/LessonPart";
 import Head from "next/head";
@@ -68,7 +68,7 @@ const EditLessonPart: NextPage<{
         }
     }, [type])
 
-    const [changes, setChanges] = useState<LessonPartInputs | null>(null);
+    const [changes, setChanges] = useState<lessonPartArgs | null>(null);
     const [seqNumber, setSeqNumber] = useState<number | null>(null)
 
     const [submitMut, output] = useMutation(mutationSpec, {

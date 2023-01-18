@@ -1,13 +1,13 @@
-import {Dispatch, FC, SetStateAction, useState} from "react";
+import {Dispatch, FC, SetStateAction} from "react";
 import {displayableOutput} from "../../backEnd/lessonParts/LessonPart";
-import {LessonPartInputs} from "../../backEnd/lessonParts/LessonPartManager";
+import {lessonPartArgs} from "../../backEnd/lessonParts/LessonPartManager";
 import {InvalidArgument} from "../../backEnd/tools/Errors";
 import ParagraphInput from "../lessonPartsInput/ParagraphInput";
 
 type args = {
     current?: displayableOutput
     others?: displayableOutput[]
-    setChanges: Dispatch<SetStateAction<LessonPartInputs | null>>
+    setChanges: Dispatch<SetStateAction<lessonPartArgs | null>>
     setSeqNumber?: Dispatch<SetStateAction<number | null>>
     seqNumber?: number | null,
     type : string,

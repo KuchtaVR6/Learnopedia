@@ -1032,6 +1032,8 @@ class ContentManager {
             }
         })
 
+        content.addAmendment(amendment)
+
         amendment.setID(parent.ID)
         author.addAmendment(amendment);
 

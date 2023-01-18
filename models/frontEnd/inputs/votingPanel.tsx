@@ -57,10 +57,13 @@ const VotingPanel: FC<args> = (args) => {
         }
     }, [data])
 
+    let multiplier = 1;
+
     useEffect(() => {
         if(args.votingOutput)
         {
             setVotingOutput(args.votingOutput)
+            multiplier = 2**(args.votingOutput.individualSupports.length);
         }
     }, [args.votingOutput])
 
@@ -116,9 +119,10 @@ const VotingPanel: FC<args> = (args) => {
                     {
                         votingOutput.individualSupports.map((supports, key) => {
                             if (supports.max > 0) {
+                                multiplier = multiplier / 2;
                                 return (
                                     <td key={key}>
-                                        <VoteProgressDisplay cost={args.cost}
+                                        <VoteProgressDisplay cost={args.cost*multiplier}
                                                              level={key === 0 ? "Course" : key === 1 ? "Chapter" : "Lesson"}
                                                              currents={supports}/>
                                     </td>

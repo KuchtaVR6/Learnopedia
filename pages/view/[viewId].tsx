@@ -171,8 +171,19 @@ export const fetchquery = gql`
                             basicText
                             advancedText
                         }
-                        ... on VideoOutput {
-                            url
+                        ... on EmbeddableOutput {
+                            uri
+                            type
+                        }
+                        ... on QuizQuestionOutput {
+                            type
+                            question
+                            answer {
+                                answerID
+                                content
+                                correct 
+                                feedback 
+                            }
                         }
                     }
                     id

@@ -2,17 +2,25 @@ import {NotFoundException, UnsupportedOperation} from "../tools/Errors";
 import prisma from "../../../prisma/prisma";
 import LessonPart from "./LessonPart";
 import Paragraph, {ParagraphOutput} from "./Paragraph";
+import {Embeddable, EmbeddableOutput} from "./Embeddable";
+import {QuizQuestion, QuizQuestionOutput} from "./QuizQuestion";
 
 export type lessonPartArgs = {
-    type : lessonPartTypes,
+    type : lessonPartTypes.PARAGRAPH,
     content : ParagraphInput
+} | {
+    type : lessonPartTypes.EMBEDDABLE,
+    content : EmbeddableOutput
+} | {
+    type : lessonPartTypes.QUIZ_QUESTION,
+    content : QuizQuestionOutput
 }
 
 export enum lessonPartTypes {
-    PARAGRAPH
+    PARAGRAPH,
+    EMBEDDABLE,
+    QUIZ_QUESTION
 }
-
-export type LessonPartInputs = ParagraphInput //todo in the future more
 
 export type ParagraphInput = {
     basicText : string,
@@ -48,7 +56,39 @@ class LessonPartManager {
                     }
                 }
             })
-
+            return output.LessonPartID
+        }
+        else if(args.type === lessonPartTypes.EMBEDDABLE) {
+            let output = await prisma.lessonpart.create({
+                data : {
+                    seqNumber : seqNumber,
+                    embeddable: {
+                        create: {
+                            type : args.content.type,
+                            uri : args.content.uri
+                        }
+                    }
+                }
+            })
+            return output.LessonPartID
+        }
+        else if(args.type === lessonPartTypes.QUIZ_QUESTION) {
+            let output = await prisma.lessonpart.create({
+                data : {
+                    seqNumber : seqNumber,
+                    quizquestion: {
+                        create: {
+                            type : args.content.type,
+                            question: args.content.question,
+                            answer : {
+                                createMany : {
+                                    data : args.content.answer
+                                }
+                            }
+                        }
+                    }
+                }
+            })
             return output.LessonPartID
         }
         else{
@@ -67,8 +107,13 @@ class LessonPartManager {
                         basicText: true,
                         advancedText: true
                     }
+                },
+                embeddable: true,
+                quizquestion: {
+                    include : {
+                        answer: true
+                    }
                 }
-                //todo (when other types added) all others
             }
         })
 
@@ -81,8 +126,27 @@ class LessonPartManager {
         {
             return new Paragraph(output.LessonPartID,output.seqNumber,output.paragraph.basicText,output.paragraph.advancedText)
         }
+        else if(output.embeddable)
+        {
+            return new Embeddable(output.LessonPartID,output.seqNumber,output.embeddable.uri,output.embeddable.type)
+        }
+        else if(output.quizquestion)
+        {
+            return new QuizQuestion(
+                output.LessonPartID,
+                output.seqNumber,
+                output.quizquestion.question,
+                output.quizquestion.type,
+                output.quizquestion.answer.map(
+                    (each) =>
+                    {return {
+                        answerID : each.AnswerID,
+                        content : each.content,
+                        feedback : each.feedback? each.feedback : undefined,
+                        correct : each.correct
+                    }}))
+        }
         else{
-            //todo (when other types added)
             throw UnsupportedOperation;
         }
     }

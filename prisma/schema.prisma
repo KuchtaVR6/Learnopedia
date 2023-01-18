@@ -106,12 +106,6 @@ model creationamendment {
   @@index([newParent], map: "FKCreationAm315379")
 }
 
-model figure {
-  LessonPartID Int         @id
-  lessonpart   lessonpart  @relation(fields: [LessonPartID], references: [LessonPartID], onDelete: Cascade, map: "FKFigure783054")
-  subfigure    subfigure[]
-}
-
 model keyword {
   ID              Int               @id @default(autoincrement())
   ContentID       Int?
@@ -163,12 +157,11 @@ model lessonpart {
   seqNumber               Int
   lesson                  lesson?                   @relation(fields: [LessonID], references: [LessonID], onDelete: Cascade, map: "FKLessonPart139108")
   contentlistmod          contentlistmod[]
-  figure                  figure?
+  embeddable              embeddable?
   paragraph               paragraph?
   partaddreplaceamendment partaddreplaceamendment[]
   partamendment           partamendment[]
-  protocolsnippet         protocolsnippet?
-  video                   video?
+  quizquestion            quizquestion?
 
   @@index([LessonID], map: "FKLessonPart139108")
 }
@@ -184,13 +177,6 @@ model metaamendment {
   newName             String?             @db.VarChar(255)
   newDescription      String?             @db.VarChar(255)
   keywordmodamendment keywordmodamendment @relation(fields: [AmendmentID], references: [AmendmentID], onDelete: Cascade, map: "FKMetaAmendm946708")
-}
-
-model paragraph {
-  LessonPartID Int        @id
-  basicText    String     @db.VarChar(1000)
-  advancedText String?    @db.VarChar(1000)
-  lessonpart   lessonpart @relation(fields: [LessonPartID], references: [LessonPartID], onDelete: Cascade, map: "FKParagraph124725")
 }
 
 model partaddreplaceamendment {
@@ -213,13 +199,6 @@ model partamendment {
   @@index([LessonPartID], map: "FKPartAmendm643663")
 }
 
-model protocolsnippet {
-  LessonPartID Int        @id
-  language     String?    @db.VarChar(255)
-  content      String     @db.VarChar(500)
-  lessonpart   lessonpart @relation(fields: [LessonPartID], references: [LessonPartID], onDelete: Cascade, map: "FKProtocolSn123813")
-}
-
 model session {
   UserID       Int
   timestamp    DateTime      @db.DateTime(0)
@@ -232,19 +211,6 @@ model session {
 
   @@id([UserID, timestamp])
   @@index([UserID], map: "FKSession82632")
-}
-
-model subfigure {
-  ID          Int     @id @default(autoincrement())
-  FigureID    Int
-  path        String  @db.VarChar(255)
-  XOffset     Int?
-  YOffset     Int?
-  name        String? @db.VarChar(255)
-  description String? @db.VarChar(500)
-  figure      figure  @relation(fields: [FigureID], references: [LessonPartID], onDelete: Cascade, map: "FKSubfigure449135")
-
-  @@index([FigureID], map: "FKSubfigure449135")
 }
 
 model user {
@@ -261,12 +227,6 @@ model user {
   amendmentopinion amendmentopinion[]
   contentopinion   contentopinion[]
   session          session[]
-}
-
-model video {
-  LessonPartID Int        @id
-  url          String     @db.VarChar(255)
-  lessonpart   lessonpart @relation(fields: [LessonPartID], references: [LessonPartID], onDelete: Cascade, map: "FKVideo763583")
 }
 
 model accesstoken {
@@ -305,4 +265,37 @@ model contentopinion {
   @@id([userID, contentID])
   @@index([userID], map: "FKContentOpinion34263")
   @@index([contentID], map: "FKContentOpinion43242")
+}
+
+model embeddable {
+  LessonPartID Int        @id
+  uri          String     @db.VarChar(255)
+  type         String     @db.VarChar(255)
+  lessonpart   lessonpart @relation(fields: [LessonPartID], references: [LessonPartID], onDelete: Cascade, map: "FKEmbeddable763583")
+}
+
+model paragraph {
+  LessonPartID Int        @id
+  basicText    String     @db.VarChar(1000)
+  advancedText String?    @db.VarChar(1000)
+  lessonpart   lessonpart @relation(fields: [LessonPartID], references: [LessonPartID], onDelete: Cascade, map: "FKParagraph124725")
+}
+
+model answer {
+  AnswerID     Int          @id @default(autoincrement())
+  parentID     Int
+  content      String       @db.VarChar(255)
+  feedback     String?      @db.VarChar(255)
+  correct      Boolean      @db.Bit(1)
+  quizquestion quizquestion @relation(fields: [parentID], references: [LessonPartID], onDelete: Cascade, map: "FKAnswer763583")
+
+  @@index([parentID], map: "FKAnswer763583")
+}
+
+model quizquestion {
+  LessonPartID Int        @id
+  question     String     @db.VarChar(255)
+  type         String     @db.VarChar(255)
+  lessonpart   lessonpart @relation(fields: [LessonPartID], references: [LessonPartID], onDelete: Cascade, map: "FKQuizQuestion763583")
+  answer       answer[]
 }

@@ -18,6 +18,8 @@ import Paragraph from "../lessonParts/Paragraph";
 import PartAddReplaceAmendment from "../amendments/PartAmendments/PartAddReplaceAmendment";
 import LessonPartManager from "../lessonParts/LessonPartManager";
 import ContentManager from "./ContentManager";
+import {Embeddable} from "../lessonParts/Embeddable";
+import {QuizQuestion} from "../lessonParts/QuizQuestion";
 
 class Lesson extends Content {
     private parent: Chapter;
@@ -62,25 +64,45 @@ class Lesson extends Content {
                 LessonID: this.getSpecificID()
             },
             include: {
-                protocolsnippet: true,
+                embeddable: true,
                 paragraph: true,
-                figure: {
-                    include: {
-                        subfigure: true
+                quizquestion: {
+                    include : {
+                        answer : true
                     }
-                },
-                video: true
+                }
             }
         })
 
         result.map((row) => {
             if (row.paragraph) {
                 this.children.set(row.seqNumber, new Paragraph(row.LessonPartID, row.seqNumber, row.paragraph.basicText, row.paragraph.advancedText))
-            } else {
-                //TODO (when more types are added)
+            }
+            else if(row.embeddable)
+            {
+                this.children.set(row.seqNumber, new Embeddable(row.LessonPartID,row.seqNumber,row.embeddable.uri,row.embeddable.type))
+            }
+            else if(row.quizquestion)
+            {
+                this.children.set(row.seqNumber, new QuizQuestion(
+                    row.LessonPartID,
+                    row.seqNumber,
+                    row.quizquestion.question,
+                    row.quizquestion.type,
+                    row.quizquestion.answer.map(
+                        (each) =>
+                        {return {
+                            answerID : each.AnswerID,
+                            content : each.content,
+                            feedback : each.feedback? each.feedback : undefined,
+                            correct : each.correct
+                        }}))
+                )
+            }
+            else {
+                throw UnsupportedOperation;
             }
         })
-
         this.sortChildern()
         this.partsFetched = true;
     }
@@ -283,6 +305,10 @@ class Lesson extends Content {
 
     public async applyPartAddReplaceAmendment(amendment: PartAddReplaceAmendment) {
 
+        if(!this.partsFetched){
+            await this.fetchParts();
+        }
+
         while (!amendment.getOldID() && this.children.has(amendment.getNewSeqNum())) {
             amendment.moveNewSeqNum();
         }
@@ -334,11 +360,17 @@ class Lesson extends Content {
                 }
             }
         } else {
+
+            console.log(this.children)
+
             let newPart = await LessonPartManager.getInstance().retrieve(newPartId)
             if(this.children.has(amendment.getNewSeqNum()))
             {
                 throw new SequenceNumberTaken()
             }
+
+            console.log(amendment.getNewSeqNum())
+
             this.children.set(amendment.getNewSeqNum(), newPart)
 
             await prisma.lessonpart.update({
@@ -349,6 +381,8 @@ class Lesson extends Content {
                     LessonID: this.getSpecificID()
                 }
             })
+
+            console.log(this.children)
         }
 
         this.sortChildern()
