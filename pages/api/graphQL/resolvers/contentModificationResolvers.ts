@@ -3,12 +3,15 @@ import {enforceUser} from "./verificationResolvers";
 import KeywordManager from "../../../../models/backEnd/contents/keywords/KeywordManager";
 import ContentManager from "../../../../models/backEnd/contents/ContentManager";
 import Keyword from "../../../../models/backEnd/contents/keywords/Keyword";
-import {lessonPartTypes} from "../../../../models/backEnd/lessonParts/LessonPartManager";
 import {genericContext} from "../resolvers";
 import {ParagraphOutput} from "../../../../models/backEnd/lessonParts/Paragraph";
 import {AmendmentOpinionValues, VotingSupport} from "../../../../models/backEnd/amendments/Amendment";
 import AmendmentManager from "../../../../models/backEnd/amendments/AmendmentManager";
 import {InvalidArgument} from "../../../../models/backEnd/tools/Errors";
+import {lessonPartArgs, lessonPartTypes} from "../../../../models/backEnd/lessonParts/LessonPartTypes";
+import {ParagraphInput} from "../../../../models/backEnd/lessonParts/LessonPartManager";
+import {EmbeddableOutput} from "../../../../models/backEnd/lessonParts/Embeddable";
+import {QuizQuestion, QuizQuestionInput} from "../../../../models/backEnd/lessonParts/QuizQuestion";
 
 export const contentModificationResolvers = {
     Mutation: {
@@ -62,7 +65,7 @@ export const contentModificationResolvers = {
 
             return {continue: true}
         },
-        createParagraph: async (parent: undefined, args: { targetID: number, seqNumber: number, args: ParagraphOutput }, context: genericContext) => {
+        createParagraph: async (parent: undefined, args: { targetID: number, seqNumber: number, args: ParagraphInput }, context: genericContext) => {
             let thisUser = await enforceUser(context)
 
             await ContentManager.getInstance().createAddReplaceAmendment(thisUser.getID(), args.targetID, args.seqNumber, {
@@ -71,11 +74,49 @@ export const contentModificationResolvers = {
 
             return {continue: true}
         },
-        modToParagraph: async (parent: undefined, args: { targetID: number, seqNumber: number, oldID : number, args: ParagraphOutput }, context: genericContext) => {
+        modToParagraph: async (parent: undefined, args: { targetID: number, seqNumber: number, oldID : number, args: ParagraphInput }, context: genericContext) => {
             let thisUser = await enforceUser(context)
 
             await ContentManager.getInstance().createAddReplaceAmendment(thisUser.getID(), args.targetID, args.seqNumber, {
                 newArgs: {type: lessonPartTypes.PARAGRAPH, content: args.args},
+                oldID : args.oldID
+            })
+
+            return {continue: true}
+        },
+        createEmbeddable: async (parent: undefined, args: { targetID: number, seqNumber: number, args: EmbeddableOutput }, context: genericContext) => {
+            let thisUser = await enforceUser(context)
+
+            await ContentManager.getInstance().createAddReplaceAmendment(thisUser.getID(), args.targetID, args.seqNumber, {
+                newArgs: {type: lessonPartTypes.EMBEDDABLE, content: args.args}
+            })
+
+            return {continue: true}
+        },
+        modToEmbeddable: async (parent: undefined, args: { targetID: number, seqNumber: number, oldID : number, args: EmbeddableOutput }, context: genericContext) => {
+            let thisUser = await enforceUser(context)
+
+            await ContentManager.getInstance().createAddReplaceAmendment(thisUser.getID(), args.targetID, args.seqNumber, {
+                newArgs: {type: lessonPartTypes.EMBEDDABLE, content: args.args},
+                oldID : args.oldID
+            })
+
+            return {continue: true}
+        },
+        createQuizQuestion: async (parent: undefined, args: { targetID: number, seqNumber: number, args: QuizQuestionInput }, context: genericContext) => {
+            let thisUser = await enforceUser(context)
+
+            await ContentManager.getInstance().createAddReplaceAmendment(thisUser.getID(), args.targetID, args.seqNumber, {
+                newArgs: {type: lessonPartTypes.QUIZ_QUESTION, content: args.args}
+            })
+
+            return {continue: true}
+        },
+        modToQuizQuestion: async (parent: undefined, args: { targetID: number, seqNumber: number, oldID : number, args: QuizQuestionInput }, context: genericContext) => {
+            let thisUser = await enforceUser(context)
+
+            await ContentManager.getInstance().createAddReplaceAmendment(thisUser.getID(), args.targetID, args.seqNumber, {
+                newArgs: {type: lessonPartTypes.QUIZ_QUESTION, content: args.args},
                 oldID : args.oldID
             })
 

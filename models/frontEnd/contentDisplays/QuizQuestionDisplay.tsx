@@ -17,8 +17,6 @@ const QuizQuestionDisplay: FC<args> = (input) => {
 
     const select = (answerID: number) => {
 
-        console.log(answerID)
-
         if (answersSelected.indexOf(answerID) >= 0) {
             setAnswerSelected(answersSelected.filter((ans) => {
                 return ans !== answerID

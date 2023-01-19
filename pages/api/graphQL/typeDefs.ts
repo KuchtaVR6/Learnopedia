@@ -11,28 +11,23 @@ export const typeDefs = gql`
         colorA: String!
         colorB: String!
     }
-
     type AuthResponse{
         authorisation : Boolean!
     }
-
     type ContinueResponse{
         continue : Boolean!
     }
-
     type VacancyResponse{
         query : String!
         vacant : Boolean!
     }
-
-    #start of helper types
-
+    
+    # display types
     type keyword{
         ID : Int!,
         Score : Int!,
         word : String!,
     }
-
     type MetaContent {
         id : Int!,
         name : String!,
@@ -46,136 +41,89 @@ export const typeDefs = gql`
         upVotes: Int!,
         downVotes: Int!
     }
-
     union unionisedOutput = ParagraphOutput | EmbeddableOutput | QuizQuestionOutput
-
     type displayableOutput{
         id : Int!
         seqNumber : Int!
         output : unionisedOutput!
     }
-
     type ParagraphOutput {
         basicText : String!,
         advancedText : String
     }
-
     type EmbeddableOutput {
         uri : String!
         type : String!
     }
-    
     type QuizQuestionOutput {
         question : String!
         type : String!
         answer : [Answer!]!
     }
-    
     type Answer {
         answerID : Int!,
         content : String!,
         correct : Boolean!,
         feedback : String
     }
-
-    input ParagraphInput {
-        basicText : String!,
-        advancedText : String
-    }
-
     type ChapterOutput {
         meta: MetaContent!,
         lessons: [MetaContent!]
     }
-
     type CourseOutput {
         meta: MetaContent!,
         chapters: [ChapterOutput!]!
     }
-
-    input MetaAmendmentChanges{
-        newName : String,
-        newDescription : String,
-        addedKeywords : [keywordInput!],
-        deletedKeywordIDs : [Int!]
-    }
-
-    input keywordInput{
-        Score : Int!,
-        word : String!,
-    }
-
     type FullOutput{
         metas: CourseOutput!,
         content: [displayableOutput!]
     }
-
-    input Changes{
-        ChildID: Int,
-        LessonPartID: Int,
-        newSeqNumber: Int,
-        delete: Boolean!
+    type viewOutput{
+        mainMeta : MetaContent,
+        output : FullOutput
     }
-
+    type searchResult{
+        score : Int!,
+        content : MetaContent!
+    }
+    
+    #amendmentsOutput start
     type ChangesOutput{
         ChildID: Int,
         LessonPartID: Int,
         newSeqNumber: Int,
         delete: Boolean
     }
-
-    #end of helper types
-
-    type viewOutput{
-        mainMeta : MetaContent,
-        output : FullOutput
-    }
-
-    type searchResult{
-        score : Int!,
-        content : MetaContent!
-    }
-
-    #amendmentsOutput start
-
     type MetaAmendmentOutput {
         newName : String,
         newDescription : String,
         addedKeywords : [keyword!],
         deletedKeywords : [keyword!]
     }
-
     type ListAmendmentOutput {
         listChanges : [ChangesOutput!]
     }
-
     type CreationAmendmentOutput {
         name : String!,
         description : String!,
         keywords : [keyword!],
         seqNumber : Int!,
     }
-
     type PartAddReplaceAmendmentOutput {
         change : displayableOutput,
         seqNumber : Int!
-        oldID : Int
+        oldID : Int,
+        old : displayableOutput
     }
-
     type AdoptionAmendmentOutput {
         newParent : Int!,
         receiver : Boolean,
     }
-
-    #amendmentsOutput end
-
-    union SpecificAmendmentOutput =
-        MetaAmendmentOutput |
+    union SpecificAmendmentOutput = MetaAmendmentOutput |
         ListAmendmentOutput |
         CreationAmendmentOutput |
         PartAddReplaceAmendmentOutput |
         AdoptionAmendmentOutput
-
     type AmendmentOutput{
         id : Int!,
         creatorNickname : String!,
@@ -187,13 +135,13 @@ export const typeDefs = gql`
         vetoed : Boolean!,
         otherDetails : SpecificAmendmentOutput
     }
-
+    
+    #voting display outputs
     type VotingSupport {
         amendmentID : Int!,
         individualSupports : [LevelSupport]
         userOP: Int
     }
-    
     type LevelSupport {
         negatives : Int!,
         positives : Int!,
@@ -201,13 +149,48 @@ export const typeDefs = gql`
     }
 
     #image types
-
     type ForDeletion{
         file : String
     }
-
     type voteOutput {
         vote : Boolean
+    }
+
+    # content modification types
+    input MetaAmendmentChanges{
+        newName : String,
+        newDescription : String,
+        addedKeywords : [keywordInput!],
+        deletedKeywordIDs : [Int!]
+    }
+    input keywordInput{
+        Score : Int!,
+        word : String!,
+    }
+    input Changes{
+        ChildID: Int,
+        LessonPartID: Int,
+        newSeqNumber: Int,
+        delete: Boolean!
+    }
+
+    # lessonPart modification types
+    input QuizQuestionInput {
+        question : String!
+        type : String!
+        answer : [AnswerInput!]!
+    }
+    input AnswerInput {
+        content : String!,
+        correct : Boolean!,
+        feedback : String
+    }
+    input EmbeddableInput {
+        uri : String!
+    }
+    input ParagraphInput {
+        basicText : String!,
+        advancedText : String
     }
 
     type Query {
@@ -251,6 +234,12 @@ export const typeDefs = gql`
 
         createParagraph(targetID : Int!, seqNumber : Int!, args : ParagraphInput!) : ContinueResponse
         modToParagraph(targetID : Int!, seqNumber : Int!, oldID : Int!, args : ParagraphInput!) : ContinueResponse
+
+        createEmbeddable(targetID : Int!, seqNumber : Int!, args : EmbeddableInput!) : ContinueResponse
+        modToEmbeddable(targetID : Int!, seqNumber : Int!, oldID : Int!, args : EmbeddableInput!) : ContinueResponse
+
+        createQuizQuestion(targetID : Int!, seqNumber : Int!, args : QuizQuestionInput!) : ContinueResponse
+        modToQuizQuestion(targetID : Int!, seqNumber : Int!, oldID : Int!, args : QuizQuestionInput!) : ContinueResponse
 
         listAmendment(targetID : Int!, changes : [Changes!]!) : ContinueResponse
         adoptionAmendment(targetID : Int!, newParent : Int!) : ContinueResponse

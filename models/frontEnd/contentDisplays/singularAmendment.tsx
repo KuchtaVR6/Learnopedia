@@ -125,6 +125,13 @@ const SingularAmendment: FC<args> = (args) => {
                                             <LessonPartDisplay row={row.otherDetails.change}
                                                                key={row.id}
                                                                loggedIn={false}/> : ":("}
+                                        {row.otherDetails.old ?
+                                            <>
+                                                <b>The lesson part {row.applied ? "was" : "is"}: </b>
+                                                <LessonPartDisplay row={row.otherDetails.old} loggedIn={false}
+                                                                   key={row.id}/>
+                                            </> : ""
+                                        }
                                     </>
                                     :
                                     row.otherDetails.__typename === "AdoptionAmendmentOutput" ?

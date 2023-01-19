@@ -12,11 +12,25 @@ export type QuizQuestionOutput = {
     }[]
 }
 
+export type QuizQuestionInput = {
+    question : string,
+    type : string,
+    answer : {
+        content : string,
+        correct : boolean,
+        feedback : string | undefined
+    }[]
+}
+
 export class QuizQuestion extends LessonPart {
 
     private readonly question : string;
     private readonly type : string;
     private readonly answers: Answer[];
+
+    public static checkType(type : string) {
+        return (type === "WrittenQuestion" || type === "SingleChoiceQuestion" || type === "MultipleChoiceQuestion")
+    }
 
     public constructor(id : number, seqNumber : number, question : string, type : string, answers : {answerID : number, content : string, correct: boolean, feedback?: string}[]) {
         super(id, seqNumber);

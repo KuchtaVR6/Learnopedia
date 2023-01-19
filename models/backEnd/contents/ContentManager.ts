@@ -23,10 +23,11 @@ import {keyword} from "@prisma/client";
 import {Course} from "./Course";
 import Chapter from "./Chapter";
 import Lesson from "./Lesson";
-import LessonPartManager, {lessonPartArgs} from "../lessonParts/LessonPartManager";
+import LessonPartManager from "../lessonParts/LessonPartManager";
 import PartAddReplaceAmendment from "../amendments/PartAmendments/PartAddReplaceAmendment";
 import {UserManager} from "../managers/UserManager";
 import AmendmentManager, {prismaInclusions} from "../amendments/AmendmentManager";
+import {lessonPartArgs} from "../lessonParts/LessonPartTypes";
 
 class ContentManager {
     private static instance: ContentManager | null = null;

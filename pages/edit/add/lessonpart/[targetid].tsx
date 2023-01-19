@@ -7,9 +7,9 @@ import {useEffect, useState} from "react";
 import styles from "../../../../styles/ContentDisplay.module.css";
 import {gql, useMutation} from "@apollo/client";
 import {useRouter} from "next/router";
-import {lessonPartArgs} from "../../../../models/backEnd/lessonParts/LessonPartManager";
 import LessonPartForm from "../../../../models/frontEnd/editForms/lessonpartForm";
 import Head from "next/head";
+import {lessonPartArgs} from "../../../../models/backEnd/lessonParts/LessonPartTypes";
 
 const AddLessonPart: NextPage<{
     data: {
@@ -47,7 +47,7 @@ const AddLessonPart: NextPage<{
         variables: {
             targetId: parseInt(router.query.targetid as string),
             seqNumber: seqNumber,
-            args: changes
+            args: changes?.content
         }
     })
 

@@ -1,8 +1,8 @@
 import {Dispatch, FC, SetStateAction} from "react";
 import {displayableOutput} from "../../backEnd/lessonParts/LessonPart";
-import {lessonPartArgs} from "../../backEnd/lessonParts/LessonPartManager";
 import {InvalidArgument} from "../../backEnd/tools/Errors";
 import ParagraphInput from "../lessonPartsInput/ParagraphInput";
+import {lessonPartArgs} from "../../backEnd/lessonParts/LessonPartTypes";
 
 type args = {
     current?: displayableOutput

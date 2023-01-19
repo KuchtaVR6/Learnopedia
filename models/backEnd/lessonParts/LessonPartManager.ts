@@ -1,26 +1,10 @@
-import {NotFoundException, UnsupportedOperation} from "../tools/Errors";
+import {InvalidArgument, NotFoundException, UnsupportedOperation} from "../tools/Errors";
 import prisma from "../../../prisma/prisma";
 import LessonPart from "./LessonPart";
-import Paragraph, {ParagraphOutput} from "./Paragraph";
-import {Embeddable, EmbeddableOutput} from "./Embeddable";
-import {QuizQuestion, QuizQuestionOutput} from "./QuizQuestion";
-
-export type lessonPartArgs = {
-    type : lessonPartTypes.PARAGRAPH,
-    content : ParagraphInput
-} | {
-    type : lessonPartTypes.EMBEDDABLE,
-    content : EmbeddableOutput
-} | {
-    type : lessonPartTypes.QUIZ_QUESTION,
-    content : QuizQuestionOutput
-}
-
-export enum lessonPartTypes {
-    PARAGRAPH,
-    EMBEDDABLE,
-    QUIZ_QUESTION
-}
+import Paragraph from "./Paragraph";
+import {Embeddable} from "./Embeddable";
+import {QuizQuestion} from "./QuizQuestion";
+import {lessonPartArgs, lessonPartTypes} from "./LessonPartTypes";
 
 export type ParagraphInput = {
     basicText : string,
@@ -64,7 +48,7 @@ class LessonPartManager {
                     seqNumber : seqNumber,
                     embeddable: {
                         create: {
-                            type : args.content.type,
+                            type : Embeddable.getType(args.content.uri),
                             uri : args.content.uri
                         }
                     }
@@ -73,23 +57,26 @@ class LessonPartManager {
             return output.LessonPartID
         }
         else if(args.type === lessonPartTypes.QUIZ_QUESTION) {
-            let output = await prisma.lessonpart.create({
-                data : {
-                    seqNumber : seqNumber,
-                    quizquestion: {
-                        create: {
-                            type : args.content.type,
-                            question: args.content.question,
-                            answer : {
-                                createMany : {
-                                    data : args.content.answer
+            if(QuizQuestion.checkType(args.content.type) && args.content.answer.length>0) {
+                let output = await prisma.lessonpart.create({
+                    data: {
+                        seqNumber: seqNumber,
+                        quizquestion: {
+                            create: {
+                                type: args.content.type,
+                                question: args.content.question,
+                                answer: {
+                                    createMany: {
+                                        data: args.content.answer
+                                    }
                                 }
                             }
                         }
                     }
-                }
-            })
-            return output.LessonPartID
+                })
+                return output.LessonPartID
+            }
+            else throw new InvalidArgument("QuizQuestion","The type must be one of the following: WrittenQuestion, SingleChoiceQuestion, MultipleChoiceQuestion & there must be at least one answer")
         }
         else{
             throw UnsupportedOperation;

@@ -9,6 +9,7 @@ export type PartAddReplaceAmendmentOutput = {
     change : displayableOutput | null
     seqNumber : number
     oldID? : number
+    old? : displayableOutput
 }
 
 class PartAddReplaceAmendment extends PartAmendment{
@@ -59,12 +60,31 @@ class PartAddReplaceAmendment extends PartAmendment{
 
     protected async getSpecificOutput() : Promise<SpecificAmendmentOutput> {
         let lessonPartID = super.getLessonPartID()
+        let oldPart : displayableOutput | undefined = undefined;
+        if(this.oldID){
+            try {
+                oldPart = (await LessonPartManager.getInstance().retrieve(this.oldID)).getDisplayable()
+            }
+            catch {
+                oldPart = {
+                    id : -1,
+                    seqNumber: 0,
+                    output : {
+                        __typename : "ParagraphOutput",
+                        basicText : "THIS LESSON PART HAS SINCE BEEN DELETED FROM THE SYSTEM",
+                        advancedText : ""
+                    }
+                }
+            }
+        }
+
         if(lessonPartID) {
             return {
                 __typename: "PartAddReplaceAmendmentOutput",
                 change: (await LessonPartManager.getInstance().retrieve(lessonPartID)).getDisplayable(),
                 seqNumber: this.seqNumber,
-                oldID: this.oldID
+                oldID: this.oldID,
+                old : oldPart
             }
         }
         else {
@@ -72,7 +92,8 @@ class PartAddReplaceAmendment extends PartAmendment{
                 __typename: "PartAddReplaceAmendmentOutput",
                 change: null,
                 seqNumber: this.seqNumber,
-                oldID: this.oldID
+                oldID: this.oldID,
+                old : oldPart
             }
         }
     }

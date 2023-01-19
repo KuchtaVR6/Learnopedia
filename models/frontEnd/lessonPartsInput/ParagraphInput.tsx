@@ -1,7 +1,8 @@
 import {Dispatch, FC, SetStateAction, useEffect, useState} from "react";
-import {lessonPartArgs, lessonPartTypes} from "../../backEnd/lessonParts/LessonPartManager";
+//import {lessonPartArgs, lessonPartTypes} from "../../backEnd/lessonParts/LessonPartManager";
 import {displayableOutput} from "../../backEnd/lessonParts/LessonPart";
 import EvaluatorInput from "../inputs/evaluatorInput";
+import {lessonPartArgs, lessonPartTypes} from "../../backEnd/lessonParts/LessonPartTypes";
 
 type args = {
     setChanges: Dispatch<SetStateAction<lessonPartArgs | null>>,

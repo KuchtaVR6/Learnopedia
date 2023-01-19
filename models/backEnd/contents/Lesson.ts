@@ -361,15 +361,11 @@ class Lesson extends Content {
             }
         } else {
 
-            console.log(this.children)
-
             let newPart = await LessonPartManager.getInstance().retrieve(newPartId)
             if(this.children.has(amendment.getNewSeqNum()))
             {
                 throw new SequenceNumberTaken()
             }
-
-            console.log(amendment.getNewSeqNum())
 
             this.children.set(amendment.getNewSeqNum(), newPart)
 
@@ -381,8 +377,6 @@ class Lesson extends Content {
                     LessonID: this.getSpecificID()
                 }
             })
-
-            console.log(this.children)
         }
 
         this.sortChildern()
