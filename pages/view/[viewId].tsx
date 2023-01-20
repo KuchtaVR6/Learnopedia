@@ -1,10 +1,9 @@
 import {GetServerSidePropsContext, NextPage} from "next";
 import RegularLayout from "../../models/frontEnd/regularLayout";
 import client from "../../apollo-client";
-import {gql, useQuery} from "@apollo/client";
+import {gql} from "@apollo/client";
 import {FullOutput, MetaOutput} from "../../models/backEnd/contents/Content";
 import ContentDisplay from "../../models/frontEnd/contentDisplays/contentDisplay";
-import {useRouter} from "next/router";
 import Head from "next/head";
 
 const View: NextPage<{data : {

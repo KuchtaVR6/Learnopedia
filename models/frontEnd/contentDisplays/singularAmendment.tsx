@@ -26,7 +26,7 @@ const SingularAmendment: FC<args> = (args) => {
 
     useEffect(() => {
         setVOutput(args.voteOutputMap?.get(args.row.id))
-    },[args.voteOutputMap])
+    },[args.voteOutputMap, args.row.id])
 
     return (
         <div style={{opacity: row.vetoed? "70%" : "100%"}}>
@@ -137,7 +137,7 @@ const SingularAmendment: FC<args> = (args) => {
                                     row.otherDetails.__typename === "AdoptionAmendmentOutput" ?
                                         <>
                                             <h3>{row.otherDetails.receiver ? "Was a receiver of an adoption" : "Had be transferred to a different parent"}</h3>
-                                            Newparent id is: <button
+                                            New parent id is: <button
                                             onClick={
                                                 () => {
                                                     router.push(row.otherDetails.__typename === "AdoptionAmendmentOutput" ? `/view/${row.otherDetails.newParent}` : "")

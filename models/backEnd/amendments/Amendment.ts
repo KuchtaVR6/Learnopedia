@@ -230,7 +230,7 @@ class Amendment extends Expirable{
             })
         })
 
-        let cutArray : LevelSupport[] = new Array();
+        let cutArray : LevelSupport[] = [];
 
         finalArray.map((each) => {
             if(each.max>0)
@@ -300,9 +300,9 @@ class Amendment extends Expirable{
                 data: {
                     userID: user.getID(),
                     amendmentID: this.id,
-                    positive: vote===AmendmentOpinionValues.Positive? true : false,
-                    negative: vote===AmendmentOpinionValues.Negative? true : false,
-                    report: vote===AmendmentOpinionValues.Report? true : false,
+                    positive: vote===AmendmentOpinionValues.Positive,
+                    negative: vote===AmendmentOpinionValues.Negative,
+                    report: vote===AmendmentOpinionValues.Report,
                 }
             })
         } else if (ans === 0) {
@@ -313,9 +313,9 @@ class Amendment extends Expirable{
                   userID_amendmentID : {userID: user.getID(), amendmentID : this.id}
                 },
                 data: {
-                    positive: vote===AmendmentOpinionValues.Positive? true : false,
-                    negative: vote===AmendmentOpinionValues.Negative? true : false,
-                    report: vote===AmendmentOpinionValues.Report? true : false,
+                    positive: vote===AmendmentOpinionValues.Positive,
+                    negative: vote===AmendmentOpinionValues.Negative,
+                    report: vote===AmendmentOpinionValues.Report,
                 }
             })
         } else {
@@ -370,7 +370,7 @@ class Amendment extends Expirable{
                 if (required <= thisLevel.negatives) {
                     await this.veto()
                 } else if (required <= thisLevel.positives) {
-                    if(this.applied === false)
+                    if(!this.applied)
                         await this.applyThisAmendment()
                 }
 

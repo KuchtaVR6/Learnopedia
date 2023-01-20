@@ -56,7 +56,7 @@ const ParagraphInput: FC<args> = ({setChanges, current}) => {
                 })
             }
         }
-    }, [basicText, advancedText])
+    }, [basicText, advancedText, current, setChanges])
 
     const conditionBasic = (input: string) => {
         if (input.length < 50) {

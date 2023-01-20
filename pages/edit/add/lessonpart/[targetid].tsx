@@ -57,7 +57,7 @@ const AddLessonPart: NextPage<{
     const [changes, setChanges] = useState<lessonPartArgs | null>(null);
     const [seqNumber, setSeqNumber] = useState<number | null>(null)
 
-    const [submitMut, output] = useMutation(mutationSpec, {
+    const [submitMut] = useMutation(mutationSpec, {
         variables: {
             targetId: parseInt(router.query.targetid as string),
             seqNumber: seqNumber,
@@ -92,6 +92,7 @@ const AddLessonPart: NextPage<{
         return (
             <RegularLayout enforceUser={true} navigation={data.output}>
                 <Head>
+                    <title>Adding LessonParts</title>
                     <meta name={"robots"} content={"noindex, nofollow"}/>
                 </Head>
                 <div className={styles.main}>

@@ -1,4 +1,4 @@
-import {gql, useLazyQuery, useQuery} from "@apollo/client";
+import {gql, useLazyQuery} from "@apollo/client";
 import 'bootstrap/dist/css/bootstrap.css'
 import Navbar from "./navigational/navbar";
 import CourseMenu from "./navigational/courseMenu";
@@ -64,7 +64,7 @@ const RegularLayout: FC<args> = ({children, enforceUser, navigation, noInlineNav
                 }
             });
         }
-    },[])
+    },[fetch, enforceUser, router])
 
     useEffect(() => {
         if(error)
@@ -78,13 +78,13 @@ const RegularLayout: FC<args> = ({children, enforceUser, navigation, noInlineNav
                 window.alert(error.message)
             }
         }
-    },[error])
+    },[enforceUser,router, error])
 
 
     return (
         <UserContext.Provider value={{
             loggedIn: () => {if(!loggedOut) {return !!data} return false;},
-            logout: () => {if(data) {logoutQuery()}; setLoggedOut(true); window.sessionStorage.setItem("loggedIn","false")},
+            logout: () => {if(data) {logoutQuery()} setLoggedOut(true); window.sessionStorage.setItem("loggedIn","false")},
             loading: () => {return loading},
             request: fetch,
             user: () => {return data? data.getUser : undefined}

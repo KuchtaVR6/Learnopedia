@@ -61,7 +61,7 @@ const ImageUploader: FC<args> = ({enforceImage, imageName, fileSizeLimit,hideOpt
             setError("")
         }
         setImage(null)
-    }, [editable])
+    }, [editable, fileSizeLimit])
 
     const [image, setImage] = useState<File | null>(null)
     const [waiting, setWaiting] = useState<boolean>(false)

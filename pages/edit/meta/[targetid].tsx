@@ -56,7 +56,7 @@ const EditChild: NextPage<{
         seqNumber: null,
     });
 
-    const [submitMut, output] = useMutation(mutationSpec, {
+    const [submitMut] = useMutation(mutationSpec, {
         variables: {
             targetId: parseInt(router.query.targetid as string),
             changes: {
@@ -94,11 +94,12 @@ const EditChild: NextPage<{
         } else {
             setValidity(false)
         }
-    }, [changes, calculateKeywords])
+    }, [changes])
 
     return (
         <RegularLayout enforceUser={true} navigation={data.output}>
             <Head>
+                <title>Edit meta</title>
                 <meta name={"robots"} content={"noindex, nofollow"}/>
             </Head>
             <div className={styles.main}>

@@ -1,7 +1,6 @@
 import {genericContext} from "../resolvers";
 import {enforceUser} from "./verificationResolvers";
 import fs from "fs";
-import avatar from "../../upload/avatar";
 
 const deleteFile = (fileToDelete: string | null, folder: string) => {
 
@@ -13,7 +12,7 @@ const deleteFile = (fileToDelete: string | null, folder: string) => {
             }
             catch (e)
             {
-                console.log("FILE DELETION FAILED", finalPath, e)
+                throw new Error ("FILE DELETION FAILED" + finalPath + e)
             }
         }
     }

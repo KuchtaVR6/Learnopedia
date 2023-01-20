@@ -5,7 +5,6 @@ import logo from "../public/images/logo.png";
 import Link from "next/link";
 import VerifyCode from "../models/frontEnd/authentication/verifyCode";
 import {useEffect, useRef, useState} from "react";
-import {useRouter} from "next/router";
 import {gql, useMutation} from "@apollo/client";
 import HCaptcha from "@hcaptcha/react-hcaptcha";
 import Head from "next/head";
@@ -23,8 +22,6 @@ const Forgot: NextPage = () => {
 
     const [message, setMessage] = useState("");
 
-    const router = useRouter()
-
     useEffect(() => {
         if ((email.indexOf("@") >= email.length - 1 || email.indexOf("@") < 0) || !captchaToken) {
             setAllValid(false)
@@ -41,7 +38,7 @@ const Forgot: NextPage = () => {
         }
     `
 
-    const [sendEmail, {loading, error, data}] = useMutation(forgot, {
+    const [sendEmail] = useMutation(forgot, {
         variables: {
             email: email,
             captchaToken: captchaToken
@@ -50,7 +47,7 @@ const Forgot: NextPage = () => {
 
     const reg = () => {
         if (allValid) {
-            sendEmail().then((e) => {
+            sendEmail().then(() => {
                 setVisibility(true)
                 setMessage("")
             }).catch(() => {
@@ -105,7 +102,7 @@ const Forgot: NextPage = () => {
 
                     <br/>
 
-                    <button disabled={!allValid} onClick={(e) => {
+                    <button disabled={!allValid} onClick={() => {
                         reg()
                     }}>Reset {allValid ? "✔" : ""}</button>
                     <br/>
@@ -122,4 +119,4 @@ const Forgot: NextPage = () => {
     )
 }
 
-export default Forgot
+export default Forgot;

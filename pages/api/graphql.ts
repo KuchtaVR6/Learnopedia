@@ -14,9 +14,6 @@ const SessionRegistryInstance = SessionRegistry.getInstance()
 const UserManagerInstance = UserManager.getInstance()
 const ContentManagerInstance = ContentManager.getInstance()
 
-UserManagerInstance.validateNickname("")
-ContentManagerInstance.getRecommendations()
-
 export const resolveUser = async (cookie : string | undefined, agent : string | undefined | null) => {
     if(cookie && agent)
     {
@@ -34,7 +31,7 @@ const server = new ApolloServer({
     resolvers,
     plugins: [httpHeadersPlugin],
 
-    context: async ({ req, res }) => ({
+    context: async ({ req }) => ({
         user: await resolveUser(req.cookies["accessToken"],req.headers['user-agent']),
         agent: req.headers['user-agent'],
         refreshToken: req.cookies["refreshToken"],

@@ -204,6 +204,7 @@ const ModList: NextPage<{
     return (
         <RegularLayout enforceUser={true} navigation={data.output}>
             <Head>
+                <title>Edit list</title>
                 <meta name={"robots"} content={"noindex, nofollow"}/>
             </Head>
             <div className={styles.main}>

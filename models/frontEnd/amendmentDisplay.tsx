@@ -1,8 +1,7 @@
 import {AmendmentOutput, VotingSupport} from "../backEnd/amendments/Amendment";
-import {FC, useContext, useEffect, useState} from "react";
+import {FC, useEffect, useState} from "react";
 import SingularAmendment from "./contentDisplays/singularAmendment";
-import {gql, useLazyQuery, useQuery} from "@apollo/client";
-import {UserContext} from "./authentication/userContext";
+import {gql, useLazyQuery} from "@apollo/client";
 
 type args = {
     input: AmendmentOutput[]
@@ -17,7 +16,7 @@ const AmendmentDisplay: FC<args> = ({input}) => {
 
     const [fetchedVotingData, setFetchedVotingData] = useState<Map<number,VotingSupport> | undefined>(undefined)
 
-    const [fetch, {data, loading, error}] = useLazyQuery(gql`
+    const [fetch, {data, loading}] = useLazyQuery(gql`
         query CheckAmendmentVotes($amendmentIds: [Int!]!) {
             checkAmendmentVotes(amendmentIds: $amendmentIds) {
                 individualSupports {
@@ -32,9 +31,9 @@ const AmendmentDisplay: FC<args> = ({input}) => {
     `)
 
     useEffect(() => {
-        let array : number[] = new Array();
+        let array : number[] = [];
         input.map((amend) => {
-            if (amend.applied === false && amend.vetoed===false && amend.id) {
+            if (!amend.applied && !amend.vetoed && amend.id) {
                 array.push(amend.id);
             }
         })
@@ -43,14 +42,14 @@ const AmendmentDisplay: FC<args> = ({input}) => {
             fetch({variables : { amendmentIds : array}})
         }
         setNumberUnapproved(array.length)
-        let array2 : number[] = new Array();
+        let array2 : number[] = [];
         input.map((amend) => {
-            if (amend.vetoed === true && amend.id) {
+            if (amend.vetoed && amend.id) {
                 array2.push(amend.id);
             }
         })
         setNumberVetoed(array2.length)
-    }, [])
+    }, [fetch,input])
 
     useEffect(() => {
         if(data) {
@@ -71,7 +70,7 @@ const AmendmentDisplay: FC<args> = ({input}) => {
                 <h3 style={{display: numberUnapproved===0? "none" : "inherit"}}>Amendments that are awaiting approval:</h3>
                 {
                     input.map((row) => {
-                        if (row.applied === false && row.vetoed === false) {
+                        if (!row.applied && !row.vetoed) {
                             x += 1;
                             return (
                                 <SingularAmendment row={row} key={x} disableVotes={loading} voteOutputMap={fetchedVotingData}/>
@@ -82,7 +81,7 @@ const AmendmentDisplay: FC<args> = ({input}) => {
                 <h3>Amendments applied:</h3>
                 {
                     input.map((row) => {
-                        if (row.applied === true && row.vetoed === false) {
+                        if (row.applied && !row.vetoed) {
                             x += 1;
                             return (
                                 <SingularAmendment row={row} key={x} disableVotes={loading} voteOutputMap={fetchedVotingData}/>
@@ -93,7 +92,7 @@ const AmendmentDisplay: FC<args> = ({input}) => {
                 <h3 style={{display: numberVetoed===0? "none" : "inherit"}}>Amendments that have been vetoed:</h3>
                 {
                     input.map((row) => {
-                        if (row.vetoed === true) {
+                        if (row.vetoed) {
                             x += 1;
                             return (
                                 <SingularAmendment row={row} key={x} disableVotes={loading} voteOutputMap={fetchedVotingData}/>

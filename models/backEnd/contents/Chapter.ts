@@ -9,7 +9,6 @@ import AdoptionAmendment from "../amendments/AdoptionAmendment";
 import prisma from "../../../prisma/prisma";
 import ListAmendment from "../amendments/ListAmendment";
 import ContentManager from "./ContentManager";
-import {User} from "../User";
 
 export type ChapterOutput = {
     meta : MetaOutput,

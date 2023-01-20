@@ -74,7 +74,7 @@ const AddKeyword : FC<args> = ({setAddedKeywords, addedKeywords, keywords}) => {
             <h2>Add Keywords:</h2>
             <label>Word: &nbsp;</label><EvaluatorInput condition={keywordEvaluator} setInput={setCKI} placeholder={"word"} type={"text"} clear={clearInput}/>
             <label>Score: &nbsp;</label><EvaluatorInput condition={keywordScoreEvaluator} setInput={setCSI} placeholder={"score"} type={"number"} clear={clearInput}/>
-            <button onClick={() => {setAddedKeywords([...addedKeywords, {Score : parseInt(currentScoreInput), word : currentKeywordInput}]); setClearInput(!clearInput)}} disabled={currentScoreInput && currentKeywordInput? false : true}><BsFillPlusSquareFill/> Add Keyword</button>
+            <button onClick={() => {setAddedKeywords([...addedKeywords, {Score : parseInt(currentScoreInput), word : currentKeywordInput}]); setClearInput(!clearInput)}} disabled={!(currentScoreInput && currentKeywordInput)}><BsFillPlusSquareFill/> Add Keyword</button>
         </div>
     )
 }

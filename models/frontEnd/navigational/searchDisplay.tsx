@@ -1,7 +1,5 @@
 import {FC} from "react";
-import {FullOutput, MetaOutput} from "../../backEnd/contents/Content";
-import {displayableOutput} from "../../backEnd/lessonParts/LessonPart";
-import NavigationTile from "./navigationTile";
+import {MetaOutput} from "../../backEnd/contents/Content";
 import KeywordDisplay from "../keywordCompoments/keywordDisplay";
 import {useRouter} from "next/router";
 import styles from "../../../styles/ContentDisplay.module.css";
@@ -32,7 +30,7 @@ const SearchDisplay: FC<args> = ({array, query}) => {
             }
 
             {
-                array.map(({score, content}) => {
+                array.map(({content}) => {
                     keyCounter += 1;
                     return (
                         <div key={keyCounter}>

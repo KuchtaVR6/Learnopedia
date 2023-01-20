@@ -1,4 +1,4 @@
-import {FC, useEffect} from "react";
+import {FC} from "react";
 import styles from "../../../styles/RegPage.module.css";
 import {FullOutput, MetaOutput} from "../../backEnd/contents/Content";
 import NavigationTile from "./navigationTile";
@@ -25,7 +25,7 @@ const CourseMenu: FC<{ navigation?: FullOutput, inline?: boolean }> = ({navigati
             }
         }`
 
-    const {loading, error, data} = useQuery(recommendationQuery);
+    const {data} = useQuery(recommendationQuery);
 
     let keyCounter = 0;
 

@@ -129,7 +129,7 @@ export const verificationResolvers = {
                         initialToken = context.initialToken
                     }
 
-                    MailManager.getInstance().unverifiedRequest(ActionType.FORGOT_PASSWORD, async () => {
+                    await MailManager.getInstance().unverifiedRequest(ActionType.FORGOT_PASSWORD, async () => {
                         return user
                     }, user.getFName(), user.getLName(), args.email, user.getNickname(), initialToken)
                 } else {

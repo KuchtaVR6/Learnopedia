@@ -118,7 +118,7 @@
 .navbarMain .searchBar input{
     width: 15em;
     font-size: 0.7em;
-    margin-right: 0em;
+    margin-right: 0;
     padding-right: 1.5em;
     margin-bottom: 0.3em;
     border-radius: 5px;
@@ -174,7 +174,7 @@
     font-weight: bold;
     width: fit-content;
     text-align: left;
-    padding: 0em 1em !important;
+    padding: 0 1em !important;
     border: none;
     border-radius: 3px;
     background: none;

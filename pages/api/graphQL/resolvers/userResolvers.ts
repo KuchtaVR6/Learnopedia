@@ -67,7 +67,7 @@ export const userResolvers = {
                                 initialToken = context.initialToken
                             }
 
-                            MailManager.getInstance().unverifiedRequest(ActionType.REGISTER, async () => {
+                            await MailManager.getInstance().unverifiedRequest(ActionType.REGISTER, async () => {
                                 return await UserManager.getInstance().addUser(args.nickname, args.email, args.fname, args.lname, args.password);
                             }, args.fname, args.lname, args.email, args.nickname, initialToken);
 
@@ -116,8 +116,8 @@ export const userResolvers = {
                             args: { email: string },
                             context: { user: User, agent: string, refreshToken: string, response: any, setCookies: any, setHeaders: any }) => {
             let thisUser = await enforceUser(context)
-            MailManager.getInstance().verificationRequest(ActionType.CHANGE_EMAIL, async () => {
-                thisUser.setEmail(args.email);
+            await MailManager.getInstance().verificationRequest(ActionType.CHANGE_EMAIL, async () => {
+                await thisUser.setEmail(args.email);
                 return thisUser;
             }, thisUser)
             return {
@@ -129,8 +129,8 @@ export const userResolvers = {
                                args: { password: string },
                                context: { user: User, agent: string, refreshToken: string, response: any, setCookies: any, setHeaders: any }) => {
             let thisUser = await enforceUser(context)
-            MailManager.getInstance().verificationRequest(ActionType.CHANGE_PASSWORD, async () => {
-                thisUser.setPassword(args.password);
+            await MailManager.getInstance().verificationRequest(ActionType.CHANGE_PASSWORD, async () => {
+                await thisUser.setPassword(args.password);
                 return thisUser;
             }, thisUser)
             return {
@@ -142,9 +142,9 @@ export const userResolvers = {
                            args: { password: string },
                            context: { user: User, agent: string, refreshToken: string, response: any, setCookies: any, setHeaders: any }) => {
             let thisUser = await enforceUser(context)
-            MailManager.getInstance().verificationRequest(ActionType.DELETE_ACCOUNT, async () => {
-                UserManager.getInstance().deleteUser(thisUser);
-                (await SessionRegistry.getInstance()).removeSession(context.refreshToken);
+            await MailManager.getInstance().verificationRequest(ActionType.DELETE_ACCOUNT, async () => {
+                await UserManager.getInstance().deleteUser(thisUser);
+                await (await SessionRegistry.getInstance()).removeSession(context.refreshToken);
                 return thisUser
             }, thisUser)
             return {

@@ -1,10 +1,9 @@
-import {FC, useContext, useEffect, useState} from "react";
+import {FC, useContext, useState} from "react";
 import styles from "../../../styles/RegPage.module.css";
 import Link from "next/link";
 import {TbSearch} from "react-icons/tb";
 import {GiFlexibleLamp} from "react-icons/gi";
 import {UserContext} from "../authentication/userContext";
-import {gql, useLazyQuery} from "@apollo/client";
 import {useRouter} from "next/router";
 
 const Navbar: FC = () => {

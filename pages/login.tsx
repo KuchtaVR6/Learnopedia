@@ -9,15 +9,6 @@ import logo from "../public/images/logo.png";
 import {useRouter} from "next/router";
 import Head from "next/head";
 
-
-export const accessTokenRequest = gql`
-    mutation Mutation{
-        requestAccessToken {
-            authorisation
-        }
-    }
-`
-
 const Login: NextPage = () => {
 
     const [identifier, setIdentifier] = useState("");

@@ -2,8 +2,7 @@ import RegularLayout from "../../../models/frontEnd/regularLayout";
 import {GetServerSidePropsContext, NextPage} from "next";
 import client from "../../../apollo-client";
 import {fetchquery} from "../../view/[viewId]";
-import {ContentType, FullOutput, MetaOutput} from "../../../models/backEnd/contents/Content";
-import MetaForm from "../../../models/frontEnd/editForms/metaForm";
+import {FullOutput, MetaOutput} from "../../../models/backEnd/contents/Content";
 import {useEffect, useState} from "react";
 import styles from "../../../styles/ContentDisplay.module.css";
 import {gql, useMutation} from "@apollo/client";
@@ -111,6 +110,7 @@ const Adopt: NextPage<{
         return (
             <RegularLayout enforceUser={true} navigation={data.output}>
                 <Head>
+                    <title>Adoption</title>
                     <meta name={"robots"} content={"noindex, nofollow"}/>
                 </Head>
                 <div className={styles.main}>
@@ -148,6 +148,7 @@ const Adopt: NextPage<{
         return (
             <RegularLayout enforceUser={false} navigation={data.output}>
                 <Head>
+                    <title>Error</title>
                     <meta name={"robots"} content={"noindex, nofollow"}/>
                 </Head>
                 <p>It is not possible to adopt a Course as it has no Parent.</p>

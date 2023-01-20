@@ -45,7 +45,7 @@ const EmbeddableInput: FC<args> = (props) => {
         else {
             props.setChanges(null)
         }
-    },[input,type])
+    },[input,type,props])
 
     return <>
         <p>

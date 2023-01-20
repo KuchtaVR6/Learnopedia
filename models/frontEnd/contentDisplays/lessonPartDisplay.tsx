@@ -12,19 +12,6 @@ type args = {
 }
 
 const LessonPartDisplay: FC<args> = ({row, loggedIn, id}) => {
-    const findLinks = (input : string) => {
-        if(input.indexOf("https://")>=0 && input.indexOf("|")>=0) {
-            let x = input.split("|");
-            let final = x.map((part, key) => {
-                if(part.indexOf("https://")>=0 && key<x.length-1) {
-                    return <a href={part}>{x[key+1]}</a>
-                }
-                return part
-            })
-            return final.join("");
-        }
-        return input
-    }
 
     return (
         <div key={row.id} className={styles.lessonPart} style={{width: "100%", wordBreak: "break-all"}}>
@@ -69,7 +56,7 @@ const LessonPartDisplay: FC<args> = ({row, loggedIn, id}) => {
 
                             :
 
-                    <b></b>
+                    <></>
             }
 
             <br/>

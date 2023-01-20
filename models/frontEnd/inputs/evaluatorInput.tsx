@@ -1,4 +1,4 @@
-import {Dispatch, FC, SetStateAction, useEffect, useRef, useState} from "react";
+import {Dispatch, FC, SetStateAction, useEffect, useState} from "react";
 
 type args = {
     condition : (input : string) => void
@@ -25,7 +25,7 @@ const EvaluatorInput : FC<args> = ({condition, setInput, width, type, placeholde
             setInput("")
             setDisplayedValue("")
         }
-    },[clear])
+    },[clear, setInput])
 
     if(!textarea) {
         return (

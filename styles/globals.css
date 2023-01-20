@@ -91,7 +91,7 @@ body{
     animation-name: showingShadow;
     animation-duration: 0.2s;
 
-    box-shadow: 5px 5px 2px 0px;
+    box-shadow: 5px 5px 2px 0;
 }
 
 .buttonNice:disabled{
@@ -99,13 +99,13 @@ body{
 }
 
 @keyframes hidingShadow {
-    0% {box-shadow: 5px 5px 2px 0px;}
+    0% {box-shadow: 5px 5px 2px 0;}
     100% {box-shadow: 0 0 0 0;}
 }
 
 @keyframes showingShadow {
     0% {box-shadow: 0 0 0 0;}
-    100% {box-shadow: 5px 5px 2px 0px;}
+    100% {box-shadow: 5px 5px 2px 0;}
 }
 
 .buttonNice:hover {

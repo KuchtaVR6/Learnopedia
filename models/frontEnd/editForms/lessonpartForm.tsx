@@ -49,9 +49,9 @@ const LessonPartForm: FC<args> =
                             let targetValue = prevSeqNumber + ((nav.seqNumber - prevSeqNumber) / 2);
                             let x = (
                                 <div key={nav.seqNumber}>
-                                    <button onClick={(e) => {
+                                    <button onClick={() => {
                                         setSeqNumber!(targetValue)
-                                    }} disabled={targetValue === seqNumber ? true : false}>Insert Here |
+                                    }} disabled={targetValue === seqNumber}>Insert Here |
                                         SQNo: <i>{targetValue}</i>
                                     </button>
                                     <br/>
@@ -66,7 +66,7 @@ const LessonPartForm: FC<args> =
                     {others ?
                         <button onClick={() => {
                             setSeqNumber!(prevSeqNumber + 32)
-                        }} disabled={(prevSeqNumber + 32) === seqNumber ? true : false}>Insert Here |
+                        }} disabled={(prevSeqNumber + 32) === seqNumber}>Insert Here |
                             SQNo: <i>{prevSeqNumber + 32}</i>
                         </button>
                         :

@@ -130,7 +130,7 @@ class AmendmentManager {
         this.cache.set(amendment.getID(), amendment);
     }
 
-    private stringToContentType(input: string): ContentType {
+    private static stringToContentType(input: string): ContentType {
         if (input === "LESSON") {
             return ContentType.LESSON
         } else if (input === "CHAPTER") {
@@ -180,7 +180,7 @@ class AmendmentManager {
                             description: input.keywordmodamendment.creationamendment.newDescription,
                             keywords: x,
                             seqNumber: input.keywordmodamendment.creationamendment.seqNumber,
-                            type: this.stringToContentType(input.keywordmodamendment.creationamendment.type),
+                            type: AmendmentManager.stringToContentType(input.keywordmodamendment.creationamendment.type),
                             parentID: input.keywordmodamendment.creationamendment.newParent ? input.keywordmodamendment.creationamendment.newParent : undefined
                         },
                         {

@@ -38,7 +38,7 @@ const Register: NextPage = () => {
         }
     `
 
-    const [sendEmail, {loading, error, data}] = useMutation(addUser, {
+    const [sendEmail] = useMutation(addUser, {
         variables: {
             nickname: nickname,
             email: email,

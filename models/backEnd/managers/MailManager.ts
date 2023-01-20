@@ -36,8 +36,6 @@ export default class MailManager {
     }
 
     private static async send(email: string, html: string, text: string) {
-
-        /*
         // create reusable transporter object using the default SMTP transport
         let transporter = nodemailer.createTransport({
             host: process.env["EMAIL_HOST"],
@@ -51,7 +49,7 @@ export default class MailManager {
         });
 
         // send mail with defined transport object
-        let info = await transporter.sendMail({
+        await transporter.sendMail({
             from: 'learnopediaTesting@gmail.com', // sender address
             to: email, // list of receivers
             subject: "Verification Code", // Subject line
@@ -68,7 +66,6 @@ export default class MailManager {
                     cid: 'logo'
                 }],
         });
-         */
 
         // Message sent: <b658f8ca-6296-ccf4-8306-87d57a0b4321@example.com>
 
@@ -76,9 +73,7 @@ export default class MailManager {
     }
 
     private static generateCode(): number {
-        let x = Math.floor(Math.random() * 89999 + 10000)
-        console.log(x)
-        return x
+        return Math.floor(Math.random() * 89999 + 10000)
     }
 
     public async unverifiedRequest(action: ActionType, actionDefinition: (() => Promise<User>), fname: string, lname: string, emailAddress: string, nickname: string, token: string) {

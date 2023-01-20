@@ -6,7 +6,6 @@ import prisma from "../../prisma/prisma";
 import Amendment, {
     AmendmentOpinionValues,
     AmendmentOutput,
-    SpecificAmendmentOutput,
     VotingSupport
 } from "./amendments/Amendment";
 import ContentManager from "./contents/ContentManager";
@@ -75,6 +74,12 @@ export class User extends Expirable {
      * @param fname         - user's fname
      * @param lname         - user's lname
      * @param password      - password MUST BE ALREADY ENCRYPTED
+     * @param amendments    - amendments associated with the user
+     * @param opinions      - map of associated opinions (upvote, downVote)
+     * @param votes         - map of associated votes
+     * @param avatarPath    - the path to the avatar
+     * @param colorA        - color on the left side of the banner on the profile page
+     * @param colorB        - color on the right side of the banner on the profile page
      */
     public constructor
         (id: number,
@@ -114,7 +119,7 @@ export class User extends Expirable {
      */
     public checkOpinion(contentId : number) : number {
         const fetched = this.opinions.get(contentId);
-        if(fetched===true || fetched===false)
+        if(fetched || !fetched)
         {
             return Number(fetched)
         }

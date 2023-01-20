@@ -764,7 +764,7 @@ class ContentManager {
                 case ContentType.LESSON:
                     throw new LessonCannotBeParent()
             }
-            while(parent.checkSeqNumberVacant(seqNumber)!){
+            if(parent.checkSeqNumberVacant(seqNumber)!){
                 throw SequenceNumberTaken;
             }
         }

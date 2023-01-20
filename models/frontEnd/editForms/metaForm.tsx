@@ -5,7 +5,6 @@ import {AiFillDelete} from "react-icons/ai";
 import AddKeyword from "../keywordCompoments/addKeyword";
 import EvaluatorInput from "../inputs/evaluatorInput";
 import {MetaChanges} from "../../../pages/edit/add/[targetid]";
-import {element} from "prop-types";
 
 type args = {
     type: number,
@@ -49,7 +48,7 @@ const MetaForm: FC<args> = ({type, main, parentTitle, navigation, setOutput}) =>
                 seqNumber: null
             })
         }
-    }, [title, description, seqNumber, addedKeywords, deletedKeywords])
+    }, [title, description, seqNumber, addedKeywords, deletedKeywords, main, setOutput])
 
     const titleEvaluator = (input: string) => {
         if (input.length > 80) {
@@ -88,7 +87,7 @@ const MetaForm: FC<args> = ({type, main, parentTitle, navigation, setOutput}) =>
                 if (index < 0) {
                     return <button
                         onClick={
-                            (e) => {
+                            () => {
                                 setRemoveKeywords([...deletedKeywords, keyword.ID])
                             }}
                         key={keyword.ID}
@@ -102,7 +101,7 @@ const MetaForm: FC<args> = ({type, main, parentTitle, navigation, setOutput}) =>
                         style = {{textDecoration: "line-through",opacity: "80%"}}
                         className={styles.keyword}
                         onClick={
-                            (e) =>
+                            () =>
                             {
                                 setRemoveKeywords([...deletedKeywords.filter((element) => {
                                     return element !== keyword.ID;
@@ -119,12 +118,9 @@ const MetaForm: FC<args> = ({type, main, parentTitle, navigation, setOutput}) =>
                 addedKeywords.map((keyword, key) => {
                     return <button
                         onClick={
-                            (e) => {
+                            () => {
                                 setAddedKeywords(addedKeywords.filter(((valueMap, index) => {
-                                    if (index == key) {
-                                        return false;
-                                    }
-                                    return true
+                                    return index != key;
                                 })))
                             }}
                         key={key}
@@ -143,9 +139,9 @@ const MetaForm: FC<args> = ({type, main, parentTitle, navigation, setOutput}) =>
                     let targetValue = prevSeqNumber + ((nav.seqNumber - prevSeqNumber) / 2);
                     let x = (
                         <div key={nav.seqNumber}>
-                            <button onClick={(e) => {
+                            <button onClick={() => {
                                 setSeqNumber(targetValue)
-                            }} disabled={targetValue === seqNumber ? true : false}>Insert Here |
+                            }} disabled={targetValue === seqNumber}>Insert Here |
                                 SQNo: <i>{targetValue}</i>
                             </button>
                             <br/>
@@ -161,7 +157,7 @@ const MetaForm: FC<args> = ({type, main, parentTitle, navigation, setOutput}) =>
             {type !== 0 ?
                 <button onClick={() => {
                     setSeqNumber(prevSeqNumber + 32)
-                }} disabled={(prevSeqNumber + 32) === seqNumber ? true : false}>Insert Here |
+                }} disabled={(prevSeqNumber + 32) === seqNumber}>Insert Here |
                     SQNo: <i>{prevSeqNumber + 32}</i>
                 </button>
                 : ""}

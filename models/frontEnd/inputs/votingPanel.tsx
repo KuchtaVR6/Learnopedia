@@ -33,7 +33,7 @@ const VotingPanel: FC<args> = (args) => {
         }
     `
 
-    const [sendVote, {data, loading, error}] = useMutation(votingMutation)
+    const [sendVote, {data, loading}] = useMutation(votingMutation)
 
     const sendFetch = (val: number) => {
         sendVote({
@@ -71,7 +71,7 @@ const VotingPanel: FC<args> = (args) => {
         <table style={{float: "right"}} className={styles.votesTable}>
             <tbody>
             <tr>
-                {args.applied === false ?
+                {!args.applied ?
                     <>
                         <td>
                             <button
@@ -114,7 +114,7 @@ const VotingPanel: FC<args> = (args) => {
                     </button>
                 </td>
             </tr>
-            {args.applied === false && votingOutput ?
+            {!args.applied && votingOutput ?
                 <tr>
                     {
                         votingOutput.individualSupports.map((supports, key) => {

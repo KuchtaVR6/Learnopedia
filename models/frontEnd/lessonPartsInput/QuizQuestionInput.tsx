@@ -65,7 +65,7 @@ const QuizQuestionInput: FC<args> = (props) => {
             }
         }
         ,
-        [question, type, answers])
+        [question, type, answers, answersChanged, props])
 
     return (
         <div>

@@ -17,7 +17,7 @@ export class SessionRegistry extends Purgeable {
         this.accessTokens = new Map<String, AccessToken>();
     }
 
-    private async DBload() {
+    private async DBLoad() {
         let dbFetch = await prisma.session.findMany(
             {
                 include : {
@@ -43,7 +43,7 @@ export class SessionRegistry extends Purgeable {
     public static async getInstance() {
         if (this.instance === null) {
             this.instance = new SessionRegistry();
-            await this.instance.DBload();
+            await this.instance.DBLoad();
         }
         return this.instance;
     }
@@ -65,7 +65,7 @@ export class SessionRegistry extends Purgeable {
         let newSession =  new Session(user, agent)
         this.sessions.set(x, newSession)
 
-        const dump = await prisma.session.createMany({
+        await prisma.session.create({
             data : {
                 timestamp : newSession.getTimestamp(),
                 UserID: user.getID(),
@@ -224,7 +224,6 @@ class Session extends Expirable {
 
     public async destroy() {
         this.invalidated = true;
-        console.log("destroyed",this.user.getID())
         await prisma.session.delete(
             {
                 where : {
@@ -237,10 +236,8 @@ class Session extends Expirable {
     public async getNewAccessToken(): Promise<AccessToken> {
         let x = new AccessToken(this, SessionRegistry.generateToken(16))
 
-        console.log("requestedNew",this.user.getID())
-
         if(this.user?.getID() && !this.invalidated && this.checkValidity()) {
-            let dump = await prisma.accesstoken.create({
+            await prisma.accesstoken.create({
                 data: {
                     sequence: this.accessTokens.size,
                     token: x.getToken(),

@@ -2,7 +2,6 @@ import {FC} from "react";
 import {MetaOutput} from "../../backEnd/contents/Content";
 import Link from "next/link";
 import styles from '../../../styles/RegPage.module.css'
-import {useRouter} from "next/router";
 
 type args = {
     meta: MetaOutput
@@ -10,7 +9,6 @@ type args = {
 }
 
 const NavigationTile: FC<args> = ({meta, treatEqually}) => {
-    let router = useRouter();
 
     return (
         <div className={treatEqually || meta.type==1? styles.addPadding : meta.type==2? styles.addExtraPadding : ""}>

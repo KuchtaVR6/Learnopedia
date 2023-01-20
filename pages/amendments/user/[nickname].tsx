@@ -1,13 +1,11 @@
 import {GetServerSidePropsContext, NextPage} from "next";
 import RegularLayout from "../../../models/frontEnd/regularLayout";
 import client from "../../../apollo-client";
-import {gql, useQuery} from "@apollo/client";
+import {gql} from "@apollo/client";
 import {AmendmentOutput} from "../../../models/backEnd/amendments/Amendment";
 import AmendmentDisplay from "../../../models/frontEnd/amendmentDisplay";
 
 const UsersAmendments: NextPage<{ data: AmendmentOutput[] }> = ({data}) => {
-
-    let x = 0;
 
     if (data) {
         return (

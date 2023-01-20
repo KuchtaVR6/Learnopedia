@@ -94,7 +94,7 @@ const ComplexActions: FC<args> = ({data}) => {
         {
             window.alert("You are logged in. Proceed to changing your password.")
         }
-    },[])
+    },[router.query])
 
     return (
         <div className={styles.zone}>

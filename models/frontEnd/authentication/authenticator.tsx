@@ -1,4 +1,4 @@
-import {FC, useCallback, useEffect, useRef} from "react";
+import {FC, useEffect, useRef} from "react";
 import {DocumentNode, gql, useMutation} from "@apollo/client";
 import {useRouter} from "next/router";
 
@@ -59,7 +59,7 @@ const Authenticator: FC<AuthenticatorArgs> = ({
     function trigger() {
         //calls the mainRequest with variables decoded from the map.
         mainRequest({variables: args})
-            .catch((e) => {
+            .catch(() => {
                 if (onErrorTrigger) {
                     onErrorTrigger()
                 }

@@ -1,4 +1,4 @@
-import {FC, useRef, useState} from "react";
+import {FC, useState} from "react";
 import {QuizQuestionOutput} from "../../backEnd/lessonParts/QuizQuestion";
 import {RxCheck, RxCross1} from "react-icons/rx";
 
@@ -68,7 +68,7 @@ const QuizQuestionDisplay: FC<args> = (input) => {
             finalFeedback = (selected[0].feedback || "") + ".\n"
         }
 
-        let op = "";
+        let op;
 
         if(score===0) {
             op = "Incorrect 😔"

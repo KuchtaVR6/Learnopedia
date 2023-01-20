@@ -1,7 +1,6 @@
 import '../styles/globals.css'
 import type {AppProps} from 'next/app'
-import {ApolloClient, ApolloProvider, gql, InMemoryCache, useQuery} from "@apollo/client";
-import {UserContext} from "../models/frontEnd/authentication/userContext";
+import {ApolloClient, ApolloProvider, InMemoryCache} from "@apollo/client";
 import Head from "next/head";
 
 export const client = new ApolloClient({

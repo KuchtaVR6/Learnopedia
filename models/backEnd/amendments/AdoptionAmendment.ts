@@ -40,10 +40,6 @@ class AdoptionAmendment extends Amendment{
         this.receivingAmendmentID = id;
     }
 
-    public getReceivingAmendmentID() {
-        return this.receivingAmendmentID;
-    }
-
     public async getApplied()
     {
         if(!this.receivingAmendmentID)

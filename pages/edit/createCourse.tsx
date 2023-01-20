@@ -1,7 +1,6 @@
 import {useEffect, useState} from "react";
 import styles from "../../styles/ContentDisplay.module.css";
 import {gql, useMutation} from "@apollo/client";
-import {useRouter} from "next/router";
 import {NextPage} from "next";
 import RegularLayout from "../../models/frontEnd/regularLayout";
 import MetaForm from "../../models/frontEnd/editForms/metaForm";
@@ -24,8 +23,6 @@ const CreateCourse: NextPage = () => {
             }
         }`
 
-    const router = useRouter();
-
     const [changes, setChanges] = useState<MetaChanges>({
         title: null,
         description: null,
@@ -34,7 +31,7 @@ const CreateCourse: NextPage = () => {
         seqNumber: null,
     });
 
-    const [submitMut, output] = useMutation(mutationSpec, {
+    const [submitMut] = useMutation(mutationSpec, {
         variables: {
             name: changes.title,
             description: changes.description,
@@ -70,6 +67,7 @@ const CreateCourse: NextPage = () => {
     return (
         <RegularLayout enforceUser={true}>
             <Head>
+                <title>Create Course</title>
                 <meta name={"robots"} content={"noindex, nofollow"}/>
             </Head>
             <div className={styles.main}>

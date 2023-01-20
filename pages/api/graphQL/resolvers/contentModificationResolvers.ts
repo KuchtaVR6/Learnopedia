@@ -4,14 +4,13 @@ import KeywordManager from "../../../../models/backEnd/contents/keywords/Keyword
 import ContentManager from "../../../../models/backEnd/contents/ContentManager";
 import Keyword from "../../../../models/backEnd/contents/keywords/Keyword";
 import {genericContext} from "../resolvers";
-import {ParagraphOutput} from "../../../../models/backEnd/lessonParts/Paragraph";
 import {AmendmentOpinionValues, VotingSupport} from "../../../../models/backEnd/amendments/Amendment";
 import AmendmentManager from "../../../../models/backEnd/amendments/AmendmentManager";
 import {InvalidArgument} from "../../../../models/backEnd/tools/Errors";
-import {lessonPartArgs, lessonPartTypes} from "../../../../models/backEnd/lessonParts/LessonPartTypes";
+import {lessonPartTypes} from "../../../../models/backEnd/lessonParts/LessonPartTypes";
 import {ParagraphInput} from "../../../../models/backEnd/lessonParts/LessonPartManager";
 import {EmbeddableOutput} from "../../../../models/backEnd/lessonParts/Embeddable";
-import {QuizQuestion, QuizQuestionInput} from "../../../../models/backEnd/lessonParts/QuizQuestion";
+import {QuizQuestionInput} from "../../../../models/backEnd/lessonParts/QuizQuestion";
 
 export const contentModificationResolvers = {
     Mutation: {

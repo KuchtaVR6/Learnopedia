@@ -4,12 +4,11 @@ import client from "../../../apollo-client";
 import {fetchquery} from "../../view/[viewId]";
 import {FullOutput, MetaOutput} from "../../../models/backEnd/contents/Content";
 import MetaForm from "../../../models/frontEnd/editForms/metaForm";
-import {useContext, useEffect, useState} from "react";
+import {useEffect, useState} from "react";
 import styles from "../../../styles/ContentDisplay.module.css";
 import {gql, useMutation} from "@apollo/client";
 import {useRouter} from "next/router";
 import Head from "next/head";
-import {UserContext} from "../../../models/frontEnd/authentication/userContext";
 
 export type MetaChanges = {
     title: string | null,
@@ -57,7 +56,7 @@ const AddChild: NextPage<{
         seqNumber: null,
     });
 
-    const [submitMut, output] = useMutation(mutationSpec, {
+    const [submitMut] = useMutation(mutationSpec, {
         variables : {
             name : changes.title,
             description : changes.description,
@@ -95,6 +94,7 @@ const AddChild: NextPage<{
         return (
             <RegularLayout enforceUser={true} navigation={data.output}>
                 <Head>
+                    <title>Add Content</title>
                     <meta name={"robots"} content={"noindex, nofollow"}/>
                 </Head>
                 <div className={styles.main}>

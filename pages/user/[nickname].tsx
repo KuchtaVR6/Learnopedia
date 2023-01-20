@@ -1,8 +1,6 @@
 import {GetServerSidePropsContext, NextPage} from "next";
 import RegularLayout from "../../models/frontEnd/regularLayout";
 import styles from "../../styles/Profile.module.css";
-import Image from "next/image";
-import defaultImage from "../../public/images/defProfile.png";
 import SimpleDetails from "../../models/frontEnd/profileComponents/simpleDetails";
 import {gql} from "@apollo/client";
 import XpBar from "../../models/frontEnd/profileComponents/xpBar";
@@ -37,6 +35,7 @@ const UserView: NextPage<args> = ({data}) => {
     return (
         <RegularLayout enforceUser={false} noInlineNav={true}>
             <Head>
+                <title>Search results</title>
                 <meta name={"robots"} content={"noindex, nofollow"}/>
             </Head>
             <div>

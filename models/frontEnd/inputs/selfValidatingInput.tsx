@@ -22,7 +22,7 @@ const SelfValidatingInput: FC<Args> = ({setProp, query, type, disable, placehold
 
     const [inputState, setInputState] = useState(OSIStates.INSUFFICIENT_LETTERS)
 
-    const [validateInner, {loading, error, data}] = useLazyQuery(query);
+    const [validateInner, {data}] = useLazyQuery(query);
     const prevChecks = useRef(new Map<String, boolean>);
     const prevSend = useRef<string>("")
 
@@ -185,7 +185,7 @@ const SelfValidatingInput: FC<Args> = ({setProp, query, type, disable, placehold
                 break;
 
         }
-    },[inputState])
+    },[inputState, type])
 
     let verMax = useRef(0);
 

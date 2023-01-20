@@ -44,25 +44,21 @@ export class UserManager {
     }
 
     public async validateEmail(email: string) {
-        let x = !(await this.userStore.emailTaken(email))
-        return x
+        return !(await this.userStore.emailTaken(email))
     }
 
     //difference is that it allows reserved emails
     public async validateEmailRes(email: string) {
-        let x = !(await this.userStore.emailTaken(email,true))
-        return x
+        return !(await this.userStore.emailTaken(email, true))
     }
 
     public async validateNickname(nickname: string) {
-        let x = !(await this.userStore.nicknameTaken(nickname))
-        return x
+        return !(await this.userStore.nicknameTaken(nickname))
     }
 
     //difference is that it allows reserved emails
     public async validateNicknameRes(nickname: string) {
-        let x = !(await this.userStore.nicknameTaken(nickname, true))
-        return x
+        return !(await this.userStore.nicknameTaken(nickname, true))
     }
 
     public async updateUserNonIdentifier(email: string, fname: string, lname: string, passHash: string, avatarPath : string | null) {
@@ -112,7 +108,7 @@ class UserStore {
 
     private readonly idMap : SelfPurgingMap<number, User>;
 
-    private DBread : Promise<boolean> | null;
+    private readonly DBread : Promise<boolean> | null;
 
     public constructor() {
         this.mainMap = new SelfPurgingMap<String, User>();
@@ -230,8 +226,6 @@ class UserStore {
             }
         })
 
-        let amendArray : Amendment[] = [];
-
         if (dbUser) {
             let amendArray : Amendment[] = await AmendmentManager.getInstance().insertManyToCache(dbUser.amendment);
 
@@ -341,8 +335,7 @@ class UserStore {
                     let result = this.takenMap.get(nickname)
                     return result === undefined;
                 }
-                let x = this.takenMap.has(nickname)
-                return x
+                return this.takenMap.has(nickname)
             }
         }
         return true

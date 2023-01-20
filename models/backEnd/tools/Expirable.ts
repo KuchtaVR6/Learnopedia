@@ -18,8 +18,7 @@ export class Expirable{
     }
 
     public checkValidity() : boolean {
-        let outcome =  new Date().getTime() < this.expiryTime()
-        return outcome
+        return new Date().getTime() < this.expiryTime()
     }
 
     private expiryTime() : number {

@@ -306,7 +306,7 @@ class Content extends Expirable {
         return this.dateModified.getFullYear() + "." + Content.twoDigit(this.dateModified.getMonth() + 1) + "." + Content.twoDigit(this.dateModified.getDate())
     }
 
-    public async getMeta(user? : User): Promise<MetaOutput> {
+    public async getMeta(): Promise<MetaOutput> {
         let outputKeywords: { ID: number, Score: number, word: string }[] = [];
         this.keywords.map((keyword) => {
             outputKeywords.push({ID: keyword.getID(), Score: keyword.getScore(), word: keyword.getWord()})

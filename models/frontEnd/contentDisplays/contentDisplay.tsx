@@ -8,7 +8,7 @@ import {UserContext} from "../authentication/userContext";
 import EditButton from "../inputs/editButton";
 import LessonPartDisplay from "./lessonPartDisplay";
 import {BiDownvote, BiUpvote} from "react-icons/bi";
-import {gql, useLazyQuery, useMutation, useQuery} from "@apollo/client";
+import {gql, useMutation, useQuery} from "@apollo/client";
 
 type args = {
     meta: MetaOutput,
@@ -49,7 +49,7 @@ const ContentDisplay: FC<args> = ({meta, contents}) => {
 
         if(voteVal === positive)
         {
-            if(voteVal === true)
+            if(voteVal)
             {
                 setAdjustUp(adjustUp - 1)
             }
@@ -59,14 +59,14 @@ const ContentDisplay: FC<args> = ({meta, contents}) => {
             setVoteValue(null)
         }
         else{
-            if(voteVal === true)
+            if(voteVal)
             {
                 setAdjustUp(adjustUp - 1)
             }
             else if(voteVal === false){
                 setAdjustDown(adjustDown - 1)
             }
-            if(positive == true)
+            if(positive)
             {
                 setAdjustUp(adjustUp + 1)
             }
@@ -97,7 +97,7 @@ const ContentDisplay: FC<args> = ({meta, contents}) => {
             if(voteVal===null)
                 if(queryVote.data.countMyView.vote===true || queryVote.data.countMyView.vote === false)
                     setVoteValue(queryVote.data.countMyView.vote)
-    },[queryVote])
+    },[queryVote, voteVal])
 
     return (
         <div className={styles.main}>

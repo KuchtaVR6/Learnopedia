@@ -134,6 +134,6 @@ export class LegacyAmendment extends Error{
 
 export class UserRobot extends Error{
     public constructor() {
-        super("Hcaptcha verification failed");
+        super("hCaptcha verification failed");
     }
 }

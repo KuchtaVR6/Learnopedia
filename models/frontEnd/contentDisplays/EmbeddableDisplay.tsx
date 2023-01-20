@@ -11,7 +11,7 @@ const EmbeddableDisplay : FC<args> = (input) => {
         <>
             {
                 input.type==="Youtube"?
-                    <iframe src={`${input.uri}`} allowFullScreen className={styles.video}></iframe>
+                    <iframe src={`${input.uri}`} allowFullScreen className={styles.video}/>
                     :
                     input.type==="GithubGist"?
                         <div className={styles.gist}>
@@ -21,7 +21,7 @@ const EmbeddableDisplay : FC<args> = (input) => {
                         :
                         input.type==="ExternalImage"?
                             <div className={styles.image}>
-                                <img src={`${input.uri}`}/>
+                                <img src={`${input.uri}`} alt={`External image from `+ input.uri}/>
                             </div>
                                 :
                                 <>

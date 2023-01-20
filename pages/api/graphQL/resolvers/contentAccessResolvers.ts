@@ -1,7 +1,7 @@
 import KeywordManager from "../../../../models/backEnd/contents/keywords/KeywordManager";
 import {genericContext} from "../resolvers";
 import ContentManager from "../../../../models/backEnd/contents/ContentManager";
-import Content, {FullOutput, LDNJSON, MetaOutput} from "../../../../models/backEnd/contents/Content";
+import {FullOutput, MetaOutput} from "../../../../models/backEnd/contents/Content";
 import {AmendmentOutput, VotingSupport} from "../../../../models/backEnd/amendments/Amendment";
 import {User} from "../../../../models/backEnd/User";
 import {UserManager} from "../../../../models/backEnd/managers/UserManager";
@@ -12,10 +12,7 @@ export const contentAccessResolvers = {
         search: async (parent: undefined, args: { query: string }, context: genericContext): Promise<{ score: number, content: MetaOutput }[]> => {
             let manager = await KeywordManager.getInstance()
 
-            if (context.user)
-                return await manager.resolveSearch(args.query.toLowerCase(), context.user)
-            else
-                return await manager.resolveSearch(args.query.toLowerCase())
+            return await manager.resolveSearch(args.query.toLowerCase())
         },
 
         countMyView: async (parent: undefined, args: { id: number, loggedIn : boolean }, context: genericContext) => {

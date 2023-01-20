@@ -47,7 +47,6 @@ class LessonPartManager {
             if(uri.startsWith("https://www.youtube.com/watch?v="))
                 uri = "https://www.youtube.com/embed/" + uri.split("=")[1]
             else if(uri.startsWith("https://gist.github.com/")) {
-                console.log(uri.split("/"))
                 uri = uri.split("/")[4]
             }
             let output = await prisma.lessonpart.create({
