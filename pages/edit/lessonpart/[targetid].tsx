@@ -36,6 +36,7 @@ const EditLessonPart: NextPage<{
 
     const [extracted, setExtracted] = useState<displayableOutput | null>(null)
 
+    // extracts the child
     useEffect(() => {
         const extractRelevant = () => {
             let x: displayableOutput | undefined;
@@ -45,10 +46,10 @@ const EditLessonPart: NextPage<{
                     x = child
                 }
             })
-
             if (x) {
                 setSeqNumber(x.seqNumber)
                 setExtracted(x)
+                setType(x.output.__typename==="ParagraphOutput"? "PARAGRAPH" : x.output.__typename==="EmbeddableOutput"? "Embeddable" : "QuizQuestion")
             } else {
                 throw new Error(parseInt(router.query.child as string) + "child is not a part of this lesson")
             }
@@ -62,6 +63,20 @@ const EditLessonPart: NextPage<{
             setMutationSpec(gql`
                 mutation ModToParagraph($targetId: Int!, $seqNumber: Int!, $oldId: Int!, $args: ParagraphInput!) {
                     modToParagraph(targetID: $targetId, seqNumber: $seqNumber, oldID: $oldId, args: $args) {
+                        continue
+                    }
+                }`)
+        } if (type === "Embeddable") {
+            setMutationSpec(gql`
+                mutation Mutation($targetId: Int!, $seqNumber: Int!, $oldId: Int!, $args: EmbeddableInput!) {
+                    modToEmbeddable(targetID: $targetId, seqNumber: $seqNumber, oldID: $oldId, args: $args) {
+                        continue
+                    }
+                }`)
+        } if (type === "QuizQuestion") {
+            setMutationSpec(gql`
+                mutation ModToQuizQuestion($targetId: Int!, $seqNumber: Int!, $oldId: Int!, $args: QuizQuestionInput!) {
+                    modToQuizQuestion(targetID: $targetId, seqNumber: $seqNumber, oldID: $oldId, args: $args) {
                         continue
                     }
                 }`)
@@ -114,6 +129,7 @@ const EditLessonPart: NextPage<{
                         <LessonPartForm
                             setChanges={setChanges}
                             type={type}
+                            disableSetType={true}
                             setType={setType}
                             seqNumber={seqNumber}
                             current={extracted}

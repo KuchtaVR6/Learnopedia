@@ -16,9 +16,9 @@ export class Embeddable extends LessonPart {
     private readonly type: string;
 
     public static getType(uri : string) {
-        if(uri.startsWith("https://www.youtube.com/embed/"))
+        if(uri.startsWith("https://www.youtube.com/watch?v=") && uri.split("=").length===2)
             return "Youtube"
-        if(uri.startsWith("gist/"))
+        if(uri.startsWith("https://gist.github.com/") && uri.split("/").length===5)
             return "GithubGist"
         let split = uri.split(".")
         let extension = split[split.length-1]
@@ -34,7 +34,7 @@ export class Embeddable extends LessonPart {
 
         this.type = type;
 
-        this.uri = uri;
+        this.uri = uri
     }
 
     public getDisplayable(): displayableOutput {
@@ -44,7 +44,7 @@ export class Embeddable extends LessonPart {
             output:
                 {
                     __typename: "EmbeddableOutput",
-                    uri : this.type === "GithubGist"? this.uri.slice(5) : this.uri,
+                    uri : this.uri,
                     type : this.type
             }
         }

@@ -98,16 +98,19 @@
 }
 
 .video{
-    width: 100%;
+    margin-top: 5px;
+    width: 99.5%;
     height: 25em;
 }
 
 .image{
     width: 100%;
+    max-width: 100%;
     max-height: 35em;
     display: flex;
 }
 
 .image img{
+    max-width: 100%;
     margin: 0 auto;
 }

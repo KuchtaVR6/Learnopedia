@@ -50,7 +50,7 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
 }
 
 const query = gql`
-    query GetUsersAmendments($getUsersAmendmentsId: String!) {
+    query getUsersAmendments($getUsersAmendmentsId: String!) {
         getUsersAmendments(nickname: $getUsersAmendmentsId) {
             otherDetails {
                 ... on MetaAmendmentOutput {
@@ -96,13 +96,49 @@ const query = gql`
                                 advancedText
 
                             }
-                            ... on VideoOutput {
-                                url
+                            ... on EmbeddableOutput {
+                                type
+                                uri
+                            }
+                            ... on QuizQuestionOutput {
+                                type
+                                question
+                                answer {
+                                    answerID
+                                    feedback
+                                    correct
+                                    content
+                                }
                             }
                         }
                     }
                     seqNumber
                     oldID
+                    old {
+                        id
+                        seqNumber
+                        output {
+                            ... on ParagraphOutput {
+                                basicText
+                                advancedText
+
+                            }
+                            ... on EmbeddableOutput {
+                                type
+                                uri
+                            }
+                            ... on QuizQuestionOutput {
+                                type
+                                question
+                                answer {
+                                    answerID
+                                    feedback
+                                    correct
+                                    content
+                                }
+                            }
+                        }
+                    }
                 }
                 ... on AdoptionAmendmentOutput {
                     newParent

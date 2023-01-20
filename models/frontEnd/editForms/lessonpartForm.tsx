@@ -3,10 +3,13 @@ import {displayableOutput} from "../../backEnd/lessonParts/LessonPart";
 import {InvalidArgument} from "../../backEnd/tools/Errors";
 import ParagraphInput from "../lessonPartsInput/ParagraphInput";
 import {lessonPartArgs} from "../../backEnd/lessonParts/LessonPartTypes";
+import QuizQuestionInput from "../lessonPartsInput/QuizQuestionInput";
+import EmbeddableInput from "../lessonPartsInput/EmbeddableInput";
 
 type args = {
     current?: displayableOutput
-    others?: displayableOutput[]
+    others?: displayableOutput[],
+    disableSetType? : boolean,
     setChanges: Dispatch<SetStateAction<lessonPartArgs | null>>
     setSeqNumber?: Dispatch<SetStateAction<number | null>>
     seqNumber?: number | null,
@@ -23,7 +26,8 @@ const LessonPartForm: FC<args> =
             setSeqNumber,
             seqNumber,
             type,
-            setType
+            setType,
+            disableSetType
         }
         ) => {
 
@@ -71,13 +75,18 @@ const LessonPartForm: FC<args> =
                 </>
             }
             <hr/>
-            <p>Select type:</p>
-            <button onClick={() => {setType("PARAGRAPH")}} disabled={type==="PARAGRAPH"}>Paragraph</button> More coming soon!
+            <p>{disableSetType? "" : "Select type"}</p>
+            <button onClick={() => {setType("PARAGRAPH")}} disabled={type==="PARAGRAPH" || disableSetType}>Paragraph</button>
+            <button onClick={() => {setType("Embeddable")}} disabled={type==="Embeddable" || disableSetType}>Embeddable</button>
+            <button onClick={() => {setType("QuizQuestion")}} disabled={type==="QuizQuestion" || disableSetType}>QuizQuestion</button>
             <hr/>
             {type==="PARAGRAPH"?
                 <ParagraphInput setChanges={setChanges} current={current}/>
                 :
-                "Coming soon"
+                type==="QuizQuestion"?
+                <QuizQuestionInput setChanges={setChanges} current={current}/>
+                :
+                    <EmbeddableInput setChanges={setChanges} current={current}/>
             }
         </>
     )

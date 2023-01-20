@@ -6,6 +6,7 @@ import styles from "../../../styles/ContentDisplay.module.css"
 type args = EmbeddableOutput
 
 const EmbeddableDisplay : FC<args> = (input) => {
+
     return (
         <>
             {

@@ -43,13 +43,20 @@ class LessonPartManager {
             return output.LessonPartID
         }
         else if(args.type === lessonPartTypes.EMBEDDABLE) {
+            let uri = args.content.uri
+            if(uri.startsWith("https://www.youtube.com/watch?v="))
+                uri = "https://www.youtube.com/embed/" + uri.split("=")[1]
+            else if(uri.startsWith("https://gist.github.com/")) {
+                console.log(uri.split("/"))
+                uri = uri.split("/")[4]
+            }
             let output = await prisma.lessonpart.create({
                 data : {
                     seqNumber : seqNumber,
                     embeddable: {
                         create: {
                             type : Embeddable.getType(args.content.uri),
-                            uri : args.content.uri
+                            uri : uri
                         }
                     }
                 }

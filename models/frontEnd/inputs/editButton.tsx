@@ -6,16 +6,17 @@ import {useRouter} from "next/router";
 type args = {
     loggedIn : boolean,
     label : string,
-    path : string
+    path : string,
+    removeText? : boolean,
 }
 
-const EditButton: FC<args> = ({loggedIn, label, path}) => {
+const EditButton: FC<args> = ({loggedIn, label, path, removeText}) => {
     const router = useRouter()
 
     return (
         <div style={{float : "right"}}>
             <button className={styles.modifyButton+" buttonNice"} disabled={!loggedIn} onClick={() =>{if(loggedIn){router.push(path)} else {router.push("/login")}}}>
-                <AiTwotoneEdit/> {loggedIn? label : "Log in to edit"}
+                <AiTwotoneEdit/> {removeText? "" : loggedIn? label : "Log in to edit"}
             </button>
         </div>
 

@@ -37,6 +37,20 @@ const AddLessonPart: NextPage<{
                         continue
                     }
                 }`)
+        } if (type === "Embeddable") {
+            setMutationSpec(gql`
+                mutation CreateEmbeddable($targetId: Int!, $seqNumber: Int!, $args: EmbeddableInput!) {
+                    createEmbeddable(targetID: $targetId, seqNumber: $seqNumber, args: $args) {
+                        continue
+                    }
+                }`)
+        } if (type === "QuizQuestion") {
+            setMutationSpec(gql`
+                mutation CreateQuizQuestion($targetId: Int!, $seqNumber: Int!, $args: QuizQuestionInput!) {
+                    createQuizQuestion(targetID: $targetId, seqNumber: $seqNumber, args: $args) {
+                        continue
+                    }
+                }`)
         }
     }, [type])
 

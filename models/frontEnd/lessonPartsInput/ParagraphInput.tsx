@@ -64,13 +64,13 @@ const ParagraphInput: FC<args> = ({setChanges, current}) => {
         }
 
         if (input.length > 1000) {
-            throw new Error("Your text is too long 📏 (max 1000 chars)")
+            throw new Error("Your text is too long 📏 (max 1000 chars), please split it into multiple paragraphs.")
         }
     }
 
     const conditionAdvanced = (input: string) => {
-        if (input.length < 50 && input.length !== 0) {
-            throw new Error("Your text is too short 📏 (min 50 chars)")
+        if (input.length < 5 && input.length !== 0) {
+            throw new Error("Your text is too short 📏 (min 5 chars)")
         }
 
         if (input.length > 1000) {
@@ -86,7 +86,7 @@ const ParagraphInput: FC<args> = ({setChanges, current}) => {
             <EvaluatorInput condition={conditionBasic} setInput={setBasicText} textarea={{rows: 12, columns: 100}}
                             value={basicText}/>
             <p>
-                Advanced Text:
+                Heading Text:
             </p>
             <EvaluatorInput condition={conditionAdvanced} setInput={setAdvText} textarea={{rows: 12, columns: 100}}
                             value={advancedText}/>
