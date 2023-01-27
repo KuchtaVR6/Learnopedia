@@ -171,7 +171,6 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
 
         const data = (await res.data).view
 
-
         // Pass data to the page via props
         return {props: {data}}
     }

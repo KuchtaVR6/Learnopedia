@@ -15,6 +15,7 @@ type args = {
 const ImageUploader: FC<args> = ({enforceImage, imageName, fileSizeLimit,hideOptions}) => {
 
     const [error, setError] = useState<string>("")
+    const [imageSRC, setISRC] = useState("")
     const [editable, setEditable] = useState<boolean>(false)
     const inputRef = useRef<HTMLInputElement>(null) as MutableRefObject<HTMLInputElement>;
 
@@ -43,6 +44,7 @@ const ImageUploader: FC<args> = ({enforceImage, imageName, fileSizeLimit,hideOpt
                         return;
                     }
                 }
+                setISRC(URL.createObjectURL(theFile));
                 setError("Press Save Changes to upload 👍")
                 setImage(theFile)
             }
@@ -111,13 +113,12 @@ const ImageUploader: FC<args> = ({enforceImage, imageName, fileSizeLimit,hideOpt
                     <div style={{display: "flex", flexDirection: "row"}}>
                         {imageName ? <label>{imageName}:&nbsp;</label> : ""}
                         <div>
-                            <input ref={inputRef} type="file" id="avatar" name="filename" onChange={(e) => {
+                            <input ref={inputRef} accept="image/*" type="file" id="avatar" name="filename" onChange={(e) => {
                                 handler(e.target)
                             }} disabled={!editable}/>
                             <div className={styles.waring}>{error}</div><br/>
                         </div>
-
-
+                        <img src={imageSRC} width={100} />
                     </div>
                 </div>
 

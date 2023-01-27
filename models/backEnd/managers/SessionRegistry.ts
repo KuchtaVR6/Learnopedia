@@ -20,20 +20,20 @@ export class SessionRegistry extends Purgeable {
     private async DBLoad() {
         let dbFetch = await prisma.session.findMany(
             {
-                include : {
-                    accesstoken : true
+                include: {
+                    accesstoken: true
                 }
             }
         )
 
         let userManagerInstance = await UserManager.getInstance()
 
-        for(let row of dbFetch) {
-            let thisSession = new Session(await userManagerInstance.getUserID(row.UserID),row.agent, row.timestamp, row.TTL)
+        for (let row of dbFetch) {
+            let thisSession = new Session(await userManagerInstance.getUserID(row.UserID), row.agent, row.timestamp, row.TTL)
 
-            for(let token of row.accesstoken) {
+            for (let token of row.accesstoken) {
                 let newAccessToken = new AccessToken(thisSession, token.token, token.timestamp, token.TTL)
-                this.accessTokens.set(newAccessToken.getToken(),newAccessToken)
+                this.accessTokens.set(newAccessToken.getToken(), newAccessToken)
                 thisSession.insertAccessToken(newAccessToken, token.sequence);
             }
             this.sessions.set(row.refreshToken, thisSession)
@@ -62,18 +62,18 @@ export class SessionRegistry extends Purgeable {
         await super.notify()
 
         let x = SessionRegistry.generateToken(16)
-        let newSession =  new Session(user, agent)
+        let newSession = new Session(user, agent)
         this.sessions.set(x, newSession)
 
-        await prisma.session.create({
-            data : {
-                timestamp : newSession.getTimestamp(),
+        await prisma.session.createMany({
+            data: [{
                 UserID: user.getID(),
-                invalidated: false,
+                agent: agent,
                 TTL: newSession.getTTL(),
                 refreshToken: x,
-                agent: agent
-            }
+                invalidated: false,
+                timestamp: newSession.getTimestamp()
+            }]
         })
 
         return x
@@ -92,12 +92,10 @@ export class SessionRegistry extends Purgeable {
 
                     this.accessTokens.set(token, newToken)
                     return token;
-                }
-                else {
+                } else {
                     await x.destroy()
                 }
-            }
-            else {
+            } else {
                 await x.destroy()
             }
         }
@@ -110,14 +108,11 @@ export class SessionRegistry extends Purgeable {
         if (x) {
             if (await x.informParent(agent)) {
                 let result = x.checkValidity()
-                if (!result)
-                {
-                    if(!x.getSession().checkValidity())
-                    {
+                if (!result) {
+                    if (!x.getSession().checkValidity()) {
                         await this.purgeAccessTokens(x.getSession())
-                        this.sessions.forEach((row,rf) => {
-                            if(row === x!.getSession())
-                            {
+                        this.sessions.forEach((row, rf) => {
+                            if (row === x!.getSession()) {
                                 this.sessions.delete(rf)
                             }
                         })
@@ -134,8 +129,7 @@ export class SessionRegistry extends Purgeable {
     //overwrite from Purgeable
     protected async purgeAsync() {
         //for all sessions
-        for(let key of Array.from(this.sessions.keys()))
-        {
+        for (let key of Array.from(this.sessions.keys())) {
             let value = this.sessions.get(key)!
             //if expired
             if (!value.checkValidity()) {
@@ -192,12 +186,10 @@ class Session extends Expirable {
     private accessTokens: Map<AccessToken, number>;
     private readonly userAgent: string;
 
-    public constructor(user: User, agent: string, timestamp? : Date, TTL? : number) {
-        if(TTL)
-        {
+    public constructor(user: User, agent: string, timestamp?: Date, TTL?: number) {
+        if (TTL) {
             super(TTL, timestamp)
-        }
-        else{
+        } else {
             super(36000) // 10 hours
         }
         this.user = user;
@@ -226,8 +218,8 @@ class Session extends Expirable {
         this.invalidated = true;
         await prisma.session.delete(
             {
-                where : {
-                    UserID_timestamp: { UserID: this.user.getID(), timestamp: this.getTimestamp()}
+                where: {
+                    UserID_timestamp: {UserID: this.user.getID(), timestamp: this.getTimestamp()}
                 }
             }
         )
@@ -236,7 +228,7 @@ class Session extends Expirable {
     public async getNewAccessToken(): Promise<AccessToken> {
         let x = new AccessToken(this, SessionRegistry.generateToken(16))
 
-        if(this.user?.getID() && !this.invalidated && this.checkValidity()) {
+        if (this.user?.getID() && !this.invalidated && this.checkValidity()) {
             await prisma.accesstoken.create({
                 data: {
                     sequence: this.accessTokens.size,
@@ -254,10 +246,10 @@ class Session extends Expirable {
     }
 
     public async asyncOnDeath() {
-        if(this.user?.getID()) {
+        if (this.user?.getID()) {
             await prisma.session.delete({
                     where: {
-                        UserID_timestamp: { UserID: this.user.getID(), timestamp: this.getTimestamp()}
+                        UserID_timestamp: {UserID: this.user.getID(), timestamp: this.getTimestamp()}
                     }
                 }
             )
@@ -274,7 +266,7 @@ class Session extends Expirable {
         return this.accessTokens.keys()
     }
 
-    public insertAccessToken(at : AccessToken, seq : number) {
+    public insertAccessToken(at: AccessToken, seq: number) {
         this.accessTokens.set(at, seq)
     }
 
@@ -284,12 +276,10 @@ class AccessToken extends Expirable {
     private readonly session: Session;
     private readonly token: string;
 
-    public constructor(session: Session, token: string, timestamp? : Date, TTL? : number) {
-        if(TTL)
-        {
+    public constructor(session: Session, token: string, timestamp?: Date, TTL?: number) {
+        if (TTL) {
             super(TTL, timestamp)
-        }
-        else{
+        } else {
             super(300)
         }
         this.session = session;
@@ -311,7 +301,7 @@ class AccessToken extends Expirable {
     public async asyncOnDeath(): Promise<void> {
         await prisma.accesstoken.delete(
             {
-                where : {
+                where: {
                     token: this.token
                 }
             }
