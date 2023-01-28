@@ -1,33 +1,113 @@
 import {NextPage} from "next";
-import {FullOutput, MetaOutput} from "../../models/backEnd/contents/Content";
 import RegularLayout from "../../models/frontEnd/regularLayout";
 import styles from "../../styles/ContentDisplay.module.css";
-import {useState} from "react";
+import {useEffect, useRef, useState} from "react";
 import {useRouter} from "next/router";
 import axios from "axios";
 import SVGModifier from "../../models/frontEnd/inputs/svgModifier";
+import {BiDownload, BiRedo, BiUndo} from "react-icons/bi";
 
-const ImageUpload: NextPage<{
-    data: {
-        mainMeta: MetaOutput,
-        output: FullOutput
-    }
-}> = ({data}) => {
+const ImageUpload: NextPage = () => {
 
-    const [imageSRC, setISRC] = useState("")
+    const [imageSRC, setImageSRC] = useState("")
     const [error, setError] = useState<string>("")
-    const [fileType, setFiletype] = useState<string>("")
-    const [image, setImage] = useState<File | null>(null)
+
+    const previousImages = useRef<File[]>([])
+    const currentIndex = useRef<number>(-1)
+
+    const [redoUndo, setRedoUndo] = useState<{ undo: boolean, redo: boolean }>({undo: false, redo: false})
+
+    const [image, setInnerImage] = useState<File | null>(null)
     const [isSVG, setIsSVG] = useState(false)
     const fileSizeLimit = 4 * 1024 * 1024;
 
+    const addImage = (file: File | null) => {
+        setInnerImage(file);
+
+        if (file) {
+            currentIndex.current += 1;
+            if (currentIndex.current >= previousImages.current.length) {
+                previousImages.current = [...previousImages.current, file]
+            } else {
+                /** deleted all the overwritten files */
+                previousImages.current = [...previousImages.current.slice(0, currentIndex.current - 1), file]
+            }
+            changeUndoRedo();
+        }
+    }
+
+    const changeUndoRedo = () => {
+        setRedoUndo(
+            {
+                redo: currentIndex.current < previousImages.current.length - 1,
+                undo: currentIndex.current > 0
+            })
+    }
+
+    const undo = () => {
+        if (currentIndex.current > 0) {
+            currentIndex.current -= 1
+            setInnerImage(previousImages.current[currentIndex.current])
+            changeUndoRedo();
+        }
+    }
+
+    const redo = () => {
+        if (currentIndex.current < previousImages.current.length - 1) {
+            currentIndex.current += 1
+            setInnerImage(previousImages.current[currentIndex.current])
+            changeUndoRedo();
+        }
+    }
+
+    const download = () => {
+        if (image) {
+            const link = document.createElement("a");
+
+            // Set link's href to point to the Blob URL
+            link.href = URL.createObjectURL(image);
+
+            let split = image.name.split(".")
+            let extension = split[split.length - 1]
+
+            link.download = "output." + extension;
+
+            // Append link to the body
+            document.body.appendChild(link);
+
+            // Dispatch click event on the link
+            // This is necessary as link.click() does not work on the latest firefox
+            link.dispatchEvent(
+                new MouseEvent('click', {
+                    bubbles: true,
+                    cancelable: true,
+                    view: window
+                })
+            );
+
+            // Remove link from body
+            document.body.removeChild(link);
+        }
+    }
+
+    useEffect(() => {
+        if (image) {
+            let split = image.name.split(".")
+            let extension = split[split.length - 1]
+            setImageSRC(URL.createObjectURL(image))
+
+            setIsSVG(extension === "svg");
+        } else {
+            setImageSRC("")
+        }
+    }, [image])
 
     const changeImage = async (x: FileList) => {
 
         setIsSVG(false)
 
         const files = x
-        setImage(null)
+        addImage(null)
 
         if (files && files.length > 0) {
             let theFile: File = files[0]
@@ -43,10 +123,9 @@ const ImageUpload: NextPage<{
                     setError("🖼️ Unsupported type.")
                     return;
                 }
-                setFiletype(extension)
-                setISRC(URL.createObjectURL(theFile));
-                setError("Press Save Changes to upload 👍")
-                setImage(theFile)
+                setImageSRC(URL.createObjectURL(theFile));
+                setError("Press Submit the Image to upload 👍")
+                addImage(theFile)
 
                 if (extension === "svg") {
                     setIsSVG(true);
@@ -57,7 +136,7 @@ const ImageUpload: NextPage<{
         }
 
         if (x.length > 0) {
-            setISRC(URL.createObjectURL(x[0]))
+            setImageSRC(URL.createObjectURL(x[0]))
         }
     }
 
@@ -129,8 +208,16 @@ const ImageUpload: NextPage<{
                 <div className={styles.waring}>{error}</div>
                 <br/>
                 <hr/>
-                {image? !isSVG? <img src={imageSRC} id="output" width="400"/> :
-                    <SVGModifier inputFile={image} setFile={setImage}></SVGModifier> : ""}
+                {image ? !isSVG ?
+                    <img alt="preview of your image" src={imageSRC} id="output" width="400"/> :
+                    <SVGModifier inputFile={image} setFile={addImage}></SVGModifier> : ""}
+                <hr/>
+                <button disabled={!redoUndo.undo} onClick={undo}><BiUndo/> undo</button>
+                <button disabled={!redoUndo.redo} onClick={redo}><BiRedo/> undo</button>
+                <button disabled={!image} onClick={download}>
+                    <BiDownload/>
+                    download
+                </button>
                 <hr/>
                 <button onClick={upload} disabled={!image || waiting}>Submit the image</button>
             </div>

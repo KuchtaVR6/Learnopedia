@@ -1,10 +1,9 @@
-import {Dispatch, FC, SetStateAction, useEffect, useRef, useState} from "react";
-import SelfValidatingInput from "./selfValidatingInput";
+import {FC, useEffect, useRef, useState} from "react";
 import EvaluatorInput from "./evaluatorInput";
 
 type args = {
     inputFile: File;
-    setFile: Dispatch<SetStateAction<File | null>>;
+    setFile: (file: File | null) => void;
 }
 
 const SVGModifier: FC<args> = (props) => {
@@ -281,7 +280,7 @@ const SVGModifier: FC<args> = (props) => {
     }
 
     return <>
-        <div ref={processedSVGElement} id={"processedSVG"}></div>
+        <div ref={processedSVGElement} id={"processedSVG"} style={{maxWidth: "100%"}}></div>
         <hr/>
         <h2>SVG Modification - add groups with explanations!</h2>
         <p>Select one shape by clicking it on the image, or multiple by click whilst holding shift. When you select all
@@ -295,7 +294,7 @@ const SVGModifier: FC<args> = (props) => {
         <input type={"color"} onChange={(e) => {
             setGroupColour(e.target.value)
         }}/><br/>
-        <button disabled={groupName.length === 0} onClick={submitGroup}>Submit the group</button>
+        <button disabled={groupName.length === 0} onClick={submitGroup}>Add the group</button>
     </>
 }
 
