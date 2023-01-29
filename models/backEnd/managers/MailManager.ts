@@ -6,6 +6,7 @@ import SelfPurgingMap from "../tools/SelfPurgingMap";
 import {User} from "../User";
 import {ActionNotDefined, CodeMismatch} from "../tools/Errors";
 import {Expirable} from "../tools/Expirable";
+import Content from "../contents/Content";
 
 const nodemailer = require("nodemailer");
 
@@ -13,6 +14,8 @@ export default class MailManager {
     private static instance: MailManager;
     private readonly verifyActionTemplateHTML: HandlebarsTemplateDelegate;
     private readonly verifyActionTemplateTEXT: HandlebarsTemplateDelegate;
+    private readonly reminderHTML: HandlebarsTemplateDelegate;
+    private readonly reminderTEXT: HandlebarsTemplateDelegate;
     private readonly actions: SelfPurgingMap<User, Action>;
     private readonly register: SelfPurgingMap<string, Action>;
 
@@ -20,9 +23,13 @@ export default class MailManager {
         if (process.env.NODE_ENV === 'development') {
             this.verifyActionTemplateHTML = Handlebars.compile(fs.readFileSync(path.resolve(__dirname, '../../../../models/emails/verifyAction.hbs')).toString());
             this.verifyActionTemplateTEXT = Handlebars.compile(fs.readFileSync(path.resolve(__dirname, '../../../../models/emails/verifyActionText.hbs')).toString());
+            this.reminderHTML = Handlebars.compile(fs.readFileSync(path.resolve(__dirname, '../../../../models/emails/reminder.hbs')).toString());
+            this.reminderTEXT = Handlebars.compile(fs.readFileSync(path.resolve(__dirname, '../../../../models/emails/reminderTEXT.hbs')).toString());
         } else {
             this.verifyActionTemplateHTML = Handlebars.compile(fs.readFileSync(path.resolve(__dirname, '../../../models/emails/verifyAction.hbs')).toString());
             this.verifyActionTemplateTEXT = Handlebars.compile(fs.readFileSync(path.resolve(__dirname, '../../../models/emails/verifyActionText.hbs')).toString());
+            this.reminderHTML = Handlebars.compile(fs.readFileSync(path.resolve(__dirname, '../../../models/emails/reminder.hbs')).toString());
+            this.reminderTEXT = Handlebars.compile(fs.readFileSync(path.resolve(__dirname, '../../../models/emails/reminderTEXT.hbs')).toString());
         }
         this.actions = new SelfPurgingMap<User, Action>();
         this.register = new SelfPurgingMap<string, Action>()
@@ -35,7 +42,10 @@ export default class MailManager {
         return this.instance;
     }
 
-    private static async send(email: string, html: string, text: string) {
+    private static async send(email: string, html: string, text: string, subject : string, noBackground? : boolean) {
+
+        console.log(email)
+
         // create reusable transporter object using the default SMTP transport
         let transporter = nodemailer.createTransport({
             host: process.env["EMAIL_HOST"],
@@ -48,28 +58,31 @@ export default class MailManager {
             },
         });
 
-        // send mail with defined transport object
-        await transporter.sendMail({
-            from: 'learnopediaTesting@gmail.com', // sender address
-            to: email, // list of receivers
-            subject: "Verification Code", // Subject line
-            text: text, // plain text body
-            html: html, // html body,
-            attachments: [{
+        let attachments = [{
+            filename: 'logo.png',
+            path: process.cwd() + '/models/emails/images/image-1.png',
+            cid: 'logo'
+        }]
+
+        if(!noBackground){
+            attachments.push({
                 filename: 'background.jpeg',
                 path: process.cwd() + '/models/emails/images/image-2.jpeg',
                 cid: 'background'
-            },
-                {
-                    filename: 'logo.png',
-                    path: process.cwd() + '/models/emails/images/image-1.png',
-                    cid: 'logo'
-                }],
+            })
+        }
+
+        // send mail with defined transport object
+        let info = await transporter.sendMail({
+            from: 'learnopediaTesting@gmail.com', // sender address
+            to: email, // list of receivers
+            subject: subject, // Subject line
+            text: text, // plain text body
+            html: html, // html body,
+            attachments: attachments,
         });
 
-        // Message sent: <b658f8ca-6296-ccf4-8306-87d57a0b4321@example.com>
-
-        // Preview only available when sending through an Ethereal account
+        console.log('Preview URL: %s', nodemailer.getTestMessageUrl(info));
     }
 
     private static generateCode(): number {
@@ -113,7 +126,7 @@ export default class MailManager {
             email = this.verifyActionTemplateHTML({
                 lname: lname,
                 fname: fname,
-                greeting: "Welcome to your Learnopedia journey...",
+                greeting: "We heard that you forgot you password...",
                 mainMessage: "We are send a code for verification purposes following your actions. Please make sure that you never share your code and that you are not performing this action" +
                     "under pressure or have been asked to do it by someone you do not trust, as this action will change your access to the account.",
                 prevAction: "ignore this email.",
@@ -136,7 +149,7 @@ export default class MailManager {
         }
 
         if (email && text) {
-            await MailManager.send(emailAddress, email, text)
+            await MailManager.send(emailAddress, email, text, "Verify your action - Learnopedia")
         } else {
             throw ActionNotDefined;
         }
@@ -199,7 +212,7 @@ export default class MailManager {
         }
 
         if (email && text) {
-            await MailManager.send(user.getEmail(), email, text)
+            await MailManager.send(user.getEmail(), email, text, "Verify your action - Learnopedia")
         } else {
             throw ActionNotDefined;
         }
@@ -230,6 +243,56 @@ export default class MailManager {
             }
         }
         throw new CodeMismatch()
+    }
+
+    public async bookmarkReminder(user: User, content : Content) {
+
+        let greeting = `Waiting for a falling star? No? Well maybe at least you are waiting for a reminder about ${content.getName()}. 🌠`;
+
+        let randomNumber = Math.round(Math.random() * 8 ) // num from <0,6>
+
+        console.log("here")
+
+        switch (randomNumber) {
+            case 0:
+                greeting = `It is time... to read ${content.getName()}. At least according to you! 😇`
+                break;
+            case 1:
+                greeting = `Oh I nearly forgot you had a reminder set for ${content.getName()}, here you go! 😅`
+                break;
+            case 2:
+                greeting = `Fancy some reading? You thought you will find ${content.getName()} interesting when you created this reminder. 📖`
+                break;
+            case 3:
+                greeting = `Hey! Isn't it amazing how quickly time flies? This is your reminder to read ${content.getName()}. ⏲`
+                break;
+            case 4:
+                greeting = `(You) introducing: ${content.getName()}, now asbestos free. Actually none of the learnopedia courses contain asbestos, Isn't it amazing? 💯`
+                break;
+            case 5:
+                greeting = `The alignment of stars has just reached the exact alignment for me to send you a reminder about ${content.getName()}. Clocks are a thing of the past aren't they? 🌟`
+                break;
+            case 6:
+                greeting = `⏰ "${content.getName()}" 👀, 😀.`
+                break;
+        }
+
+        let email = this.reminderHTML({
+            lname: user.getLName(),
+            fname: user.getFName(),
+            contentID: content.getID(),
+            greeting: greeting,
+            mainMessage: "This your personal reminder to have a read through the content linked below. We hope it will be insightful and fun! "
+        });
+        let text = this.reminderTEXT({
+            lname: user.getLName(),
+            fname: user.getFName(),
+            contentID: content.getID(),
+            greeting: greeting,
+            mainMessage: "This your personal reminder to have a read through the content linked below. We hope it will be insightful and fun! "
+        });
+
+        await MailManager.send(user.getEmail(),email,text,"Content Reminder - Learnopedia", true)
     }
 }
 

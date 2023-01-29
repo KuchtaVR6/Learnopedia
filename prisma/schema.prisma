@@ -61,6 +61,7 @@ model content {
   numberOfAuthors   Int
   adoptionamendment adoptionamendment[]
   amendment         amendment[]
+  bookmarks         bookmarks[]
   chapter           chapter?
   contentlistmod    contentlistmod[]
   contentopinion    contentopinion[]
@@ -225,6 +226,7 @@ model user {
   colorB           String?            @db.VarChar(255)
   amendment        amendment[]
   amendmentopinion amendmentopinion[]
+  bookmarks        bookmarks[]
   contentopinion   contentopinion[]
   session          session[]
 }
@@ -298,4 +300,16 @@ model quizquestion {
   type         String     @db.VarChar(255)
   lessonpart   lessonpart @relation(fields: [LessonPartID], references: [LessonPartID], onDelete: Cascade, map: "FKQuizQuestion763583")
   answer       answer[]
+}
+
+model bookmarks {
+  contentID         Int
+  userID            Int
+  reminderTimestamp DateTime? @db.DateTime(0)
+  reminded          Boolean   @db.Bit(1)
+  content           content   @relation(fields: [contentID], references: [ID], onDelete: Cascade, map: "FKBookmarks43242")
+  user              user      @relation(fields: [userID], references: [ID], onDelete: Cascade, map: "FKBookmarks34263")
+
+  @@id([userID, contentID])
+  @@index([contentID], map: "FKBookmarks43242")
 }

@@ -152,8 +152,14 @@ export const typeDefs = gql`
     type ForDeletion{
         file : String
     }
+    
     type voteOutput {
         vote : Boolean
+    }
+    type countMyView {
+        vote : Boolean,
+        bookmark : Boolean,
+        reminderDate : String,
     }
 
     # content modification types
@@ -203,7 +209,7 @@ export const typeDefs = gql`
         view(id : Int!) : viewOutput
         countMyView(id : Int!, loggedIn : Boolean!) : voteOutput
 
-        getRecommended : [MetaContent]
+        getRecommended(loggedIn : Boolean) : [MetaContent]
 
         getUsersAmendments(nickname : String) : [AmendmentOutput],
         getContentAmendments(id : Int!) : [AmendmentOutput]
@@ -246,6 +252,9 @@ export const typeDefs = gql`
 
         #upVote downVote
         vote(contentID : Int!, positive : Boolean!) : ContinueResponse
+
+        deleteBookmark(contentID : Int!) : ContinueResponse
+        appendBookmark(contentID : Int!, reminderDate : String) : ContinueResponse
 
         #image resolvers
         avatarFinalise(newPath : String) : ContinueResponse

@@ -10,6 +10,7 @@ import Amendment, {
 } from "./amendments/Amendment";
 import ContentManager from "./contents/ContentManager";
 import AmendmentManager from "./amendments/AmendmentManager";
+import Content, {MetaOutput} from "./contents/Content";
 
 export type UserDetails = {
     nickname: string,
@@ -34,9 +35,20 @@ export class User extends Expirable {
     private colorA: string;
     private colorB: string;
 
+    /**
+        content number to upVote (true) / downVote (false)
+     */
     private opinions : Map<number, boolean>;
 
+    /**
+     content number to vote
+     */
     private votes : Map<number, AmendmentOpinionValues>;
+
+    /**
+     content number to true / date of the coming reminder (if set)
+     */
+    private bookmarks : Map<number, Date | true>
 
     /**
      * Bcrypt only allows to check strings up to 72 bytes so these methods
@@ -92,6 +104,7 @@ export class User extends Expirable {
          opinions : Map<number, boolean>,
          votes : Map<number, AmendmentOpinionValues>,
          avatarPath: string | null,
+         bookmarks : Map<number, Date | true>,
          colorA?: string | null,
          colorB?: string | null
         ) {
@@ -108,6 +121,7 @@ export class User extends Expirable {
         this.colorB = colorB || "#023189"
         this.opinions = opinions;
         this.votes = votes;
+        this.bookmarks = bookmarks;
     }
 
     /**
@@ -146,6 +160,77 @@ export class User extends Expirable {
         }
         this.opinions.set(contentId, positive)
         return 1
+    }
+
+    public async getBookmarkedContent() : Promise<MetaOutput[]> {
+        let instance = await ContentManager.getInstance();
+        let result : MetaOutput[] = new Array(this.bookmarks.size)
+        let index = this.bookmarks.size - 1;
+        for(let key of Array.from(this.bookmarks.keys()))
+            result[index] = await (await instance.getContentByID(key)).getMeta()
+        return result;
+    }
+
+    public async pushBookmark(contentId : number, options : {delete : true} | {add : true | Date, delete : false}) {
+        let output;
+        if(options.delete) {
+            this.bookmarks.delete(contentId)
+            output = await prisma.bookmarks.delete({
+                where: {
+                    userID_contentID: {
+                        userID: this.id,
+                        contentID: contentId
+                    }
+                }
+            })
+        }
+        else {
+            if(this.bookmarks.has(contentId)) {
+                output = await prisma.bookmarks.update({
+                    where : {
+                        userID_contentID : {
+                            userID : this.id,
+                            contentID : contentId
+                        }
+                    },
+                    data : {
+                        reminderTimestamp: (options.add instanceof Date)? options.add : undefined,
+                        reminded: (options.add instanceof Date)? false : undefined
+                    }
+                })
+            }
+            else{
+                output = await prisma.bookmarks.create({
+                    data : {
+                        userID : this.id,
+                        contentID : contentId,
+                        reminded : false,
+                        reminderTimestamp: (options.add instanceof Date)? options.add : undefined
+                    }
+                })
+            }
+            this.bookmarks.set(contentId, options.add)
+        }
+        return output;
+    }
+
+    public checkBookmark(contentId: number) : {reminder : boolean, reminderDate? : string} {
+        let output = this.bookmarks.get(contentId)
+
+        if(output) {
+            if (output instanceof Date) {
+                return {
+                    reminder : true,
+                    reminderDate : output.getFullYear() + "." + Content.twoDigit(output.getMonth() + 1) + "." + Content.twoDigit(output.getDate())
+                }
+            }
+            return {
+                reminder : true
+            }
+        }
+        return {
+            reminder : false
+        }
     }
 
     public checkVote(amendmentId : number) : AmendmentOpinionValues {

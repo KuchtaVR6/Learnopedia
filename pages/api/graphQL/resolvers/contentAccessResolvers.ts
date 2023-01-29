@@ -6,6 +6,8 @@ import {AmendmentOutput, VotingSupport} from "../../../../models/backEnd/amendme
 import {User} from "../../../../models/backEnd/User";
 import {UserManager} from "../../../../models/backEnd/managers/UserManager";
 import {enforceUser} from "./verificationResolvers";
+import bookmarkManager from "../../../../models/backEnd/managers/BookmarkManager";
+import BookmarkManager from "../../../../models/backEnd/managers/BookmarkManager";
 
 export const contentAccessResolvers = {
     Query: {
@@ -25,6 +27,7 @@ export const contentAccessResolvers = {
                 let user = await enforceUser(context)
 
                 let voteUninterpreted = user.checkOpinion(args.id);
+                let checkBookmark = user.checkBookmark(args.id)
 
                 let vote;
 
@@ -41,7 +44,9 @@ export const contentAccessResolvers = {
                 }
 
                 return {
-                    vote : vote
+                    vote : vote,
+                    bookmark : checkBookmark.reminder,
+                    reminderDate : checkBookmark.reminderDate
                 }
 
             }
@@ -49,7 +54,6 @@ export const contentAccessResolvers = {
             return {}
 
         },
-
 
         view: async (parent: undefined, args: { id: number }, context: genericContext):
             Promise<{
@@ -64,9 +68,22 @@ export const contentAccessResolvers = {
                 output: await myContent.fullRead()
             }
         },
-        getRecommended: async (parent: undefined, args: any, context: genericContext): Promise<MetaOutput[]> => {
-            return await ContentManager.getInstance().getRecommendedMetas();
+
+        getRecommended: async (parent: undefined, args: {loggedIn? : boolean}, context: genericContext): Promise<MetaOutput[]> => {
+
+            let recommendation = await ContentManager.getInstance().getRecommendedMetas();
+
+            if(args.loggedIn) {
+                let user = await enforceUser(context)
+
+                let bookmarks = await user.getBookmarkedContent()
+
+                return [...bookmarks, ...recommendation];
+            }
+
+            return recommendation;
         },
+
         getUsersAmendments: async (parent: undefined, args: { nickname?: string }, context: genericContext): Promise<AmendmentOutput[]> => {
             let x: User;
 
@@ -78,16 +95,19 @@ export const contentAccessResolvers = {
 
             return await x.getAmendments();
         },
+
         getContentAmendments: async (parent: undefined, args: { id: number }, context: genericContext): Promise<AmendmentOutput[]> => {
             let content = await ContentManager.getInstance().getSpecificByID(args.id)
 
             return content.getAmendmentsOutput();
         },
+
         checkAmendmentVotes: async (parent: undefined, args: { amendmentIds: number[] }, context: genericContext): Promise<VotingSupport[]> => {
             let user = await enforceUser(context)
 
             return await user.getVoteData(args.amendmentIds);
         }
+
     },
     Mutation: {
         vote: async (parent: undefined, args: { contentID: number, positive: boolean }, context: genericContext) => {
@@ -96,6 +116,36 @@ export const contentAccessResolvers = {
             let content = await ContentManager.getInstance().getSpecificByID(args.contentID)
 
             await content.vote(thisUser, args.positive)
+
+            return {
+                continue: true
+            }
+        },
+
+        deleteBookmark: async (parent: undefined, args: { contentID: number }, context: genericContext) => {
+            let thisUser = await enforceUser(context);
+
+            let content = await ContentManager.getInstance().getSpecificByID(args.contentID)
+
+            let bookmarkManager = await BookmarkManager.getInstance();
+
+            await bookmarkManager.pushBookmark(thisUser, content.getID(), {delete : true})
+
+            return {
+                continue: true
+            }
+        },
+
+        appendBookmark: async (parent: undefined, args: { contentID: number, reminderDate? : string }, context: genericContext) => {
+            let thisUser = await enforceUser(context);
+
+            console.log(thisUser)
+
+            let content = await ContentManager.getInstance().getSpecificByID(args.contentID)
+
+            let bookmarkManager = await BookmarkManager.getInstance();
+
+            await bookmarkManager.pushBookmark(thisUser, content.getID(), {delete : false, add : args.reminderDate? new Date(args.reminderDate) : true})
 
             return {
                 continue: true

@@ -129,6 +129,10 @@ class Content extends Expirable {
         }
     }
 
+    public getName() : string {
+        return this.name;
+    }
+
     public async applyMetaAmendment(amendment: MetaAmendment) {
 
         await this.modification()
@@ -291,7 +295,7 @@ class Content extends Expirable {
         })
     }
 
-    private static twoDigit(input: number) {
+    public static twoDigit(input: number) {
         if (input < 10) {
             return "0" + input.toString()
         }

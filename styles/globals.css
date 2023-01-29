@@ -64,8 +64,12 @@ body{
     --medium-champagne: #f3dfa2ff;
     --linen: #efe6ddff;
 }
+.buttonNiceContainer a {
+    margin: 0 auto;
+    width: max-content;
+}
 
-.buttonNice {
+.buttonNice, .buttonNiceContainer a {
     align-items: center;
     background-color: var(--medium-champagne);
     border: 2px solid var(--raisin-black);
@@ -108,13 +112,13 @@ body{
     100% {box-shadow: 5px 5px 2px 0;}
 }
 
-.buttonNice:hover {
+.buttonNice:hover, .buttonNiceContainer a:hover {
     box-shadow: none;
     animation-name: hidingShadow;
     animation-duration: 0.2s;
 }
 
-.buttonNice:hover:after {
+.buttonNice:hover:after, .buttonNiceContainer a:hover:after {
     animation-name: showingShadow;
     animation-duration: 0.2s;
 }

@@ -9,10 +9,9 @@ import initMiddleware from "./graphQL/initMiddleware";
 import {SessionRegistry} from "../../models/backEnd/managers/SessionRegistry";
 import {UserManager} from "../../models/backEnd/managers/UserManager";
 import ContentManager from "../../models/backEnd/contents/ContentManager";
+import MailManager from "../../models/backEnd/managers/MailManager";
 
 const SessionRegistryInstance = SessionRegistry.getInstance()
-const UserManagerInstance = UserManager.getInstance()
-const ContentManagerInstance = ContentManager.getInstance()
 
 export const resolveUser = async (cookie : string | undefined, agent : string | undefined | null) => {
     if(cookie && agent)

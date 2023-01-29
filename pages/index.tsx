@@ -3,6 +3,7 @@ import Head from 'next/head'
 import RegularLayout from "../models/frontEnd/regularLayout";
 import {useRouter} from "next/router";
 import styles from "../styles/Home.module.css"
+import Link from "next/link";
 
 const Home: NextPage = () => {
 
@@ -42,21 +43,16 @@ const Home: NextPage = () => {
                     <p style={{textAlign: "right"}}><i>*you need to register to create/edit content on Learnopedia</i></p>
 
                     <h2>Now, time for your action:</h2>
-                    <button className={"buttonNice"} onClick={() => {
-                        router.push("/register")
-                    }}>Register
-                    </button>
-                    <br/><br/>
-                    <button className={"buttonNice"} onClick={() => {
-                        router.push("/login")
-                    }}>Log In
-                    </button>
-                    <br/><br/>
-                    <button className={"buttonNice"} onClick={() => {
-                        router.push("/edit/createCourse")
-                    }}>Create a Course
-                    </button>
-                    <br/><br/>
+                    <div className={"buttonNiceContainer"}>
+                        <Link  href={"/register"}>Register</Link>
+                        <br/>
+                        <Link href={"/login"}>Log In</Link>
+                        <br/>
+                        <Link href={"/edit/createCourse"}>Create a Course</Link>
+                        <br/>
+                        <Link href={"edit/imageUpload"}>Upload Images</Link>
+                        <br/>
+                    </div>
                 </div>
             </RegularLayout>
         </>
