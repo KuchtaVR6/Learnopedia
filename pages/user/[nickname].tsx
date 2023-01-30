@@ -9,6 +9,7 @@ import {UserDetails} from "../../models/backEnd/User";
 import {useRouter} from "next/router";
 import Head from "next/head";
 import {MutableRefObject, useEffect, useRef, useState} from "react";
+import Link from "next/link";
 
 type args = {
     data: UserDetails
@@ -35,8 +36,9 @@ const UserView: NextPage<args> = ({data}) => {
     return (
         <RegularLayout enforceUser={false} noInlineNav={true}>
             <Head>
-                <title>Search results</title>
-                <meta name={"robots"} content={"noindex, nofollow"}/>
+                <title>Profile of {data.nickname}</title>
+                <meta name={"description"} content={"This is the page of a member of the learnopedia platform."}/>
+                <meta name={"keywords"} content={"Learnopedia, Learning, Course, Courses, Online, Create, Edit, Modify"}/>
             </Head>
             <div>
                 <div className={styles.profile}>
@@ -62,9 +64,11 @@ const UserView: NextPage<args> = ({data}) => {
                     <br/>
                     <br/>
 
-                    <button className={"buttonNice"} style={{width: "fit-content", margin: "0 auto"}} onClick={() => {router.push("/amendments/user/"+data.nickname)}}>
-                        Check this users input to the community here
-                    </button>
+                    <span className={"buttonNiceContainer"} style={{width: "fit-content", margin: "0 auto"}}>
+                        <Link href={"/amendments/user/"+data.nickname}>
+                            Check this users input to the community here
+                        </Link>
+                    </span>
 
                 </div>
 

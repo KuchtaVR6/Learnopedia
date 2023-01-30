@@ -5,6 +5,7 @@ import {SessionRegistry} from "../../../../models/backEnd/managers/SessionRegist
 import {UserManager} from "../../../../models/backEnd/managers/UserManager";
 import MailManager, {ActionType} from "../../../../models/backEnd/managers/MailManager";
 import {UserNotFoundException, UserRobot} from "../../../../models/backEnd/tools/Errors";
+import {genericContext} from "../resolvers";
 
 //function that will check if the user has been found and if not will attempt at refreshing the token and accessing them again
 export const enforceUser = async (context: { user: User, agent: string, refreshToken: string, response: any, setCookies: any, setHeaders: any }) => {
@@ -32,7 +33,7 @@ export const enforceUser = async (context: { user: User, agent: string, refreshT
 
 export const verificationResolvers = {
     Query: {
-        logout: async (parent: undefined, args: any, context: { user: User, agent: string, refreshToken: string, response: any, setCookies: any, setHeaders: any }) => {
+        logout: async (parent: undefined, args: any, context: genericContext) => {
             await (await SessionRegistry.getInstance()).removeSession(context.refreshToken)
             return {
                 authorisation: true
@@ -41,7 +42,8 @@ export const verificationResolvers = {
     },
 
     Mutation: {
-        login: async (parent: undefined, args: { login: string, password: string }, context: { user: User, agent: string, response: any, setCookies: any, setHeaders: any }) => {
+        login: async (parent: undefined, args: { login: string, password: string }, context: genericContext) => {
+
             let consideredUser: User;
             try {
                 consideredUser = await UserManager.getInstance().getUser(args.login)
@@ -71,10 +73,10 @@ export const verificationResolvers = {
                 throw new AuthenticationError("Password is incorrect");
             }
         },
-        requestAccessToken: async (parent: undefined, args: { RefreshToken: string }, context: { user: User, agent: string, refreshToken: string, response: any, setCookies: any, setHeaders: any }) => {
+        requestAccessToken: async (parent: undefined, args: undefined, context: genericContext) => {
+
             let accessToken : string;
             accessToken = await (await SessionRegistry.getInstance()).accessTokenRequest(context.refreshToken, context.agent)
-
 
             context.setCookies.push({
                 name: "accessToken",
@@ -85,6 +87,7 @@ export const verificationResolvers = {
                     secure: true
                 }
             });
+
             return {
                 authorisation: true
             }

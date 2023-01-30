@@ -44,8 +44,6 @@ export default class MailManager {
 
     private static async send(email: string, html: string, text: string, subject : string, noBackground? : boolean) {
 
-        console.log(email)
-
         // create reusable transporter object using the default SMTP transport
         let transporter = nodemailer.createTransport({
             host: process.env["EMAIL_HOST"],
@@ -73,7 +71,7 @@ export default class MailManager {
         }
 
         // send mail with defined transport object
-        let info = await transporter.sendMail({
+        await transporter.sendMail({
             from: 'learnopediaTesting@gmail.com', // sender address
             to: email, // list of receivers
             subject: subject, // Subject line
@@ -81,8 +79,6 @@ export default class MailManager {
             html: html, // html body,
             attachments: attachments,
         });
-
-        console.log('Preview URL: %s', nodemailer.getTestMessageUrl(info));
     }
 
     private static generateCode(): number {
@@ -250,8 +246,6 @@ export default class MailManager {
         let greeting = `Waiting for a falling star? No? Well maybe at least you are waiting for a reminder about ${content.getName()}. 🌠`;
 
         let randomNumber = Math.round(Math.random() * 8 ) // num from <0,6>
-
-        console.log("here")
 
         switch (randomNumber) {
             case 0:

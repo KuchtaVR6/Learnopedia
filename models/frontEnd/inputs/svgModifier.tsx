@@ -144,9 +144,7 @@ const SVGModifier: FC<args> = (props) => {
         let final: string[] = [""];
         let currentLength = 0;
         let currentIndex = 0;
-        console.log(maxGroupSize)
         for (let word of textSplit) {
-            console.log(final)
             if (word.length < maxGroupSize - currentLength) {
                 final[currentIndex] += word + " "
                 currentLength += word.length + 1
@@ -156,7 +154,6 @@ const SVGModifier: FC<args> = (props) => {
                 final.push(word + " ");
             }
         }
-        console.log(final)
         return final
     }
 

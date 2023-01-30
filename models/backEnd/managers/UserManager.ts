@@ -29,7 +29,7 @@ export class UserManager {
     }
 
     public deletedUser() {
-        return new User(-1,"DELETED USER", "deleted@deleted", "DELETED", "DELETED", "===", [], new Map<number, boolean>(), new Map<number, number>(), null, new Map<number, Date | true>())
+        return new User(-1,"DELETED USER", "deleted@deleted", "DELETED", "DELETED", "===", [], new Map<number, boolean>(), new Map<number, number>(), null, null, false , new Map<number, Date | true>())
     }
 
     public async addUser(nickname: string, email: string, fname: string, lname: string, password: string): Promise<User> {
@@ -172,7 +172,7 @@ class UserStore {
             }
         })
 
-        return this.cache(new User(output.ID, nickname, email, fname, lname, passHash, [], new Map<number, boolean>(), new Map<number, number>(), null, new Map<number, true | Date>()));
+        return this.cache(new User(output.ID, nickname, email, fname, lname, passHash, [], new Map<number, boolean>(), new Map<number, number>(), null, null, false, new Map<number, true | Date>()));
     }
 
     private async dbScanFinished() {
@@ -253,10 +253,10 @@ class UserStore {
 
             let bookmarksMap : Map<number, true | Date> = new Map<number, true | Date>();
             dbUser.bookmarks.map((row) => {
-                bookmarksMap.set(row.contentID, row.reminderTimestamp? row.reminderTimestamp : true)
+                bookmarksMap.set(row.contentID, row.reminderTimestamp && row.reminderTimestamp > new Date()? row.reminderTimestamp : true)
             })
 
-            return this.cache(new User(dbUser.ID, dbUser.nickname, dbUser.email, dbUser.fname, dbUser.lname, dbUser.passHash, amendArray, opMap, AmendOpMap, dbUser.avatarFile, bookmarksMap, dbUser.colorA, dbUser.colorB))
+            return this.cache(new User(dbUser.ID, dbUser.nickname, dbUser.email, dbUser.fname, dbUser.lname, dbUser.passHash, amendArray, opMap, AmendOpMap, dbUser.avatarFile, dbUser.uploadCacheFile, dbUser.moderator, bookmarksMap, dbUser.colorA, dbUser.colorB))
         }
 
         throw new UserNotFoundException(query)
@@ -311,10 +311,10 @@ class UserStore {
 
             let bookmarksMap : Map<number, true | Date> = new Map<number, true | Date>();
             dbUser.bookmarks.map((row) => {
-                bookmarksMap.set(row.contentID, row.reminderTimestamp? row.reminderTimestamp : true)
+                bookmarksMap.set(row.contentID, row.reminderTimestamp && row.reminderTimestamp > new Date()? row.reminderTimestamp : true)
             })
 
-            let newUser = new User(dbUser.ID,dbUser.nickname, dbUser.email, dbUser.fname, dbUser.lname, dbUser.passHash, amendArray, opMap, AmendOpMap, dbUser.avatarFile, bookmarksMap, dbUser.colorA, dbUser.colorB);
+            let newUser = new User(dbUser.ID,dbUser.nickname, dbUser.email, dbUser.fname, dbUser.lname, dbUser.passHash, amendArray, opMap, AmendOpMap, dbUser.avatarFile, dbUser.uploadCacheFile, dbUser.moderator, bookmarksMap, dbUser.colorA, dbUser.colorB);
             this.idMap.set(id, newUser)
             return newUser;
         }

@@ -90,7 +90,13 @@ const AddChild: NextPage<{
         }
     }, [changes])
 
-    if (data.mainMeta.type !== 2) {
+    useEffect(()=>{
+        if(data && data.mainMeta.type===2) {
+            router.push("/edit/add/lessonpart/"+router.query.targetid)
+        }
+    },[data])
+
+    if (data && data.mainMeta.type !== 2) {
         return (
             <RegularLayout enforceUser={true} navigation={data.output}>
                 <Head>
@@ -153,7 +159,6 @@ const AddChild: NextPage<{
         )
     }
     else {
-        router.push("/edit/add/lessonpart/"+router.query.targetid)
         return (
             <RegularLayout enforceUser={true} navigation={data.output}>
                 <p>Redirecting...</p>

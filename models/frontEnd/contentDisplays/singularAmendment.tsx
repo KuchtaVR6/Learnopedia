@@ -6,11 +6,12 @@ import LessonPartDisplay from "./lessonPartDisplay";
 import {AmendmentOutput, VotingSupport} from "../../backEnd/amendments/Amendment";
 import {useRouter} from "next/router";
 import {UserContext} from "../authentication/userContext";
+import Link from "next/link";
 
 type args =
     {
         row: AmendmentOutput
-        voteOutputMap?: Map<number,VotingSupport>
+        voteOutputMap?: Map<number, VotingSupport>
         disableVotes: boolean
     }
 
@@ -20,23 +21,24 @@ const SingularAmendment: FC<args> = (args) => {
 
     const userContext = useContext(UserContext)
 
-    const[voteOutput,setVOutput] = useState<VotingSupport | undefined>()
+    const [voteOutput, setVOutput] = useState<VotingSupport | undefined>()
 
     let row = args.row
 
     useEffect(() => {
         setVOutput(args.voteOutputMap?.get(args.row.id))
-    },[args.voteOutputMap, args.row.id])
+    }, [args.voteOutputMap, args.row.id])
 
     return (
-        <div style={{opacity: row.vetoed? "70%" : "100%"}}>
+        <div style={{opacity: row.vetoed ? "70%" : "100%"}}>
             <i>{row.creationDate}</i>
             <h1>
-                <button style={{borderRadius: "10px"}} onClick={() => {
-                    router.push("/user/" + row.creatorNickname)
-                }}>
-                    <b>{row.creatorNickname}</b>
-                </button>
+                <span className={"buttonNiceContainer"}>
+                    <Link href={"/user/" + row.creatorNickname}>
+                        <b>{row.creatorNickname}</b>
+                    </Link>
+                </span>
+
                 &nbsp;created
                 an {row.otherDetails.__typename.slice(0, -6)} on:
             </h1>
@@ -57,9 +59,11 @@ const SingularAmendment: FC<args> = (args) => {
                 <div>
                     <i>{row.targetMeta.type === 0 ? "Course" : row.targetMeta.type === 1 ? "Chapter" : "Lesson"}</i>
                     <br/>
-                    <button className={styles.hideButton} onClick={() => {
-                        router.push("/view/" + row.targetMeta.id)
-                    }}><h5>{row.targetMeta.name}</h5></button>
+                    <span className={"buttonNiceContainer"}>
+                        <Link href={"/view/" + row.targetMeta.id}>
+                            <h3>{row.targetMeta.name}</h3>
+                        </Link>
+                    </span>
                     <p className={styles.details}>
                         {row.targetMeta.authors}<br/>
                         Last Modified: {row.targetMeta.modification}<br/>
@@ -151,7 +155,8 @@ const SingularAmendment: FC<args> = (args) => {
                                         </>
                 }
             </div>
-            {row.applied ? "" : row.vetoed? <i>This amendment has been vetoed</i> : <i>This amendment has not been yet applied</i>}
+            {row.applied ? "" : row.vetoed ? <i>This amendment has been vetoed</i> :
+                <i>This amendment has not been yet applied</i>}
             <hr/>
         </div>
     )

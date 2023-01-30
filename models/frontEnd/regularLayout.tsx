@@ -90,7 +90,7 @@ const RegularLayout: FC<args> = ({children, enforceUser, navigation, noInlineNav
             user: () => {return data? data.getUser : undefined}
         }}>
             <div className={styles.fullPage}>
-                <Navbar/>
+                <Navbar enforceUser={enforceUser}/>
                 <div className={styles.limited}>
                     {children}
                     {noInlineNav? "" :

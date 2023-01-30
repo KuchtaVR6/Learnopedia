@@ -8,6 +8,7 @@ export type EmbeddableOutput = {
 
 export type EmbeddableInput = {
     uri: string,
+    localCacheImage: boolean
 }
 
 export class Embeddable extends LessonPart {
@@ -24,9 +25,9 @@ export class Embeddable extends LessonPart {
         let extension = split[split.length-1]
         let allowedExtensions = ["apng","gif","ico","cur","jpg","jpeg","jfif","pjpeg","pjp","png","svg"];
         if(allowedExtensions.indexOf(extension)>=0) {
-            return "ExternalImage"
+            return "Image"
         }
-        throw new InvalidArgument("Embeddable","must conform to a Embeddable type: Youtube, GithubGist, ExternalImage")
+        throw new InvalidArgument("Embeddable","must conform to a Embeddable type: Youtube, GithubGist, Image")
     }
 
     public constructor(id: number, seqNumber: number, uri: string, type: string) {

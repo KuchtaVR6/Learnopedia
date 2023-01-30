@@ -6,7 +6,7 @@ import {GiFlexibleLamp} from "react-icons/gi";
 import {UserContext} from "../authentication/userContext";
 import {useRouter} from "next/router";
 
-const Navbar: FC = () => {
+const Navbar: FC<{enforceUser : boolean}> = (data) => {
 
     const router = useRouter();
 
@@ -43,7 +43,12 @@ const Navbar: FC = () => {
                             () => {
                                 userContext.logout()
                                 setLoggedIn(false)
-                                router.reload()
+                                if(data.enforceUser) {
+                                    router.push("/")
+                                }
+                                else{
+                                    router.reload()
+                                }
                             }}
                         >
                             Logout

@@ -25,9 +25,29 @@ export const imageResolvers = {
 
             let file = thisUser.getAvatarPath()
 
+            await thisUser.setAvatarPath(null)
+
             deleteFile(file, "avatars")
 
             return { file :  file }
+        },
+        uploadAuthorise : async (parent : undefined, args : undefined, context: genericContext) => {
+            let thisUser = await enforceUser(context)
+
+            let file = thisUser.getUploadCachePath()
+
+            await thisUser.setUploadCachePath(null)
+
+            deleteFile(file, "images")
+
+            return { file :  file }
+        },
+        getUploadedImageLink : async (parent : undefined, args : undefined, context: genericContext) => {
+            let thisUser = await enforceUser(context)
+
+            let file = thisUser.getUploadCachePath()
+
+            return {file : file}
         }
     },
     Mutation : {
@@ -36,6 +56,16 @@ export const imageResolvers = {
             let thisUser = await enforceUser(context)
 
             await thisUser.setAvatarPath(args.newPath)
+
+            return {
+                continue : true
+            }
+        },
+        uploadFinalise : async (parent : undefined, args : {newPath : string}, context: genericContext) => {
+
+            let thisUser = await enforceUser(context)
+
+            await thisUser.setUploadCachePath(args.newPath)
 
             return {
                 continue : true

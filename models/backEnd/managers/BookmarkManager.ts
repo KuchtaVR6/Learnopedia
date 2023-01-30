@@ -85,8 +85,6 @@ class BookmarkManager {
     public async pushBookmark(user : User, contentId : number, options : { delete: true; } | { add: true | Date; delete: false; }) {
         let output = await user.pushBookmark(contentId,options)
 
-        console.log(user)
-
         if(output && !options.delete) {
             if (output.reminderTimestamp && !output.reminded) {
                 if (this.nextFetch > output.reminderTimestamp) {

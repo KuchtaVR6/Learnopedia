@@ -5,6 +5,7 @@ import ComplexActions from "./complexActions";
 import {UserContext} from "../authentication/userContext";
 import XpBar from "./xpBar";
 import {useRouter} from "next/router";
+import Link from "next/link";
 
 const ProfileComponent: FC = () => {
 
@@ -50,11 +51,11 @@ const ProfileComponent: FC = () => {
                     <br/>
                     <br/>
 
-                    <button className={"buttonNice"} style={{width: "fit-content", margin: "0 auto"}} onClick={() => {
-                        router.push("/amendments/user/" + userContext.user()?.nickname)
-                    }}>
-                        Amendments you have created
-                    </button>
+                    <span className={"buttonNiceContainer"} style={{width: "fit-content", margin: "0 auto"}}>
+                        <Link href={"/amendments/user/" + userContext.user()?.nickname}>
+                            Amendments you have created
+                        </Link>
+                    </span>
 
                     <ComplexActions data={userContext.user()}/>
 

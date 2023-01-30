@@ -139,8 +139,6 @@ export const contentAccessResolvers = {
         appendBookmark: async (parent: undefined, args: { contentID: number, reminderDate? : string }, context: genericContext) => {
             let thisUser = await enforceUser(context);
 
-            console.log(thisUser)
-
             let content = await ContentManager.getInstance().getSpecificByID(args.contentID)
 
             let bookmarkManager = await BookmarkManager.getInstance();

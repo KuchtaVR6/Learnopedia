@@ -2,6 +2,7 @@ import {FC} from "react";
 import styles from "../../../styles/ContentDisplay.module.css";
 import {AiTwotoneEdit} from "react-icons/ai";
 import {useRouter} from "next/router";
+import Link from "next/link";
 
 type args = {
     loggedIn : boolean,
@@ -11,13 +12,14 @@ type args = {
 }
 
 const EditButton: FC<args> = ({loggedIn, label, path, removeText}) => {
-    const router = useRouter()
 
     return (
-        <div style={{float : "right"}}>
-            <button className={styles.modifyButton+" buttonNice"} disabled={!loggedIn} onClick={() =>{if(loggedIn){router.push(path)} else {router.push("/login")}}}>
-                <AiTwotoneEdit/> {removeText? "" : loggedIn? label : "Log in to edit"}
-            </button>
+        <div className={"buttonNiceContainer"} style={{float : "right", marginRight: "10px"}}>
+            <a style={{opacity: loggedIn? "1" : "0.5"}} href={loggedIn? path : "/login?red="+path}>
+                <>
+                    <AiTwotoneEdit/> {removeText? "" : loggedIn? label : "Log in to edit"}
+                </>
+            </a>
         </div>
 
     )

@@ -6,6 +6,7 @@ import {useRouter} from "next/router";
 import axios from "axios";
 import SVGModifier from "../../models/frontEnd/inputs/svgModifier";
 import {BiDownload, BiRedo, BiUndo} from "react-icons/bi";
+import Head from "next/head";
 
 const ImageUpload: NextPage = () => {
 
@@ -144,7 +145,7 @@ const ImageUpload: NextPage = () => {
 
     const router = useRouter();
 
-    let imageName = "content";
+    let imageName = "Image";
 
     const upload = async () => {
         if (image) {
@@ -169,7 +170,8 @@ const ImageUpload: NextPage = () => {
                 } else {
                     setError("Unexpected error occurred 😿")
                 }
-            } catch {
+            } catch(e) {
+                console.log(e)
                 setError("Unexpected error occurred 😿")
             }
         }
@@ -177,6 +179,10 @@ const ImageUpload: NextPage = () => {
 
     return (
         <RegularLayout enforceUser={true}>
+            <Head>
+                <title>Learnopedia</title>
+                <meta name={"robots"} content={"noindex, nofollow"}/>
+            </Head>
             <div className={styles.main}>
                 <h1>Upload images for your courses.</h1>
                 <hr/>
@@ -195,7 +201,7 @@ const ImageUpload: NextPage = () => {
                     a active* content proposal or active* content edit proposal. Every image above the 5 threshold will
                     overwrite the oldest image.<br/>
                     4. All files uploaded here must be no larger than 4MB and conform to one of these types: apng, gif,
-                    ico, cur, jpg, jpeg, jfif, pjpeg, pjp, png, svg
+                    ico, cur, jpg, jpeg, jfif, pjpeg, pjp, png, svg<br/>
                     *active - has not been vetoed / deleted<br/>
                     <b>There is no limit to the number of purposeful images you upload to the platform that become parts
                         of meaningful courses.</b><br/>

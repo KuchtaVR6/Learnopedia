@@ -192,7 +192,8 @@ export const typeDefs = gql`
         feedback : String
     }
     input EmbeddableInput {
-        uri : String!
+        uri : String!,
+        localCacheImage: Boolean!
     }
     input ParagraphInput {
         basicText : String!,
@@ -207,7 +208,7 @@ export const typeDefs = gql`
 
         search(query : String!) : [searchResult],
         view(id : Int!) : viewOutput
-        countMyView(id : Int!, loggedIn : Boolean!) : voteOutput
+        countMyView(id : Int!, loggedIn : Boolean!) : countMyView
 
         getRecommended(loggedIn : Boolean) : [MetaContent]
 
@@ -216,6 +217,10 @@ export const typeDefs = gql`
 
         #image resolvers
         avatarAuthorise : ForDeletion
+        uploadAuthorise : ForDeletion
+        getUploadedImageLink : ForDeletion
+
+        MODERATOR_fetchReported : [MetaContent]
 
         checkAmendmentVotes(amendmentIds : [Int!]!): [VotingSupport]
     }
@@ -257,7 +262,10 @@ export const typeDefs = gql`
         appendBookmark(contentID : Int!, reminderDate : String) : ContinueResponse
 
         #image resolvers
-        avatarFinalise(newPath : String) : ContinueResponse
+        avatarFinalise(newPath : String!) : ContinueResponse
+        uploadFinalise(newPath : String!) : ContinueResponse
+        
+        MODERATOR_hideContent(contentID : Int!) : ContinueResponse
         
         voteOnAmendment(amendmentID : Int!, positive: Boolean, negative: Boolean, report: Boolean) : VotingSupport
     }

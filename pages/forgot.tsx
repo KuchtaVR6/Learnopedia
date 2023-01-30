@@ -62,6 +62,8 @@ const Forgot: NextPage = () => {
         <div>
             <Head>
                 <title>Learnopedia</title>
+                <meta name={"description"} content={"This is the registration page of a great open community of learners where you can take a wide range of courses and create your own content."}/>
+                <meta name={"keywords"} content={"Learnopedia, Learning, Course, Courses, Online, Create, Edit, Modify"}/>
             </Head>
             <div className={visibility ? [styles.page, styles.hide].join(" ") : styles.page}>
                 <form className={styles.form} onSubmit={(e) => {

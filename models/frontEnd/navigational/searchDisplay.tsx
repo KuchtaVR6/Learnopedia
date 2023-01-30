@@ -3,6 +3,7 @@ import {MetaOutput} from "../../backEnd/contents/Content";
 import KeywordDisplay from "../keywordCompoments/keywordDisplay";
 import {useRouter} from "next/router";
 import styles from "../../../styles/ContentDisplay.module.css";
+import Link from "next/link";
 
 type args = {
     array: {
@@ -37,9 +38,11 @@ const SearchDisplay: FC<args> = ({array, query}) => {
                             <hr/>
                             <i>{content.type === 0 ? "Course" : content.type === 1 ? "Chapter" : "Lesson"}</i>
                             <br/>
-                            <button className={styles.hideButton} onClick={() => {
-                                router.push("/view/" + content.id)
-                            }}><h5>{content.name}</h5></button>
+                            <span className={"buttonNiceContainer"}>
+                                <Link href={"/view/" + content.id}>
+                                    <h3>{content.name}</h3>
+                                </Link>
+                            </span>
                             <p className={styles.details}>
                                 {content.authors}<br/>
                                 Last Modified: {content.modification}<br/>

@@ -9,7 +9,7 @@ import AmendmentManager from "../../../../models/backEnd/amendments/AmendmentMan
 import {InvalidArgument} from "../../../../models/backEnd/tools/Errors";
 import {lessonPartTypes} from "../../../../models/backEnd/lessonParts/LessonPartTypes";
 import {ParagraphInput} from "../../../../models/backEnd/lessonParts/LessonPartManager";
-import {EmbeddableOutput} from "../../../../models/backEnd/lessonParts/Embeddable";
+import {EmbeddableInput, EmbeddableOutput} from "../../../../models/backEnd/lessonParts/Embeddable";
 import {QuizQuestionInput} from "../../../../models/backEnd/lessonParts/QuizQuestion";
 
 export const contentModificationResolvers = {
@@ -83,8 +83,13 @@ export const contentModificationResolvers = {
 
             return {continue: true}
         },
-        createEmbeddable: async (parent: undefined, args: { targetID: number, seqNumber: number, args: EmbeddableOutput }, context: genericContext) => {
+        createEmbeddable: async (parent: undefined, args: { targetID: number, seqNumber: number, args: EmbeddableInput }, context: genericContext) => {
             let thisUser = await enforceUser(context)
+
+            if(args.args.localCacheImage) {
+                await thisUser.setUploadCachePath(null);
+                args.args.uri = "/uploads/images/"
+            }
 
             await ContentManager.getInstance().createAddReplaceAmendment(thisUser.getID(), args.targetID, args.seqNumber, {
                 newArgs: {type: lessonPartTypes.EMBEDDABLE, content: args.args}
@@ -92,7 +97,7 @@ export const contentModificationResolvers = {
 
             return {continue: true}
         },
-        modToEmbeddable: async (parent: undefined, args: { targetID: number, seqNumber: number, oldID : number, args: EmbeddableOutput }, context: genericContext) => {
+        modToEmbeddable: async (parent: undefined, args: { targetID: number, seqNumber: number, oldID : number, args: EmbeddableInput }, context: genericContext) => {
             let thisUser = await enforceUser(context)
 
             await ContentManager.getInstance().createAddReplaceAmendment(thisUser.getID(), args.targetID, args.seqNumber, {

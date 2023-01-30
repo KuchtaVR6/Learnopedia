@@ -2,13 +2,22 @@ import nc from 'next-connect';
 import {NextApiRequest, NextApiResponse} from "next";
 import multer from 'multer';
 
-const MAX_IMAGE_SIZE = 2 * 1024 * 1024; // 2 MB
+const MAX_IMAGE_SIZE = 4 * 1024 * 1024; // 2 MB
 
 const index = multer({
     storage: multer.diskStorage({
-        destination: './public/uploads/avatars',
+        destination: './public/uploads/images',
         filename: (req, file, cb) => cb(null, file.fieldname + "_" + Date.now() + '.' + file.mimetype.split('/')[1]),
     }),
+    fileFilter: function (req, file, callback) {
+        let split = file.originalname.split(".")
+        let extension = split[split.length - 1]
+        let allowedExtensions = ["apng", "gif", "ico", "cur", "jpg", "jpeg", "jfif", "pjpeg", "pjp", "png", "svg"]
+        if (allowedExtensions.indexOf(extension) < 0) {
+            return callback(new Error('Only images are allowed'))
+        }
+        callback(null, true)
+    },
     limits: {fileSize: MAX_IMAGE_SIZE}
 });
 
@@ -17,7 +26,7 @@ const apiRoute = nc({
         res.status(405).json({error: `Method '${req.method}' Not Allowed`});
     },
 });
-const uploadMiddleware = index.single('avatar');
+const uploadMiddleware = index.single('image');
 
 apiRoute.use(uploadMiddleware);
 
@@ -38,8 +47,8 @@ apiRoute.post(async (req: NextApiRequest & { file: { filename: string } }, res: 
         },
 
         body: JSON.stringify({
-            query: `mutation Mutation($newPath: String) {
-                        avatarFinalise(newPath: $newPath) {
+            query: `mutation Mutation($newPath: String!) {
+                        uploadFinalise(newPath: $newPath) {
                             continue
                             }
                         }`,
@@ -54,8 +63,9 @@ apiRoute.post(async (req: NextApiRequest & { file: { filename: string } }, res: 
     if (response.errors) {
         res.status(200).json({success: false, message: 'Unexpected Error'})
     }
-
-    res.status(200).json({success: true, file: req.file.filename});
+    else {
+        res.status(200).json({success: true, file: req.file.filename});
+    }
 })
 
 export default apiRoute;

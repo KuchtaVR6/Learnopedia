@@ -4,6 +4,7 @@ import client from "../../apollo-client";
 import {gql} from "@apollo/client";
 import {AmendmentOutput} from "../../models/backEnd/amendments/Amendment";
 import AmendmentDisplay from "../../models/frontEnd/amendmentDisplay";
+import Head from "next/head";
 
 const ContentsAmendments: NextPage<{ data: AmendmentOutput[] }> = ({data}) => {
 
@@ -11,6 +12,10 @@ const ContentsAmendments: NextPage<{ data: AmendmentOutput[] }> = ({data}) => {
         return (
             <div>
                 <RegularLayout enforceUser={false} noInlineNav={true}>
+                    <Head>
+                        <title>Learnopedia</title>
+                        <meta name={"robots"} content={"noindex, nofollow"}/>
+                    </Head>
                     <AmendmentDisplay input={data}/>
                 </RegularLayout>
             </div>

@@ -1,14 +1,15 @@
-import {FC} from "react";
+import {FC, useContext} from "react";
 import styles from "../../../styles/RegPage.module.css";
 import {FullOutput, MetaOutput} from "../../backEnd/contents/Content";
 import NavigationTile from "./navigationTile";
 import {gql, useQuery} from "@apollo/client";
+import {UserContext} from "../authentication/userContext";
 
 const CourseMenu: FC<{ navigation?: FullOutput, inline?: boolean }> = ({navigation, inline}) => {
 
     const recommendationQuery = gql`
-        query GetRecommended {
-            getRecommended {
+        query GetRecommended($loggedIn: Boolean) {
+            getRecommended(loggedIn: $loggedIn) {
                 id
                 name
                 description
@@ -25,7 +26,13 @@ const CourseMenu: FC<{ navigation?: FullOutput, inline?: boolean }> = ({navigati
             }
         }`
 
-    const {data} = useQuery(recommendationQuery);
+    const user = useContext(UserContext)
+
+    const {data} = useQuery(recommendationQuery, {
+        variables : {
+            loggedIn : user.loggedIn()
+        }
+    });
 
     let keyCounter = 0;
 

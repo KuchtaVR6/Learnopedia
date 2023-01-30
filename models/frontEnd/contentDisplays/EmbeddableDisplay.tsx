@@ -19,9 +19,9 @@ const EmbeddableDisplay : FC<args> = (input) => {
                         </div>
 
                         :
-                        input.type==="ExternalImage"?
+                        input.type==="Image"?
                             <div className={styles.image}>
-                                <img src={`${input.uri}`} alt={`External image from `+ input.uri}/>
+                                <img src={`${input.uri}`} alt={`Image from `+ input.uri}/>
                             </div>
                                 :
                                 <>

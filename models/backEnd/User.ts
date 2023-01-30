@@ -30,10 +30,16 @@ export class User extends Expirable {
     private fname: string;
     private lname: string;
     private passHash: string;
-    private avatarPath: string | null;
+
     private readonly amendments: Amendment[];
+
     private colorA: string;
     private colorB: string;
+
+    private avatarPath: string | null;
+    private uploadCachePath: string | null;
+
+    private isModerator : boolean;
 
     /**
         content number to upVote (true) / downVote (false)
@@ -104,6 +110,8 @@ export class User extends Expirable {
          opinions : Map<number, boolean>,
          votes : Map<number, AmendmentOpinionValues>,
          avatarPath: string | null,
+         uploadPath: string | null,
+         moderator : boolean,
          bookmarks : Map<number, Date | true>,
          colorA?: string | null,
          colorB?: string | null
@@ -122,6 +130,9 @@ export class User extends Expirable {
         this.opinions = opinions;
         this.votes = votes;
         this.bookmarks = bookmarks;
+
+        this.isModerator = moderator;
+        this.uploadCachePath = uploadPath;
     }
 
     /**
@@ -166,8 +177,11 @@ export class User extends Expirable {
         let instance = await ContentManager.getInstance();
         let result : MetaOutput[] = new Array(this.bookmarks.size)
         let index = this.bookmarks.size - 1;
-        for(let key of Array.from(this.bookmarks.keys()))
+        for(let key of Array.from(this.bookmarks.keys())) {
             result[index] = await (await instance.getContentByID(key)).getMeta()
+            index-=1;
+        }
+
         return result;
     }
 
@@ -219,10 +233,11 @@ export class User extends Expirable {
 
         if(output) {
             if (output instanceof Date) {
-                return {
-                    reminder : true,
-                    reminderDate : output.getFullYear() + "." + Content.twoDigit(output.getMonth() + 1) + "." + Content.twoDigit(output.getDate())
-                }
+                if(output > new Date())
+                    return {
+                        reminder : true,
+                        reminderDate : output.getFullYear() + "." + Content.twoDigit(output.getMonth() + 1) + "." + Content.twoDigit(output.getDate())
+                    }
             }
             return {
                 reminder : true
@@ -455,6 +470,29 @@ export class User extends Expirable {
                 avatarFile: newAvatarPath
             }
         })
+    }
+
+    public getUploadCachePath() {
+        return this.uploadCachePath;
+    }
+
+    public async setUploadCachePath(newUploadCachePath: string | null) {
+        super.refresh()
+
+        this.uploadCachePath = newUploadCachePath;
+
+        await prisma.user.update({
+            where: {
+                ID: this.id
+            },
+            data: {
+                uploadCacheFile: this.uploadCachePath
+            }
+        })
+    }
+    
+    public getIsModerator() {
+        return this.isModerator
     }
 
     public async setColorA(newColor: string) {

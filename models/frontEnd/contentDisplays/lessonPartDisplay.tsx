@@ -14,7 +14,7 @@ type args = {
 const LessonPartDisplay: FC<args> = ({row, loggedIn, id}) => {
 
     return (
-        <div key={row.id} className={styles.lessonPart} style={{width: "100%", wordBreak: "break-all"}}>
+        <div key={row.id} className={styles.lessonPart} style={{width: "100%", wordBreak: "break-word"}}>
             {id !== undefined ? <EditButton loggedIn={loggedIn} label={"Edit a part"}
                                             path={"/edit/lessonpart/" + id + "?child=" + row.id} removeText={true}/> : ""}
             {

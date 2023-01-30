@@ -28,7 +28,7 @@ const Login: NextPage = () => {
         <div className={styles.page}>
             <Head>
                 <title>Learnopedia</title>
-                <meta name={"description"} content={"A great open community of learners where you can take a wide range of courses and create your own content."}/>
+                <meta name={"description"} content={"This is the login page of a great open community of learners where you can take a wide range of courses and create your own content."}/>
                 <meta name={"keywords"} content={"Learnopedia, Learning, Course, Courses, Online, Create, Edit, Modify"}/>
             </Head>
 

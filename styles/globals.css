@@ -113,6 +113,7 @@ body{
 }
 
 .buttonNice:hover, .buttonNiceContainer a:hover {
+    color: black;
     box-shadow: none;
     animation-name: hidingShadow;
     animation-duration: 0.2s;
@@ -121,6 +122,10 @@ body{
 .buttonNice:hover:after, .buttonNiceContainer a:hover:after {
     animation-name: showingShadow;
     animation-duration: 0.2s;
+}
+
+.buttonNiceContainer h3:hover, b:hover {
+    text-decoration: underline black;
 }
 
 @media (min-width: 768px) {
