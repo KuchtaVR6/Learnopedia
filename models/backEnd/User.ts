@@ -39,7 +39,9 @@ export class User extends Expirable {
     private avatarPath: string | null;
     private uploadCachePath: string | null;
 
-    private isModerator : boolean;
+    private readonly isModerator : boolean;
+
+    private suspension : Date | null;
 
     /**
         content number to upVote (true) / downVote (false)
@@ -111,6 +113,7 @@ export class User extends Expirable {
          votes : Map<number, AmendmentOpinionValues>,
          avatarPath: string | null,
          uploadPath: string | null,
+         suspension: Date | null,
          moderator : boolean,
          bookmarks : Map<number, Date | true>,
          colorA?: string | null,
@@ -130,6 +133,7 @@ export class User extends Expirable {
         this.opinions = opinions;
         this.votes = votes;
         this.bookmarks = bookmarks;
+        this.suspension = suspension
 
         this.isModerator = moderator;
         this.uploadCachePath = uploadPath;
@@ -493,6 +497,27 @@ export class User extends Expirable {
     
     public getIsModerator() {
         return this.isModerator
+    }
+
+    public checkSuspension() : boolean {
+        if (this.suspension) {
+            if (this.suspension > new Date()) {
+                return false
+            }
+        }
+        return true
+    }
+
+    public async setSuspended(newDate : Date) {
+        this.suspension = newDate;
+        await prisma.user.update({
+            where : {
+               ID : this.id
+            },
+            data : {
+                suspension : this.suspension
+            }
+        })
     }
 
     public async setColorA(newColor: string) {

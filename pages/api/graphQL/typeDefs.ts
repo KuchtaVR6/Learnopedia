@@ -220,7 +220,7 @@ export const typeDefs = gql`
         uploadAuthorise : ForDeletion
         getUploadedImageLink : ForDeletion
 
-        MODERATOR_fetchReported : [MetaContent]
+        MODERATOR_fetchReported : [AmendmentOutput]
 
         checkAmendmentVotes(amendmentIds : [Int!]!): [VotingSupport]
     }
@@ -266,6 +266,7 @@ export const typeDefs = gql`
         uploadFinalise(newPath : String!) : ContinueResponse
         
         MODERATOR_hideContent(contentID : Int!) : ContinueResponse
+        MODERATOR_suspendUser(userNickname : String!, suspensionLift : String!, reason : String!) : ContinueResponse
         
         voteOnAmendment(amendmentID : Int!, positive: Boolean, negative: Boolean, report: Boolean) : VotingSupport
     }

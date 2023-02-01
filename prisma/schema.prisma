@@ -226,6 +226,7 @@ model user {
   colorB           String?            @db.VarChar(255)
   moderator        Boolean            @default(dbgenerated("(b'0')")) @db.Bit(1)
   uploadCacheFile  String?            @db.VarChar(255)
+  suspension       DateTime?          @db.DateTime(0)
   amendment        amendment[]
   amendmentopinion amendmentopinion[]
   bookmarks        bookmarks[]

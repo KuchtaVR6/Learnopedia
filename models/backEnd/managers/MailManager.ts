@@ -16,6 +16,8 @@ export default class MailManager {
     private readonly verifyActionTemplateTEXT: HandlebarsTemplateDelegate;
     private readonly reminderHTML: HandlebarsTemplateDelegate;
     private readonly reminderTEXT: HandlebarsTemplateDelegate;
+    private readonly suspensionHTML: HandlebarsTemplateDelegate;
+    private readonly suspensionTEXT: HandlebarsTemplateDelegate;
     private readonly actions: SelfPurgingMap<User, Action>;
     private readonly register: SelfPurgingMap<string, Action>;
 
@@ -25,11 +27,15 @@ export default class MailManager {
             this.verifyActionTemplateTEXT = Handlebars.compile(fs.readFileSync(path.resolve(__dirname, '../../../../models/emails/verifyActionText.hbs')).toString());
             this.reminderHTML = Handlebars.compile(fs.readFileSync(path.resolve(__dirname, '../../../../models/emails/reminder.hbs')).toString());
             this.reminderTEXT = Handlebars.compile(fs.readFileSync(path.resolve(__dirname, '../../../../models/emails/reminderTEXT.hbs')).toString());
+            this.suspensionHTML = Handlebars.compile(fs.readFileSync(path.resolve(__dirname, '../../../../models/emails/suspension.hbs')).toString());
+            this.suspensionTEXT = Handlebars.compile(fs.readFileSync(path.resolve(__dirname, '../../../../models/emails/suspensionTEXT.hbs')).toString());
         } else {
             this.verifyActionTemplateHTML = Handlebars.compile(fs.readFileSync(path.resolve(__dirname, '../../../models/emails/verifyAction.hbs')).toString());
             this.verifyActionTemplateTEXT = Handlebars.compile(fs.readFileSync(path.resolve(__dirname, '../../../models/emails/verifyActionText.hbs')).toString());
             this.reminderHTML = Handlebars.compile(fs.readFileSync(path.resolve(__dirname, '../../../models/emails/reminder.hbs')).toString());
             this.reminderTEXT = Handlebars.compile(fs.readFileSync(path.resolve(__dirname, '../../../models/emails/reminderTEXT.hbs')).toString());
+            this.suspensionHTML = Handlebars.compile(fs.readFileSync(path.resolve(__dirname, '../../../../models/emails/suspension.hbs')).toString());
+            this.suspensionTEXT = Handlebars.compile(fs.readFileSync(path.resolve(__dirname, '../../../../models/emails/suspensionTEXT.hbs')).toString());
         }
         this.actions = new SelfPurgingMap<User, Action>();
         this.register = new SelfPurgingMap<string, Action>()
@@ -42,7 +48,7 @@ export default class MailManager {
         return this.instance;
     }
 
-    private static async send(email: string, html: string, text: string, subject : string, noBackground? : boolean) {
+    private static async send(email: string, html: string, text: string, subject : string, noBackground? : boolean, cc? : string) {
 
         // create reusable transporter object using the default SMTP transport
         let transporter = nodemailer.createTransport({
@@ -74,6 +80,7 @@ export default class MailManager {
         await transporter.sendMail({
             from: 'learnopediaTesting@gmail.com', // sender address
             to: email, // list of receivers
+            cc: cc,
             subject: subject, // Subject line
             text: text, // plain text body
             html: html, // html body,
@@ -287,6 +294,23 @@ export default class MailManager {
         });
 
         await MailManager.send(user.getEmail(),email,text,"Content Reminder - Learnopedia", true)
+    }
+
+    public async suspendUser(user: User, suspensionLift : string, reason : String) {
+        let email = this.suspensionHTML({
+            lname: user.getLName(),
+            fname: user.getFName(),
+            reason: reason,
+            time: suspensionLift
+        });
+        let text = this.suspensionTEXT({
+            lname: user.getLName(),
+            fname: user.getFName(),
+            reason: reason,
+            time: suspensionLift
+        });
+
+        await MailManager.send(user.getEmail(),email,text,"Suspension Notice - Learnopedia", true, "kuchcik007pat@gmail.com")
     }
 }
 
