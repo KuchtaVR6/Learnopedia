@@ -67,8 +67,8 @@ const SVGModifier: FC<args> = (props) => {
                     (node as Element).setAttribute("width", String(svgWidth.current + textWidth));
                 }
                 let x = (new XMLSerializer().serializeToString(node))
-                x = (x.replace("g xmlns=\"http://www.w3.org/1999/xhtml\"", "g"))
-                x = (x.replace("style xmlns=\"\"", "style"))
+                x = (x.replaceAll("g xmlns=\"http://www.w3.org/1999/xhtml\"", "g"))
+                x = (x.replaceAll("style xmlns=\"\"", "style"))
                 output += x;
             }
 
@@ -161,7 +161,7 @@ const SVGModifier: FC<args> = (props) => {
         if (selectedObjects.current.length > 0 && processedSVGElement.current) {
             let parentElement: HTMLElement = document.getElementById(selectedObjects.current[0])!.parentElement!;
             let inserter = document.createElement("g")
-            inserter.id = groupName.replace(" ","_");
+            inserter.id = groupName.replaceAll(" ","_");
             inserter.setAttribute("transform", "matrix(1,0,0,1,0,0)")
             for (let id of selectedObjects.current) {
                 let child = document.getElementById(id)

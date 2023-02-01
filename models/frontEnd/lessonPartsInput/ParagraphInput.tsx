@@ -3,6 +3,8 @@ import {Dispatch, FC, SetStateAction, useEffect, useState} from "react";
 import {displayableOutput} from "../../backEnd/lessonParts/LessonPart";
 import EvaluatorInput from "../inputs/evaluatorInput";
 import {lessonPartArgs, lessonPartTypes} from "../../backEnd/lessonParts/LessonPartTypes";
+import EmbeddableDisplay from "../contentDisplays/EmbeddableDisplay";
+import ParagraphDisplay from "../contentDisplays/ParagraphDisplay";
 
 type args = {
     setChanges: Dispatch<SetStateAction<lessonPartArgs | null>>,
@@ -99,6 +101,12 @@ const ParagraphInput: FC<args> = ({setChanges, current}) => {
                     <td>
                         {basicText.length > 0 ? (!current || (current.output.__typename !== "ParagraphOutput" || basicText !== current.output.basicText)) ? "✔" : "📕" : "❌"}
                     </td>
+                </tr>
+                <tr>
+                    {basicText.length > 0? "Preview:" : ""}
+                    <div style={{border: "5px solid", padding: "0 20px"}}>
+                        <ParagraphDisplay basicText={basicText} advancedText={advancedText}/>
+                    </div>
                 </tr>
                 </tbody>
             </table>

@@ -3,6 +3,8 @@ import {lessonPartArgs, lessonPartTypes} from "../../backEnd/lessonParts/LessonP
 import {displayableOutput} from "../../backEnd/lessonParts/LessonPart";
 import EvaluatorInput from "../inputs/evaluatorInput";
 import {AiFillDelete} from "react-icons/ai";
+import ParagraphDisplay from "../contentDisplays/ParagraphDisplay";
+import QuizQuestionDisplay from "../contentDisplays/QuizQuestionDisplay";
 
 type args = {
     setChanges: Dispatch<SetStateAction<lessonPartArgs | null>>,
@@ -147,6 +149,19 @@ const QuizQuestionInput: FC<args> = (props) => {
                 }
             }} disabled={currentContent.length < 1}>Add Answer
             </button>
+
+            <br/>
+            {question.length > 0? "Preview:" : ""}
+            <div style={{border: "5px solid", padding: "0 20px"}}>
+                <QuizQuestionDisplay question={question} type={type} answer={answers.map((ans, key) => {
+                    return {
+                        content : ans.content,
+                        correct : ans.correct,
+                        answerID : key,
+                        feedback : ans.feedback
+                    }
+                })} />
+            </div>
 
             <br/>
             <br/>

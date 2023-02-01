@@ -74,7 +74,7 @@ const Profile: NextPage = () => {
             </Head>
             <div className={styles.main}>
                 <h1>Reported Content:</h1>
-                <div style={{maxHeight: "30em", overflowY: "scroll", border: "5px black"}}>
+                <div style={{maxHeight: "30em", overflowY: "scroll", border: "5px solid"}}>
                     {reported.data ? <AmendmentDisplay input={reported.data.MODERATOR_fetchReported}/> : "loading..."}
                 </div>
 

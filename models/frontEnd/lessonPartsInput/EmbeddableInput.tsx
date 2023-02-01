@@ -4,6 +4,7 @@ import {lessonPartArgs, lessonPartTypes} from "../../backEnd/lessonParts/LessonP
 import {displayableOutput} from "../../backEnd/lessonParts/LessonPart";
 import Link from "next/link";
 import {gql, useQuery} from "@apollo/client";
+import EmbeddableDisplay from "../contentDisplays/EmbeddableDisplay";
 
 type args = {
     setChanges: Dispatch<SetStateAction<lessonPartArgs | null>>,
@@ -83,6 +84,13 @@ const EmbeddableInput: FC<args> = (props) => {
         <br/>
         <Link href={"/edit/imageUpload"}>Want to upload the image first? (CLICK HERE)</Link><br/>
         <b>The type: {type} </b> <br/>
+
+
+        {input.length > 0? "Preview:" : ""}
+        <div style={{border: "5px solid"}}>
+            <EmbeddableDisplay uri={input} type={type} />
+        </div>
+
         URI: {input.length > 0 ? (!props.current || (props.current.output.__typename !== "EmbeddableOutput" || input !== props.current.output.uri)) ? "✔" : "📕" : "❌"}
     </>
 }
