@@ -22,7 +22,7 @@ const UsersAmendments: NextPage<{ data: AmendmentOutput[] }> = ({data}) => {
                         <meta name={"robots"} content={"noindex, nofollow"}/>
                     </Head>
                     <div className={styles.main}>
-                        <div className={"buttonNiceContainer"} style={{float: "left"}}>
+                        <div className={"buttonNiceContainer"}>
                             <a href={"/user/" + router.query.nickname}><BiArrowBack/>Back to the user</a>
                         </div>
                         <AmendmentDisplay input={data}/>

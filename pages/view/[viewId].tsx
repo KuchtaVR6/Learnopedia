@@ -76,8 +76,9 @@ const View: NextPage<{
                 </Head>
                 <RegularLayout enforceUser={false} navigation={data.output}>
                     {data.mainMeta.type != 0 ?
-                        <div className={"buttonNiceContainer"} style={{float: "left"}}>
+                        <div className={"buttonNiceContainer"}>
                             <a href={"/view/" + parentID()}><BiArrowBack/>Back to the {data.mainMeta.type == 1? "course" : "chapter"}</a>
+                            <br/>
                         </div>
                         :
                         ""

@@ -208,7 +208,6 @@ export const typeDefs = gql`
 
         search(query : String!) : [searchResult],
         view(id : Int!) : viewOutput
-        countMyView(id : Int!, loggedIn : Boolean!) : countMyView
 
         getRecommended(loggedIn : Boolean) : [MetaContent]
 
@@ -257,6 +256,7 @@ export const typeDefs = gql`
 
         #upVote downVote
         vote(contentID : Int!, positive : Boolean!) : ContinueResponse
+        countMyView(id : Int!, loggedIn : Boolean!) : countMyView
 
         deleteBookmark(contentID : Int!) : ContinueResponse
         appendBookmark(contentID : Int!, reminderDate : String) : ContinueResponse

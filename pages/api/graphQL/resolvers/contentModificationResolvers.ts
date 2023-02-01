@@ -154,6 +154,9 @@ export const contentModificationResolvers = {
             return {continue: true}
         },
         modToQuizQuestion: async (parent: undefined, args: { targetID: number, seqNumber: number, oldID: number, args: QuizQuestionInput }, context: genericContext) => {
+
+            console.log("here")
+
             let thisUser = await enforceUser(context)
 
             if (thisUser.checkSuspension()) {

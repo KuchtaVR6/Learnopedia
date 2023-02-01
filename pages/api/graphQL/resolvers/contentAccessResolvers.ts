@@ -17,44 +17,6 @@ export const contentAccessResolvers = {
             return await manager.resolveSearch(args.query.toLowerCase())
         },
 
-        countMyView: async (parent: undefined, args: { id: number, loggedIn : boolean }, context: genericContext) => {
-            let myContent = await ContentManager.getInstance().getSpecificByID(args.id)
-
-            myContent.view()
-
-            if(args.loggedIn) {
-
-                let user = await enforceUser(context)
-
-                let voteUninterpreted = user.checkOpinion(args.id);
-                let checkBookmark = user.checkBookmark(args.id)
-
-                let vote;
-
-                if(voteUninterpreted==1)
-                {
-                    vote = true
-                }
-                else if(voteUninterpreted==0)
-                {
-                    vote = false
-                }
-                else{
-                    vote = null
-                }
-
-                return {
-                    vote : vote,
-                    bookmark : checkBookmark.reminder,
-                    reminderDate : checkBookmark.reminderDate
-                }
-
-            }
-
-            return {}
-
-        },
-
         view: async (parent: undefined, args: { id: number }, context: genericContext):
             Promise<{
                 mainMeta: MetaOutput,
@@ -120,6 +82,50 @@ export const contentAccessResolvers = {
             return {
                 continue: true
             }
+        },
+
+        countMyView: async (parent: undefined, args: { id: number, loggedIn : boolean }, context: genericContext) => {
+            let myContent = await ContentManager.getInstance().getSpecificByID(args.id)
+
+            myContent.view()
+
+            if(args.loggedIn) {
+
+                let user = await enforceUser(context)
+
+                let voteUninterpreted = user.checkOpinion(args.id);
+                let checkBookmark = user.checkBookmark(args.id)
+
+                let vote;
+
+                if(voteUninterpreted==1)
+                {
+                    vote = true
+                }
+                else if(voteUninterpreted==0)
+                {
+                    vote = false
+                }
+                else{
+                    vote = null
+                }
+
+                console.log({
+                    vote : vote,
+                    bookmark : checkBookmark.reminder,
+                    reminderDate : checkBookmark.reminderDate
+                })
+
+                return {
+                    vote : vote,
+                    bookmark : checkBookmark.reminder,
+                    reminderDate : checkBookmark.reminderDate
+                }
+
+            }
+
+            return {}
+
         },
 
         deleteBookmark: async (parent: undefined, args: { contentID: number }, context: genericContext) => {

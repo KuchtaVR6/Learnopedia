@@ -3,7 +3,6 @@ import {lessonPartArgs, lessonPartTypes} from "../../backEnd/lessonParts/LessonP
 import {displayableOutput} from "../../backEnd/lessonParts/LessonPart";
 import EvaluatorInput from "../inputs/evaluatorInput";
 import {AiFillDelete} from "react-icons/ai";
-import ParagraphDisplay from "../contentDisplays/ParagraphDisplay";
 import QuizQuestionDisplay from "../contentDisplays/QuizQuestionDisplay";
 
 type args = {
@@ -58,7 +57,13 @@ const QuizQuestionInput: FC<args> = (props) => {
                     content : {
                         question : question,
                         type : type,
-                        answer : answers
+                        answer : answers.map((ans) => {
+                            return {
+                                content : ans.content,
+                                correct : ans.correct,
+                                feedback : ans.feedback
+                            }
+                        })
                     }
                 })
             }

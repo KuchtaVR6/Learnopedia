@@ -19,8 +19,8 @@ type args = {
 
 const ContentDisplay: FC<args> = ({meta, contents}) => {
 
-    const query = gql`
-        query CountMyView($countMyViewId: Int!, $loggedIn: Boolean!) {
+    const countMyViewMutation = gql`
+        mutation CountMyView($countMyViewId: Int!, $loggedIn: Boolean!) {
             countMyView(id: $countMyViewId, loggedIn: $loggedIn) {
                 vote
                 bookmark
@@ -109,7 +109,7 @@ const ContentDisplay: FC<args> = ({meta, contents}) => {
     const [adjustDown, setAdjustDown] = useState(0)
     const [adjustUp, setAdjustUp] = useState(0)
 
-    const queryVote = useQuery(query, {
+    const [sendCountMyView, queryVote] = useMutation(countMyViewMutation, {
         variables: {
             countMyViewId: meta.id,
             loggedIn: !userContext.loggedIn()
@@ -119,6 +119,7 @@ const ContentDisplay: FC<args> = ({meta, contents}) => {
     let keyCounter = 0;
 
     useEffect(() => {
+        console.log(queryVote.data)
         if (queryVote.data && queryVote.data.countMyView.bookmark !== null) {
             if (voteVal === null)
                 if (queryVote.data.countMyView.vote === true || queryVote.data.countMyView.vote === false)
@@ -133,6 +134,10 @@ const ContentDisplay: FC<args> = ({meta, contents}) => {
             }
         }
     }, [queryVote, voteVal])
+
+    useEffect(()=>{
+        sendCountMyView();
+    },[])
 
     return (
         <div className={styles.main}>
@@ -157,7 +162,7 @@ const ContentDisplay: FC<args> = ({meta, contents}) => {
                     marginRight: "1%",
                     backgroundColor: voteVal === false ? "orange" : ""
                 }}
-                disabled={!userContext.loggedIn() || voteOutcome.loading}
+                disabled={!userContext.loggedIn() || voteOutcome.loading || queryVote.loading}
                 onClick={() => {
                     vote(false)
                 }}>
@@ -170,7 +175,7 @@ const ContentDisplay: FC<args> = ({meta, contents}) => {
                     marginRight: "1%",
                     backgroundColor: voteVal === true ? "orange" : ""
                 }}
-                disabled={!userContext.loggedIn() || voteOutcome.loading}
+                disabled={!userContext.loggedIn() || voteOutcome.loading || queryVote.loading}
                 onClick={() => {
                     vote(true)
                 }}>
@@ -183,7 +188,7 @@ const ContentDisplay: FC<args> = ({meta, contents}) => {
                     marginRight: "1%",
                     backgroundColor: bookmark !== false ? "orange" : ""
                 }}
-                disabled={!userContext.loggedIn() || voteOutcome.loading}
+                disabled={!userContext.loggedIn() || voteOutcome.loading || queryVote.loading}
                 onClick={bookmarkSend}
             >
                 {bookmark === true ? <><BsFillBookmarkXFill/>&nbsp;Remove Bookmark</> : bookmark === false ? <>

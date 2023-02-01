@@ -50,7 +50,7 @@ const EditLessonPart: NextPage<{
             if (x) {
                 setSeqNumber(x.seqNumber)
                 setExtracted(x)
-                setType(x.output.__typename==="ParagraphOutput"? "PARAGRAPH" : x.output.__typename==="EmbeddableOutput"? "Embeddable" : "QuizQuestion")
+                setType(x.output.__typename === "ParagraphOutput" ? "PARAGRAPH" : x.output.__typename === "EmbeddableOutput" ? "Embeddable" : "QuizQuestion")
             } else {
                 throw new Error(parseInt(router.query.child as string) + "child is not a part of this lesson")
             }
@@ -67,14 +67,16 @@ const EditLessonPart: NextPage<{
                         continue
                     }
                 }`)
-        } if (type === "Embeddable") {
+        }
+        if (type === "Embeddable") {
             setMutationSpec(gql`
                 mutation Mutation($targetId: Int!, $seqNumber: Int!, $oldId: Int!, $args: EmbeddableInput!) {
                     modToEmbeddable(targetID: $targetId, seqNumber: $seqNumber, oldID: $oldId, args: $args) {
                         continue
                     }
                 }`)
-        } if (type === "QuizQuestion") {
+        }
+        if (type === "QuizQuestion") {
             setMutationSpec(gql`
                 mutation ModToQuizQuestion($targetId: Int!, $seqNumber: Int!, $oldId: Int!, $args: QuizQuestionInput!) {
                     modToQuizQuestion(targetID: $targetId, seqNumber: $seqNumber, oldID: $oldId, args: $args) {
@@ -100,11 +102,18 @@ const EditLessonPart: NextPage<{
     const [submitted, setSubmitted] = useState(false)
 
     const submit = async () => {
+        console.log({
+            targetId: parseInt(router.query.targetid as string),
+            seqNumber: seqNumber,
+            args: changes?.content,
+            oldId: parseInt(router.query.child as string)
+        })
         submitMut().then(() => {
                 setWarning("Changes saved correctly, it will take up to 20 minutes for the changes to be visible.");
                 setSubmitted(true)
             }
         ).catch((e) => {
+            console.log(e)
             setWarning(e.toString())
         })
     }
@@ -127,8 +136,8 @@ const EditLessonPart: NextPage<{
                     <meta name={"robots"} content={"noindex, nofollow"}/>
                 </Head>
                 <div className={styles.main}>
-                    <div className={"buttonNiceContainer"} style={{float: "left"}}>
-                        <a href={"/view/"+data.mainMeta.id}><BiArrowBack/>Back to the content</a>
+                    <div className={"buttonNiceContainer"}>
+                        <a href={"/view/" + data.mainMeta.id}><BiArrowBack/>Back to the content</a>
                     </div>
                     {extracted ?
                         <LessonPartForm

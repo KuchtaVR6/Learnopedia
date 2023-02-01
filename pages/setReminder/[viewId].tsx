@@ -59,7 +59,7 @@ const SetReminder: NextPage<{
                 <meta name={"robots"} content={"noindex, nofollow"}/>
             </Head>
             <div className={styles.main}>
-                <div className={"buttonNiceContainer"} style={{float: "left"}}>
+                <div className={"buttonNiceContainer"}>
                     <a href={"/view/"+data.mainMeta.id}><BiArrowBack/>Back to the content</a>
                 </div>
                 <h1>Set a reminder for:</h1>

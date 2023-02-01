@@ -22,7 +22,7 @@ const ContentsAmendments: NextPage<{ data: AmendmentOutput[] }> = ({data}) => {
                         <meta name={"robots"} content={"noindex, nofollow"}/>
                     </Head>
                     <div className = {styles.main}>
-                        <div className={"buttonNiceContainer"} style={{float: "left"}}>
+                        <div className={"buttonNiceContainer"}>
                             <a href={"/view/"+router.query.viewId}><BiArrowBack/>Back to the content</a>
                         </div>
                         <AmendmentDisplay input={data}/>

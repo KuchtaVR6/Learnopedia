@@ -105,7 +105,7 @@ const AddChild: NextPage<{
                     <meta name={"robots"} content={"noindex, nofollow"}/>
                 </Head>
                 <div className={styles.main}>
-                    <div className={"buttonNiceContainer"} style={{float: "left"}}>
+                    <div className={"buttonNiceContainer"}>
                         <a href={"/view/"+data.mainMeta.id}><BiArrowBack/>Back to the content</a>
                     </div>
                     <MetaForm type={data.mainMeta.type + 1}
