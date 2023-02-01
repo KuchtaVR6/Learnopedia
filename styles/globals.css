@@ -124,7 +124,7 @@ body{
     animation-duration: 0.2s;
 }
 
-.buttonNiceContainer h3:hover, b:hover {
+.buttonNiceContainer h3:hover,.buttonNiceContainer b:hover {
     text-decoration: underline black;
 }
 

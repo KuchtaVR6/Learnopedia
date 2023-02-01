@@ -9,6 +9,7 @@ import KeywordDisplay from "../../models/frontEnd/keywordCompoments/keywordDispl
 import Link from "next/link";
 import {useEffect, useState} from "react";
 import {useRouter} from "next/router";
+import {BiArrowBack} from "react-icons/bi";
 
 const SetReminder: NextPage<{
     data: {
@@ -58,6 +59,9 @@ const SetReminder: NextPage<{
                 <meta name={"robots"} content={"noindex, nofollow"}/>
             </Head>
             <div className={styles.main}>
+                <div className={"buttonNiceContainer"} style={{float: "left"}}>
+                    <a href={"/view/"+data.mainMeta.id}><BiArrowBack/>Back to the content</a>
+                </div>
                 <h1>Set a reminder for:</h1>
                 <div>
                     <hr/>

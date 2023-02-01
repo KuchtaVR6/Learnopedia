@@ -9,6 +9,7 @@ import styles from "../../../styles/ContentDisplay.module.css";
 import {gql, useMutation} from "@apollo/client";
 import {useRouter} from "next/router";
 import Head from "next/head";
+import {BiArrowBack} from "react-icons/bi";
 
 export type MetaChanges = {
     title: string | null,
@@ -103,6 +104,9 @@ const EditChild: NextPage<{
                 <meta name={"robots"} content={"noindex, nofollow"}/>
             </Head>
             <div className={styles.main}>
+                <div className={"buttonNiceContainer"} style={{float: "left"}}>
+                    <a href={"/view/"+data.mainMeta.id}><BiArrowBack/>Back to the content</a>
+                </div>
                 <MetaForm type={data.mainMeta.type}
                           parentTitle={data.mainMeta.name}
                           setOutput={setChanges}

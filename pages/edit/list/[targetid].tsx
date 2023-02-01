@@ -10,6 +10,7 @@ import {useRouter} from "next/router";
 import {AiFillDelete} from "react-icons/ai";
 import {displayableOutput} from "../../../models/backEnd/lessonParts/LessonPart";
 import Head from "next/head";
+import {BiArrowBack} from "react-icons/bi";
 
 
 const ModList: NextPage<{
@@ -208,6 +209,9 @@ const ModList: NextPage<{
                 <meta name={"robots"} content={"noindex, nofollow"}/>
             </Head>
             <div className={styles.main}>
+                <div className={"buttonNiceContainer"} style={{float: "left"}}>
+                    <a href={"/view/"+data.mainMeta.id}><BiArrowBack/>Back to the content</a>
+                </div>
                 <h1>List modifications on {data.mainMeta.name}</h1>
                 <hr/>
                 <table style={{width: "100%"}}>

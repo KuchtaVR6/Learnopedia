@@ -9,6 +9,7 @@ import {gql, useMutation} from "@apollo/client";
 import {useRouter} from "next/router";
 import EvaluatorInput from "../../../models/frontEnd/inputs/evaluatorInput";
 import Head from "next/head";
+import {BiArrowBack} from "react-icons/bi";
 
 const Adopt: NextPage<{
     data: {
@@ -114,6 +115,9 @@ const Adopt: NextPage<{
                     <meta name={"robots"} content={"noindex, nofollow"}/>
                 </Head>
                 <div className={styles.main}>
+                    <div className={"buttonNiceContainer"} style={{float: "left"}}>
+                        <a href={"/view/"+data.mainMeta.id}><BiArrowBack/>Back to the content</a>
+                    </div>
                     <h1>Change parent</h1>
                     <p>Paste the new parents link or ID:</p>
                     &nbsp;&nbsp;<EvaluatorInput width={25} condition={condition} setInput={setStringInput}/>

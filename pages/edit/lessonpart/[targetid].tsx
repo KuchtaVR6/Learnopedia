@@ -11,6 +11,7 @@ import LessonPartForm from "../../../models/frontEnd/editForms/lessonpartForm";
 import {displayableOutput} from "../../../models/backEnd/lessonParts/LessonPart";
 import Head from "next/head";
 import {lessonPartArgs} from "../../../models/backEnd/lessonParts/LessonPartTypes";
+import {BiArrowBack} from "react-icons/bi";
 
 const EditLessonPart: NextPage<{
     data: {
@@ -126,6 +127,9 @@ const EditLessonPart: NextPage<{
                     <meta name={"robots"} content={"noindex, nofollow"}/>
                 </Head>
                 <div className={styles.main}>
+                    <div className={"buttonNiceContainer"} style={{float: "left"}}>
+                        <a href={"/view/"+data.mainMeta.id}><BiArrowBack/>Back to the content</a>
+                    </div>
                     {extracted ?
                         <LessonPartForm
                             setChanges={setChanges}

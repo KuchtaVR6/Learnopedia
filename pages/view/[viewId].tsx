@@ -5,11 +5,15 @@ import {gql} from "@apollo/client";
 import {FullOutput, MetaOutput} from "../../models/backEnd/contents/Content";
 import ContentDisplay from "../../models/frontEnd/contentDisplays/contentDisplay";
 import Head from "next/head";
+import lesson from "../../models/backEnd/contents/Lesson";
+import {BiArrowBack} from "react-icons/bi";
 
-const View: NextPage<{data : {
+const View: NextPage<{
+    data: {
         mainMeta: MetaOutput,
         output: FullOutput
-    }}> = ({data}) => {
+    }
+}> = ({data}) => {
 
     const jsonLD = () => {
         let creation = new Date(data.mainMeta.creation)
@@ -39,7 +43,23 @@ const View: NextPage<{data : {
         )
     }
 
-    if(data) {
+    const parentID = () : number => {
+        if(data.mainMeta.type==1) {
+            return data.output.metas.meta.id
+        }
+        else {
+            for(let chapter of data.output.metas.chapters){
+                for(let lesson of chapter.lessons) {
+                    if(lesson.id === data.mainMeta.id) {
+                        return chapter.meta.id
+                    }
+                }
+            }
+        }
+        return 0
+    }
+
+    if (data) {
         return (
             <div>
                 <Head>
@@ -51,26 +71,32 @@ const View: NextPage<{data : {
                     <script
                         key="structured-data"
                         type="application/ld+json"
-                        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLD()) }}
+                        dangerouslySetInnerHTML={{__html: JSON.stringify(jsonLD())}}
                     />
                 </Head>
                 <RegularLayout enforceUser={false} navigation={data.output}>
+                    {data.mainMeta.type != 0 ?
+                        <div className={"buttonNiceContainer"} style={{float: "left"}}>
+                            <a href={"/view/" + parentID()}><BiArrowBack/>Back to the {data.mainMeta.type == 1? "course" : "chapter"}</a>
+                        </div>
+                        :
+                        ""
+                    }
                     <ContentDisplay meta={data.mainMeta} contents={data.output}/>
                 </RegularLayout>
             </div>
 
         )
-    }
-    else{
+    } else {
         return <></>;
     }
 }
 
-export async function getServerSideProps(context : GetServerSidePropsContext) {
+export async function getServerSideProps(context: GetServerSidePropsContext) {
 
     const id = parseInt(context.query.viewId as string)
 
-    if(id) {
+    if (id) {
 
         // Fetch data from external API
         const res = await client.query({
@@ -81,7 +107,7 @@ export async function getServerSideProps(context : GetServerSidePropsContext) {
             fetchPolicy: "network-only",
         },)
         if (res.error) {
-            return { notFound : true }
+            return {notFound: true}
         }
 
         const data = (await res.data).view
@@ -90,7 +116,7 @@ export async function getServerSideProps(context : GetServerSidePropsContext) {
         // Pass data to the page via props
         return {props: {data}}
     }
-    return { notFound : true }
+    return {notFound: true}
 }
 
 export const fetchquery = gql`
@@ -180,8 +206,8 @@ export const fetchquery = gql`
                             answer {
                                 answerID
                                 content
-                                correct 
-                                feedback 
+                                correct
+                                feedback
                             }
                         }
                     }

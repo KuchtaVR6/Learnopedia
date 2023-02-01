@@ -5,8 +5,13 @@ import {gql} from "@apollo/client";
 import {AmendmentOutput} from "../../models/backEnd/amendments/Amendment";
 import AmendmentDisplay from "../../models/frontEnd/amendmentDisplay";
 import Head from "next/head";
+import styles from "../../styles/ContentDisplay.module.css";
+import {useRouter} from "next/router";
+import {BiArrowBack} from "react-icons/bi";
 
 const ContentsAmendments: NextPage<{ data: AmendmentOutput[] }> = ({data}) => {
+
+    let router = useRouter();
 
     if (data) {
         return (
@@ -16,7 +21,12 @@ const ContentsAmendments: NextPage<{ data: AmendmentOutput[] }> = ({data}) => {
                         <title>Learnopedia</title>
                         <meta name={"robots"} content={"noindex, nofollow"}/>
                     </Head>
-                    <AmendmentDisplay input={data}/>
+                    <div className = {styles.main}>
+                        <div className={"buttonNiceContainer"} style={{float: "left"}}>
+                            <a href={"/view/"+router.query.viewId}><BiArrowBack/>Back to the content</a>
+                        </div>
+                        <AmendmentDisplay input={data}/>
+                    </div>
                 </RegularLayout>
             </div>
         )

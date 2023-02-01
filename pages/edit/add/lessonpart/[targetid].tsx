@@ -10,6 +10,7 @@ import {useRouter} from "next/router";
 import LessonPartForm from "../../../../models/frontEnd/editForms/lessonpartForm";
 import Head from "next/head";
 import {lessonPartArgs} from "../../../../models/backEnd/lessonParts/LessonPartTypes";
+import {BiArrowBack} from "react-icons/bi";
 
 const AddLessonPart: NextPage<{
     data: {
@@ -102,6 +103,9 @@ const AddLessonPart: NextPage<{
                     <meta name={"robots"} content={"noindex, nofollow"}/>
                 </Head>
                 <div className={styles.main}>
+                    <div className={"buttonNiceContainer"} style={{float: "left"}}>
+                        <a href={"/view/"+data.mainMeta.id}><BiArrowBack/>Back to the content</a>
+                    </div>
                     <LessonPartForm
                         setChanges={setChanges}
                         type={type}
