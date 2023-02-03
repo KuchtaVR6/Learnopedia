@@ -9,7 +9,7 @@ import AmendmentManager from "../../../../models/backEnd/amendments/AmendmentMan
 import {InvalidArgument} from "../../../../models/backEnd/tools/Errors";
 import {lessonPartTypes} from "../../../../models/backEnd/lessonParts/LessonPartTypes";
 import {ParagraphInput} from "../../../../models/backEnd/lessonParts/LessonPartManager";
-import {EmbeddableInput, EmbeddableOutput} from "../../../../models/backEnd/lessonParts/Embeddable";
+import {EmbeddableInput} from "../../../../models/backEnd/lessonParts/Embeddable";
 import {QuizQuestionInput} from "../../../../models/backEnd/lessonParts/QuizQuestion";
 
 export const contentModificationResolvers = {
@@ -154,8 +154,6 @@ export const contentModificationResolvers = {
             return {continue: true}
         },
         modToQuizQuestion: async (parent: undefined, args: { targetID: number, seqNumber: number, oldID: number, args: QuizQuestionInput }, context: genericContext) => {
-
-            console.log("here")
 
             let thisUser = await enforceUser(context)
 

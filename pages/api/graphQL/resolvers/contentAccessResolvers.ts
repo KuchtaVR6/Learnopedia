@@ -6,7 +6,6 @@ import {AmendmentOutput, VotingSupport} from "../../../../models/backEnd/amendme
 import {User} from "../../../../models/backEnd/User";
 import {UserManager} from "../../../../models/backEnd/managers/UserManager";
 import {enforceUser} from "./verificationResolvers";
-import bookmarkManager from "../../../../models/backEnd/managers/BookmarkManager";
 import BookmarkManager from "../../../../models/backEnd/managers/BookmarkManager";
 
 export const contentAccessResolvers = {
@@ -109,12 +108,6 @@ export const contentAccessResolvers = {
                 else{
                     vote = null
                 }
-
-                console.log({
-                    vote : vote,
-                    bookmark : checkBookmark.reminder,
-                    reminderDate : checkBookmark.reminderDate
-                })
 
                 return {
                     vote : vote,

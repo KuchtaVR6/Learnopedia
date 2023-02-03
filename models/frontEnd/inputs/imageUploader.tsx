@@ -118,7 +118,7 @@ const ImageUploader: FC<args> = ({enforceImage, imageName, fileSizeLimit,hideOpt
                             }} disabled={!editable}/>
                             <div className={styles.waring}>{error}</div><br/>
                         </div>
-                        <img src={imageSRC} width={100} />
+                        <img src={imageSRC} width={100} alt={"uploaded image preview"}/>
                     </div>
                 </div>
 

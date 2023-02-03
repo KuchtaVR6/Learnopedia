@@ -1,10 +1,5 @@
 import {AnchorHTMLAttributes, DetailedHTMLProps, FC, useEffect, useState} from "react";
-import {EmbeddableOutput} from "../../backEnd/lessonParts/Embeddable";
-import Gist from "react-gist";
-import styles from "../../../styles/ContentDisplay.module.css"
 import {ParagraphOutput} from "../../backEnd/lessonParts/Paragraph";
-import {string} from "prop-types";
-import {compareSync} from "bcrypt";
 
 type args = ParagraphOutput
 
@@ -44,7 +39,7 @@ const ParagraphDisplay: FC<args> = (input) => {
         indexInProcessedText = 0;
 
         for(let text of processedText) {
-            if(typeof text === 'string' || text instanceof String) {
+            if(typeof text === 'string') {
                 //find triple stars
                 let starSplit = text.split("***")
                 for (let i = 0; i < starSplit.length; i++) {

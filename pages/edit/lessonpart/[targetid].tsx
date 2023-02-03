@@ -102,18 +102,11 @@ const EditLessonPart: NextPage<{
     const [submitted, setSubmitted] = useState(false)
 
     const submit = async () => {
-        console.log({
-            targetId: parseInt(router.query.targetid as string),
-            seqNumber: seqNumber,
-            args: changes?.content,
-            oldId: parseInt(router.query.child as string)
-        })
         submitMut().then(() => {
                 setWarning("Changes saved correctly, it will take up to 20 minutes for the changes to be visible.");
                 setSubmitted(true)
             }
         ).catch((e) => {
-            console.log(e)
             setWarning(e.toString())
         })
     }

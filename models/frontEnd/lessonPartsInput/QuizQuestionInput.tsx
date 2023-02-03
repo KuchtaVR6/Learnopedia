@@ -31,7 +31,6 @@ const QuizQuestionInput: FC<args> = (props) => {
             }
         }
     }
-
     const [question, setQuestion] = useState<string>(props.current?.output.__typename === "QuizQuestionOutput" ? props.current.output.question : "")
     const [type, setType] = useState<string>(props.current?.output.__typename === "QuizQuestionOutput" ? props.current?.output.type : "SingleChoiceQuestion")
     const [answers, setAnswers] = useState<{

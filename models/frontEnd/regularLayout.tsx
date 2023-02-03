@@ -51,7 +51,7 @@ const RegularLayout: FC<args> = ({children, enforceUser, navigation, noInlineNav
     useEffect(() => {
         if(enforceUser || window.sessionStorage.getItem("loggedIn")==="true"){
             fetch().catch((e) => {
-                if(e.message === "Session has been Invalidated")
+                if(e.message === "Session has been Invalidated" || e.message === "Refresh Token is Invalid")
                 {
                     window.sessionStorage.setItem("loggedIn","false")
                     if(enforceUser)

@@ -8,8 +8,6 @@ export async function middleware(req : NextRequest) {
     const protocol = req.headers.get('x-forwarded-proto') || 'http'
     const baseUrl = `${protocol}://${req.headers.get('host')}`
 
-    console.log(1)
-
     const resp = await fetch(baseUrl + '/api/graphql', {
         method: 'POST',
 
@@ -29,8 +27,6 @@ export async function middleware(req : NextRequest) {
     })
 
     let response = (JSON.parse(await resp.text()))
-
-    console.log(2,response)
 
     if (response.errors)
     {

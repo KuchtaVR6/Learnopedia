@@ -65,16 +65,38 @@ export class SessionRegistry extends Purgeable {
         let newSession = new Session(user, agent)
         this.sessions.set(x, newSession)
 
-        await prisma.session.createMany({
-            data: [{
+        console.log("this 1")
+
+
+        console.log({
+            data: {
                 UserID: user.getID(),
                 agent: agent,
                 TTL: newSession.getTTL(),
                 refreshToken: x,
                 invalidated: false,
                 timestamp: newSession.getTimestamp()
-            }]
+            }
         })
+
+        try{
+            await prisma.session.createMany({
+                data: [{
+                    UserID: user.getID(),
+                    agent: agent,
+                    TTL: newSession.getTTL(),
+                    refreshToken: x,
+                    invalidated: false,
+                    timestamp: newSession.getTimestamp()
+                }]
+            })
+        }
+        catch (e) {
+            console.log(e)
+
+            throw e
+        }
+
 
         return x
     }
@@ -93,12 +115,15 @@ export class SessionRegistry extends Purgeable {
                     this.accessTokens.set(token, newToken)
                     return token;
                 } else {
+                    console.log("RF expired on ATR")
                     await x.destroy()
                 }
             } else {
+                console.log("RF agent mismatch on ATR")
                 await x.destroy()
             }
         }
+        console.log("RF not found on ATR")
         throw new SessionHasBeenInvalidated();
     }
 
@@ -216,6 +241,7 @@ class Session extends Expirable {
 
     public async destroy() {
         this.invalidated = true;
+
         await prisma.session.delete(
             {
                 where: {

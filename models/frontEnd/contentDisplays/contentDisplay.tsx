@@ -2,13 +2,12 @@ import {FC, useContext, useEffect, useState} from "react";
 import {FullOutput, MetaOutput} from "../../backEnd/contents/Content";
 import NavigationTile from "../navigational/navigationTile";
 import KeywordDisplay from "../keywordCompoments/keywordDisplay";
-import {useRouter} from "next/router";
 import styles from "../../../styles/ContentDisplay.module.css";
 import {UserContext} from "../authentication/userContext";
 import EditButton from "../inputs/editButton";
 import LessonPartDisplay from "./lessonPartDisplay";
 import {BiDownvote, BiUpvote} from "react-icons/bi";
-import {gql, useMutation, useQuery} from "@apollo/client";
+import {gql, useMutation} from "@apollo/client";
 import {BsClockFill, BsFillBookmarkHeartFill, BsFillBookmarkXFill} from "react-icons/bs";
 import Link from "next/link";
 
@@ -119,7 +118,6 @@ const ContentDisplay: FC<args> = ({meta, contents}) => {
     let keyCounter = 0;
 
     useEffect(() => {
-        console.log(queryVote.data)
         if (queryVote.data && queryVote.data.countMyView.bookmark !== null) {
             if (voteVal === null)
                 if (queryVote.data.countMyView.vote === true || queryVote.data.countMyView.vote === false)
@@ -136,7 +134,8 @@ const ContentDisplay: FC<args> = ({meta, contents}) => {
     }, [queryVote, voteVal])
 
     useEffect(()=>{
-        sendCountMyView();
+        sendCountMyView().catch(()=>{
+        });
     },[])
 
     return (

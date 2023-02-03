@@ -32,17 +32,6 @@ export type MetaOutput = {
     downVotes: number
 }
 
-export type LDNJSON = {
-    "@context": string,
-    "@type": string,
-    headline: string,
-    description: string,
-    image: string,
-    author: { "@type": string, name: string },
-    publisher: { "@type": string, name: string, logo: { "@type": string, url: string } },
-    datePublished: string, dateModified: string
-}
-
 export type contentShareOutput = {
     level : ContentType,
     maximum : number,

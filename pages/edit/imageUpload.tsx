@@ -171,7 +171,6 @@ const ImageUpload: NextPage = () => {
                     setError("Unexpected error occurred 😿")
                 }
             } catch(e) {
-                console.log(e)
                 setError("Unexpected error occurred 😿")
             }
         }
@@ -216,7 +215,7 @@ const ImageUpload: NextPage = () => {
                 <hr/>
                 {image ? !isSVG ?
                     <img alt="preview of your image" src={imageSRC} id="output" width="400"/> :
-                    <SVGModifier inputFile={image} setFile={addImage}></SVGModifier> : ""}
+                    <SVGModifier inputFile={image} setFile={addImage}/> : ""}
                 <hr/>
                 <button disabled={!redoUndo.undo} onClick={undo}><BiUndo/> undo</button>
                 <button disabled={!redoUndo.redo} onClick={redo}><BiRedo/> undo</button>

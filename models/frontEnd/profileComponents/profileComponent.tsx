@@ -4,7 +4,6 @@ import SimpleDetails from "./simpleDetails";
 import ComplexActions from "./complexActions";
 import {UserContext} from "../authentication/userContext";
 import XpBar from "./xpBar";
-import {useRouter} from "next/router";
 import Link from "next/link";
 
 const ProfileComponent: FC = () => {
@@ -21,7 +20,6 @@ const ProfileComponent: FC = () => {
 
     const userContext = useContext(UserContext)
 
-    const router = useRouter();
     useEffect(() => {
         checkImage()
     }, [])

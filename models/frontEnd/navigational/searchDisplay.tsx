@@ -1,7 +1,6 @@
 import {FC} from "react";
 import {MetaOutput} from "../../backEnd/contents/Content";
 import KeywordDisplay from "../keywordCompoments/keywordDisplay";
-import {useRouter} from "next/router";
 import styles from "../../../styles/ContentDisplay.module.css";
 import Link from "next/link";
 
@@ -14,8 +13,6 @@ type args = {
 }
 
 const SearchDisplay: FC<args> = ({array, query}) => {
-
-    let router = useRouter()
 
     let keyCounter = 0;
 

@@ -6,7 +6,6 @@ import {gql} from "@apollo/client";
 import XpBar from "../../models/frontEnd/profileComponents/xpBar";
 import client from "../../apollo-client";
 import {UserDetails} from "../../models/backEnd/User";
-import {useRouter} from "next/router";
 import Head from "next/head";
 import {MutableRefObject, useEffect, useRef, useState} from "react";
 import Link from "next/link";
@@ -26,8 +25,6 @@ const UserView: NextPage<args> = ({data}) => {
                 setIsPortrait(false)
             }
     }
-
-    const router = useRouter();
 
     useEffect(() => {
         checkImage()

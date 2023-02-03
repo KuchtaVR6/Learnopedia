@@ -70,6 +70,7 @@ const Profile: NextPage = () => {
     return (
         <RegularLayout enforceUser={true} noInlineNav={true}>
             <Head>
+                <title>Moderator View</title>
                 <meta name={"robots"} content={"noindex, nofollow"}/>
             </Head>
             <div className={styles.main}>

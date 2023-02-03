@@ -7,9 +7,6 @@ const httpHeadersPlugin = require("apollo-server-plugin-http-headers");
 import cors from "cors"
 import initMiddleware from "./graphQL/initMiddleware";
 import {SessionRegistry} from "../../models/backEnd/managers/SessionRegistry";
-import {UserManager} from "../../models/backEnd/managers/UserManager";
-import ContentManager from "../../models/backEnd/contents/ContentManager";
-import MailManager from "../../models/backEnd/managers/MailManager";
 
 const SessionRegistryInstance = SessionRegistry.getInstance()
 

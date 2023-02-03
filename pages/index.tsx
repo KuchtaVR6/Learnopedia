@@ -1,13 +1,11 @@
 import type {NextPage} from 'next'
 import Head from 'next/head'
 import RegularLayout from "../models/frontEnd/regularLayout";
-import {useRouter} from "next/router";
 import styles from "../styles/Home.module.css"
 import Link from "next/link";
 
 const Home: NextPage = () => {
 
-    const router = useRouter();
     return (
         <>
             <Head>

@@ -50,7 +50,7 @@ const SetReminder: NextPage<{
         if(baOutput.error) {
             window.alert("Unexpected error occurred...")
         }
-    },[baOutput])
+    },[baOutput, data.mainMeta.id])
 
     return (
         <RegularLayout enforceUser={true}>

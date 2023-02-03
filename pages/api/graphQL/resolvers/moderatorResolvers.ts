@@ -1,4 +1,3 @@
-import {ParagraphInput} from "../../../../models/backEnd/lessonParts/LessonPartManager";
 import {genericContext} from "../resolvers";
 import prisma from "../../../../prisma/prisma";
 import {AmendmentOutput} from "../../../../models/backEnd/amendments/Amendment";

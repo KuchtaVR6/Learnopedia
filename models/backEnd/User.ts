@@ -98,6 +98,10 @@ export class User extends Expirable {
      * @param opinions      - map of associated opinions (upvote, downVote)
      * @param votes         - map of associated votes
      * @param avatarPath    - the path to the avatar
+     * @param uploadPath    - the path of the last uploaded image
+     * @param suspension    - the time until which the user is/has been suspended.
+     * @param moderator     - flag distinguishing moderators true = moderator
+     * @param bookmarks     - map of bookmark that the user created (including reminders)
      * @param colorA        - color on the left side of the banner on the profile page
      * @param colorB        - color on the right side of the banner on the profile page
      */

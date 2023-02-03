@@ -1,8 +1,5 @@
 import {FC} from "react";
-import styles from "../../../styles/ContentDisplay.module.css";
 import {AiTwotoneEdit} from "react-icons/ai";
-import {useRouter} from "next/router";
-import Link from "next/link";
 
 type args = {
     loggedIn : boolean,

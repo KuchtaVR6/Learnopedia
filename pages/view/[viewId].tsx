@@ -5,7 +5,6 @@ import {gql} from "@apollo/client";
 import {FullOutput, MetaOutput} from "../../models/backEnd/contents/Content";
 import ContentDisplay from "../../models/frontEnd/contentDisplays/contentDisplay";
 import Head from "next/head";
-import lesson from "../../models/backEnd/contents/Lesson";
 import {BiArrowBack} from "react-icons/bi";
 
 const View: NextPage<{
