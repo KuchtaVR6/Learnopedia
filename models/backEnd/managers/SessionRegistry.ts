@@ -29,7 +29,7 @@ export class SessionRegistry extends Purgeable {
         let userManagerInstance = await UserManager.getInstance()
 
         for (let row of dbFetch) {
-            let thisSession = new Session(await userManagerInstance.getUserID(row.UserID), row.agent, row.timestamp, row.TTL)
+            let thisSession = new Session(row.SessionID, await userManagerInstance.getUserID(row.UserID), row.agent, row.timestamp, row.TTL)
 
             for (let token of row.accesstoken) {
                 let newAccessToken = new AccessToken(thisSession, token.token, token.timestamp, token.TTL)
@@ -62,41 +62,22 @@ export class SessionRegistry extends Purgeable {
         await super.notify()
 
         let x = SessionRegistry.generateToken(16)
-        let newSession = new Session(user, agent)
-        this.sessions.set(x, newSession)
 
-        console.log("this 1")
+        let timestamp = new Date();
 
-
-        console.log({
+        let output = await prisma.session.create({
             data: {
                 UserID: user.getID(),
                 agent: agent,
-                TTL: newSession.getTTL(),
+                TTL: 36000,
                 refreshToken: x,
                 invalidated: false,
-                timestamp: newSession.getTimestamp()
+                timestamp: timestamp
             }
         })
 
-        try{
-            await prisma.session.createMany({
-                data: [{
-                    UserID: user.getID(),
-                    agent: agent,
-                    TTL: newSession.getTTL(),
-                    refreshToken: x,
-                    invalidated: false,
-                    timestamp: newSession.getTimestamp()
-                }]
-            })
-        }
-        catch (e) {
-            console.log(e)
-
-            throw e
-        }
-
+        let newSession = new Session(output.SessionID, user, agent, timestamp, 36000)
+        this.sessions.set(x, newSession)
 
         return x
     }
@@ -206,17 +187,19 @@ export class SessionRegistry extends Purgeable {
 
 class Session extends Expirable {
 
+    private readonly sessionID : number;
     private readonly user: User;
     private invalidated: boolean;
     private accessTokens: Map<AccessToken, number>;
     private readonly userAgent: string;
 
-    public constructor(user: User, agent: string, timestamp?: Date, TTL?: number) {
+    public constructor(sessionID : number, user : User, agent: string, timestamp?: Date, TTL?: number) {
         if (TTL) {
             super(TTL, timestamp)
         } else {
             super(36000) // 10 hours
         }
+        this.sessionID = sessionID;
         this.user = user;
         this.accessTokens = new Map<AccessToken, number>();
         this.invalidated = false;
@@ -245,7 +228,7 @@ class Session extends Expirable {
         await prisma.session.delete(
             {
                 where: {
-                    UserID_timestamp: {UserID: this.user.getID(), timestamp: this.getTimestamp()}
+                    SessionID: this.sessionID
                 }
             }
         )
@@ -259,8 +242,7 @@ class Session extends Expirable {
                 data: {
                     sequence: this.accessTokens.size,
                     token: x.getToken(),
-                    Sessiontimestamp: this.getTimestamp(),
-                    SessionUserID: this.user.getID(),
+                    SessionID: this.sessionID,
                     timestamp: x.getTimestamp(),
                     TTL: x.getTTL()
                 }
@@ -275,7 +257,7 @@ class Session extends Expirable {
         if (this.user?.getID()) {
             await prisma.session.delete({
                     where: {
-                        UserID_timestamp: {UserID: this.user.getID(), timestamp: this.getTimestamp()}
+                        SessionID : this.sessionID
                     }
                 }
             )

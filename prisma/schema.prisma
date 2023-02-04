@@ -202,16 +202,16 @@ model partamendment {
 
 model session {
   UserID       Int
-  timestamp    DateTime      @db.DateTime(0)
-  invalidated  Boolean       @db.Bit(1)
+  timestamp    DateTime @db.DateTime(0)
+  invalidated  Boolean  @db.Bit(1)
   TTL          Int
-  agent        String        @db.VarChar(255)
-  refreshToken String        @db.VarChar(255)
-  user         user          @relation(fields: [UserID], references: [ID], onDelete: Cascade, map: "FKSession82632")
-  accesstoken  accesstoken[]
+  agent        String   @db.VarChar(255)
+  refreshToken String   @db.VarChar(255)
+  SessionID    Int      @id @default(autoincrement())
+  user         user     @relation(fields: [UserID], references: [ID], onDelete: Cascade, map: "FKSession82632")
 
-  @@id([UserID, timestamp])
   @@index([UserID], map: "FKSession82632")
+  accesstoken accesstoken[]
 }
 
 model user {
@@ -235,15 +235,14 @@ model user {
 }
 
 model accesstoken {
-  token            String   @id @db.VarChar(255)
-  SessionUserID    Int
-  Sessiontimestamp DateTime @db.DateTime(0)
-  timestamp        DateTime @db.DateTime(0)
-  TTL              Int
-  sequence         Int
-  session          session  @relation(fields: [SessionUserID, Sessiontimestamp], references: [UserID, timestamp], onDelete: Cascade, map: "FKAccessToken78212")
+  token     String   @id @db.VarChar(255)
+  SessionID Int      @default(1)
+  timestamp DateTime @db.DateTime(0)
+  TTL       Int
+  sequence  Int
+  session   session  @relation(fields: [SessionID], references: [SessionID], onDelete: Cascade, map: "FKAccessToken78212")
 
-  @@index([SessionUserID, Sessiontimestamp], map: "FKAccessToken78212")
+  @@index([SessionID], map: "FKAccessToken78212")
 }
 
 model amendmentopinion {
