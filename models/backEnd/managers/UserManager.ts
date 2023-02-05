@@ -168,7 +168,8 @@ class UserStore {
                 lname: lname,
                 fname: fname,
                 nickname: nickname,
-                passHash: passHash
+                passHash: passHash,
+                moderator: false
             }
         })
 
