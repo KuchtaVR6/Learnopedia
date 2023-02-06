@@ -129,6 +129,7 @@ const SelfValidatingInput: FC<Args> = ({setProp, query, type, disable, placehold
             } else if (type === ConstrainedInputTypes.NICKNAME && newInput.indexOf("@") >= 0) {
                 setCurrentState(OSIStates.INVALID_INPUT, ver)
             } else {
+                console.log(prevSend.current, newInput)
                 if(prevSend.current !== newInput) {
                     setInternal(newInput);
                     prevSend.current = newInput;
@@ -220,6 +221,7 @@ const SelfValidatingInput: FC<Args> = ({setProp, query, type, disable, placehold
                 setCurrentState={setCurrentState}
                 basicValidator={basicValidator}
                 OnChange={()=>{setProp("")}}
+                prevState={prevSend}
             />
             <br/>
             {disable ? "" : <span className={styles.waring}>{message}</span>}

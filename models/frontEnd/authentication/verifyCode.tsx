@@ -60,12 +60,17 @@ const VerifyCode: FC<Args> = ({email, visibility, setVisibility, refresh, next, 
         }
     }, [codeValue])
 
-    const onFail = () => {
+    const onFail = (e : Error) => {
+
         setToggle(false);
         inputRef!.current!.disabled = false
         inputRef!.current!.value = ""
-        setMessage("Code was incorrect 🛑")
-
+        if(e.message === "Provided code is incorrect") {
+            setMessage("Code was incorrect 🛑")
+        }
+        else {
+            setMessage("Provided registration data was incorrect.")
+        }
     }
 
     return (
@@ -85,6 +90,7 @@ const VerifyCode: FC<Args> = ({email, visibility, setVisibility, refresh, next, 
                     onChange={(e) => setCodeValue(e.target.value)}
                 />
                 <span className={prompt.overlay}>_____</span>
+                {message}
 
                 {toggle ? <Authenticator method={query} args={{
                     code: parseInt(codeValue)

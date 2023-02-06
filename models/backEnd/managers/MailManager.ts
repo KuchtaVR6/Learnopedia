@@ -26,16 +26,16 @@ export default class MailManager {
             this.verifyActionTemplateHTML = Handlebars.compile(fs.readFileSync(path.resolve(__dirname, '../../../../models/emails/verifyAction.hbs')).toString());
             this.verifyActionTemplateTEXT = Handlebars.compile(fs.readFileSync(path.resolve(__dirname, '../../../../models/emails/verifyActionText.hbs')).toString());
             this.reminderHTML = Handlebars.compile(fs.readFileSync(path.resolve(__dirname, '../../../../models/emails/reminder.hbs')).toString());
-            this.reminderTEXT = Handlebars.compile(fs.readFileSync(path.resolve(__dirname, '../../../../models/emails/reminderTEXT.hbs')).toString());
+            this.reminderTEXT = Handlebars.compile(fs.readFileSync(path.resolve(__dirname, '../../../../models/emails/reminderText.hbs')).toString());
             this.suspensionHTML = Handlebars.compile(fs.readFileSync(path.resolve(__dirname, '../../../../models/emails/suspension.hbs')).toString());
-            this.suspensionTEXT = Handlebars.compile(fs.readFileSync(path.resolve(__dirname, '../../../../models/emails/suspensionTEXT.hbs')).toString());
+            this.suspensionTEXT = Handlebars.compile(fs.readFileSync(path.resolve(__dirname, '../../../../models/emails/suspensionText.hbs')).toString());
         } else {
             this.verifyActionTemplateHTML = Handlebars.compile(fs.readFileSync(path.resolve(__dirname, '../../../models/emails/verifyAction.hbs')).toString());
             this.verifyActionTemplateTEXT = Handlebars.compile(fs.readFileSync(path.resolve(__dirname, '../../../models/emails/verifyActionText.hbs')).toString());
             this.reminderHTML = Handlebars.compile(fs.readFileSync(path.resolve(__dirname, '../../../models/emails/reminder.hbs')).toString());
-            this.reminderTEXT = Handlebars.compile(fs.readFileSync(path.resolve(__dirname, '../../../models/emails/reminderTEXT.hbs')).toString());
-            this.suspensionHTML = Handlebars.compile(fs.readFileSync(path.resolve(__dirname, '../../../../models/emails/suspension.hbs')).toString());
-            this.suspensionTEXT = Handlebars.compile(fs.readFileSync(path.resolve(__dirname, '../../../../models/emails/suspensionTEXT.hbs')).toString());
+            this.reminderTEXT = Handlebars.compile(fs.readFileSync(path.resolve(__dirname, '../../../models/emails/reminderText.hbs')).toString());
+            this.suspensionHTML = Handlebars.compile(fs.readFileSync(path.resolve(__dirname, '../../../models/emails/suspension.hbs')).toString());
+            this.suspensionTEXT = Handlebars.compile(fs.readFileSync(path.resolve(__dirname, '../../../models/emails/suspensionText.hbs')).toString());
         }
         this.actions = new SelfPurgingMap<User, Action>();
         this.register = new SelfPurgingMap<string, Action>()
@@ -147,6 +147,7 @@ export default class MailManager {
                 action: "forgot password",
                 code: generatedCode,
             })
+
         } else {
             throw ActionNotDefined
         }

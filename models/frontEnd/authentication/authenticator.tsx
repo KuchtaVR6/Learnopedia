@@ -8,7 +8,7 @@ export type AuthenticatorArgs = {
     next: string
     buttonName?: string
     instantTrigger?: boolean
-    onErrorTrigger?: () => void
+    onErrorTrigger?: (e : Error) => void
     disable?: boolean
 }
 
@@ -59,9 +59,9 @@ const Authenticator: FC<AuthenticatorArgs> = ({
     function trigger() {
         //calls the mainRequest with variables decoded from the map.
         mainRequest({variables: args})
-            .catch(() => {
+            .catch((e : Error) => {
                 if (onErrorTrigger) {
-                    onErrorTrigger()
+                    onErrorTrigger(e)
                 }
                 //the error is already being printed using error
             })
@@ -77,7 +77,7 @@ const Authenticator: FC<AuthenticatorArgs> = ({
                 if (router.route === "/" + next) {
                     router.reload()
                 } else {
-                    router.push("/" + next)
+                    router.push(next)
                 }
             }).catch(() => {
                 /**

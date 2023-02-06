@@ -115,7 +115,7 @@ class UserStore {
         this.takenMap = new Map<String, boolean>();
         this.idMap = new SelfPurgingMap<number, User>();
 
-        this.takenMap.set("DELETED USER", true)
+        this.takenMap.set("deleted user", true)
         this.takenMap.set("deleted@deleted", true)
 
         this.DBread = this.getDBUnique()
@@ -130,37 +130,48 @@ class UserStore {
         })
 
         rows.forEach((value: { email: string, nickname: string }) => {
-            this.takenMap.set(value.email, true)
-            this.takenMap.set(value.nickname, true)
+            this.takenMap.set(value.email.toLowerCase(), true)
+            this.takenMap.set(value.nickname.toLowerCase(), true)
         })
         return true
     }
 
     private cache(newUser: User): User {
-        this.mainMap.set(newUser.getEmail(), newUser)
-        this.mainMap.set(newUser.getNickname(), newUser)
-        this.takenMap.set(newUser.getEmail(), true)
-        this.takenMap.set(newUser.getNickname(), true)
+        this.mainMap.set(newUser.getEmail().toLowerCase(), newUser)
+        this.mainMap.set(newUser.getNickname().toLowerCase(), newUser)
+        this.takenMap.set(newUser.getEmail().toLowerCase(), true)
+        this.takenMap.set(newUser.getNickname().toLowerCase(), true)
         return newUser;
     }
 
     public reserve(email: string, nickname: string) {
-        this.takenMap.set(email, false);
-        this.takenMap.set(nickname, false)
+        this.takenMap.set(email.toLowerCase(), false);
+        this.takenMap.set(nickname.toLowerCase(), false)
     }
 
     public release(email: string, nickname: string) {
-        this.takenMap.set(email, false);
-        if (this.takenMap.get(email) === false) {
-            this.takenMap.delete(email)
+        this.takenMap.set(email.toLowerCase(), false);
+        if (this.takenMap.get(email.toLowerCase()) === false) {
+            this.takenMap.delete(email.toLowerCase())
         }
-        if (this.takenMap.get(nickname) === false) {
-            this.takenMap.delete(nickname)
+        if (this.takenMap.get(nickname.toLowerCase()) === false) {
+            this.takenMap.delete(nickname.toLowerCase())
         }
     }
 
     public async push(nickname: string, email: string, fname: string, lname: string, password: string): Promise<User> {
         let passHash = await User.generateHash(password)
+
+        console.log({
+            data: {
+                email: email,
+                lname: lname,
+                fname: fname,
+                nickname: nickname,
+                passHash: passHash,
+                moderator: false
+            }
+        })
 
         let output = await prisma.user.create({
             data: {
@@ -186,14 +197,14 @@ class UserStore {
     public async delete(user: User): Promise<boolean> {
         await this.dbScanFinished()
 
-        this.mainMap.delete(user.getNickname())
-        this.mainMap.delete(user.getEmail())
-        this.takenMap.delete(user.getEmail())
-        this.takenMap.delete(user.getNickname())
+        this.mainMap.delete(user.getNickname().toLowerCase())
+        this.mainMap.delete(user.getEmail().toLowerCase())
+        this.takenMap.delete(user.getEmail().toLowerCase())
+        this.takenMap.delete(user.getNickname().toLowerCase())
 
         await prisma.user.delete({
             where: {
-                email: user.getEmail()
+                email: user.getEmail().toLowerCase()
             }
         })
 
@@ -204,7 +215,7 @@ class UserStore {
         await this.dbScanFinished()
 
         //check the cache
-        let result = this.mainMap.get(query)
+        let result = this.mainMap.get(query.toLowerCase())
         if (result) {
             return result
         }
@@ -356,10 +367,10 @@ class UserStore {
         if (email.indexOf("@") >= 0 && email.indexOf("@") <= email.length - 2) {
             if (email.length > 3) {
                 if (allowReserved) {
-                    let result = this.takenMap.get(email)
+                    let result = this.takenMap.get(email.toLowerCase())
                     return result === undefined;
                 }
-                return this.takenMap.has(email)
+                return this.takenMap.has(email.toLowerCase())
             }
         }
         return true
@@ -372,10 +383,10 @@ class UserStore {
         if (nickname.indexOf("@") < 0) {
             if (nickname.length > 3) {
                 if (allowReserved) {
-                    let result = this.takenMap.get(nickname)
+                    let result = this.takenMap.get(nickname.toLowerCase())
                     return result === undefined;
                 }
-                return this.takenMap.has(nickname)
+                return this.takenMap.has(nickname.toLowerCase())
             }
         }
         return true
@@ -397,13 +408,13 @@ class UserStore {
     }
 
     private updateIdentifierCaches(oldIdentifier: string, newIdentifier: string) {
-        let user = this.mainMap.get(oldIdentifier)
+        let user = this.mainMap.get(oldIdentifier.toLowerCase())
 
         if (user) {
-            this.mainMap.delete(oldIdentifier)
-            this.mainMap.set(newIdentifier, user)
-            this.takenMap.delete(oldIdentifier)
-            this.takenMap.set(newIdentifier, true)
+            this.mainMap.delete(oldIdentifier.toLowerCase())
+            this.mainMap.set(newIdentifier.toLowerCase(), user)
+            this.takenMap.delete(oldIdentifier.toLowerCase())
+            this.takenMap.set(newIdentifier.toLowerCase(), true)
         } else {
             throw UserNotFoundException
         }

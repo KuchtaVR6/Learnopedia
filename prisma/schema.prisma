@@ -224,7 +224,7 @@ model user {
   avatarFile       String?            @db.VarChar(255)
   colorA           String?            @db.VarChar(255)
   colorB           String?            @db.VarChar(255)
-  moderator        Boolean            @db.Bit(1)
+  moderator        Boolean            @default(false) @db.Bit(1)
   uploadCacheFile  String?            @db.VarChar(255)
   suspension       DateTime?          @db.DateTime(0)
   amendment        amendment[]

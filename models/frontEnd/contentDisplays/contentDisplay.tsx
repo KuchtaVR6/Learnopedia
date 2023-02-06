@@ -1,4 +1,4 @@
-import {FC, useContext, useEffect, useState} from "react";
+import {FC, useContext, useEffect, useRef, useState} from "react";
 import {FullOutput, MetaOutput} from "../../backEnd/contents/Content";
 import NavigationTile from "../navigational/navigationTile";
 import KeywordDisplay from "../keywordCompoments/keywordDisplay";
@@ -91,15 +91,17 @@ const ContentDisplay: FC<args> = ({meta, contents}) => {
                 variables: {
                     contentId: meta.id
                 }
+            }).then(() => {
+                setBookmark(true);
             })
-            setBookmark(true)
         } else {
             await bookmarkDelete({
                 variables: {
                     contentId: meta.id
                 }
+            }).then(() => {
+                setBookmark(false)
             })
-            setBookmark(false)
         }
     }
 
@@ -108,35 +110,46 @@ const ContentDisplay: FC<args> = ({meta, contents}) => {
     const [adjustDown, setAdjustDown] = useState(0)
     const [adjustUp, setAdjustUp] = useState(0)
 
-    const [sendCountMyView, queryVote] = useMutation(countMyViewMutation, {
-        variables: {
-            countMyViewId: meta.id,
-            loggedIn: !userContext.loggedIn()
-        }
-    })
+    const [sendCountMyView, queryVote] = useMutation(countMyViewMutation)
+    const awaitingQueryVote = useRef(false);
 
     let keyCounter = 0;
 
     useEffect(() => {
-        if (queryVote.data && queryVote.data.countMyView.bookmark !== null) {
-            if (voteVal === null)
-                if (queryVote.data.countMyView.vote === true || queryVote.data.countMyView.vote === false)
-                    setVoteValue(queryVote.data.countMyView.vote)
-            if (queryVote.data.countMyView.bookmark) {
-                if (queryVote.data.countMyView.reminderDate)
-                    setBookmark(queryVote.data.countMyView.reminderDate)
-                else
-                    setBookmark(true)
-            } else {
-                setBookmark(false)
+            if (queryVote.data && queryVote.data.countMyView.bookmark !== null) {
+                if (awaitingQueryVote.current) {
+                    awaitingQueryVote.current = false;
+                    if (voteVal === null)
+                        if (queryVote.data.countMyView.vote === true || queryVote.data.countMyView.vote === false)
+                            setVoteValue(queryVote.data.countMyView.vote)
+                    if (queryVote.data.countMyView.bookmark) {
+                        if (queryVote.data.countMyView.reminderDate)
+                            setBookmark(queryVote.data.countMyView.reminderDate)
+                        else
+                            setBookmark(true)
+                    } else {
+                        setBookmark(false)
+                    }
+                }
             }
-        }
-    }, [queryVote, voteVal])
+        }, [queryVote, voteVal]
+    )
 
-    useEffect(()=>{
-        sendCountMyView().catch(()=>{
-        });
-    },[])
+    useEffect(() => {
+        setAdjustUp(0)
+        setAdjustDown(0)
+        setVoteValue(null)
+        setBookmark(false)
+        awaitingQueryVote.current = true;
+
+        sendCountMyView({
+            variables: {
+                countMyViewId: meta.id,
+                loggedIn: userContext.loggedIn()
+            }
+        }).catch(() => {});
+
+    }, [meta, userContext])
 
     return (
         <div className={styles.main}>
@@ -159,7 +172,7 @@ const ContentDisplay: FC<args> = ({meta, contents}) => {
                 style={{
                     float: "right",
                     marginRight: "1%",
-                    backgroundColor: voteVal === false ? "orange" : ""
+                    backgroundColor: voteVal === false ? "orange" : "lightgray"
                 }}
                 disabled={!userContext.loggedIn() || voteOutcome.loading || queryVote.loading}
                 onClick={() => {
@@ -172,7 +185,7 @@ const ContentDisplay: FC<args> = ({meta, contents}) => {
                 style={{
                     float: "right",
                     marginRight: "1%",
-                    backgroundColor: voteVal === true ? "orange" : ""
+                    backgroundColor: voteVal === true ? "orange" : "lightgray"
                 }}
                 disabled={!userContext.loggedIn() || voteOutcome.loading || queryVote.loading}
                 onClick={() => {

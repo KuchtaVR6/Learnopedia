@@ -36,6 +36,7 @@ const EmbeddableInput: FC<args> = (props) => {
 
     const [hideInput, setHideInput] = useState<boolean>(false)
     const [input, setInput] = useState<string>("")
+    const [parsedInput, setParsedInput] = useState<string>("")
     const [type, setType] = useState<string>("")
 
     const uploadedImageData = useQuery(gql`query GetUploadedImageLink {
@@ -57,6 +58,17 @@ const EmbeddableInput: FC<args> = (props) => {
             props.setChanges(null)
         }
     },[input,type,props])
+
+    useEffect(() => {
+        let uri = input;
+        if(uri.startsWith("https://www.youtube.com/watch?v="))
+            uri = "https://www.youtube.com/embed/" + uri.split("=")[1]
+        else if(uri.startsWith("https://gist.github.com/")) {
+            uri = uri.split("/")[4]
+        }
+
+        setParsedInput(uri)
+    })
 
     return <>
         <p>
@@ -88,7 +100,7 @@ const EmbeddableInput: FC<args> = (props) => {
 
         {input.length > 0? "Preview:" : ""}
         <div style={{border: "5px solid"}}>
-            <EmbeddableDisplay uri={input} type={type} />
+            <EmbeddableDisplay uri={parsedInput} type={type} />
         </div>
 
         URI: {input.length > 0 ? (!props.current || (props.current.output.__typename !== "EmbeddableOutput" || input !== props.current.output.uri)) ? "✔" : "📕" : "❌"}

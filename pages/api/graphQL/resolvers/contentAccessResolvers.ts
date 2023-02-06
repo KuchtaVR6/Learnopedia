@@ -122,6 +122,7 @@ export const contentAccessResolvers = {
         },
 
         deleteBookmark: async (parent: undefined, args: { contentID: number }, context: genericContext) => {
+
             let thisUser = await enforceUser(context);
 
             let content = await ContentManager.getInstance().getSpecificByID(args.contentID)
@@ -136,6 +137,7 @@ export const contentAccessResolvers = {
         },
 
         appendBookmark: async (parent: undefined, args: { contentID: number, reminderDate? : string }, context: genericContext) => {
+
             let thisUser = await enforceUser(context);
 
             let content = await ContentManager.getInstance().getSpecificByID(args.contentID)

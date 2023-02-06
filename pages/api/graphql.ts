@@ -26,6 +26,7 @@ const server = new ApolloServer({
     typeDefs,
     resolvers,
     plugins: [httpHeadersPlugin],
+    cache: "bounded",
 
     context: async ({ req }) => ({
         user: await resolveUser(req.cookies["accessToken"],req.headers['user-agent']),

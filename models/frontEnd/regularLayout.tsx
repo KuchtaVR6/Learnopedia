@@ -60,6 +60,7 @@ const RegularLayout: FC<args> = ({children, enforceUser, navigation, noInlineNav
                     }
                 }
                 else{
+                    console.log("1",e)
                     window.alert(e.message)
                 }
             });
@@ -75,6 +76,7 @@ const RegularLayout: FC<args> = ({children, enforceUser, navigation, noInlineNav
                     router.push("/login?red="+router.asPath)
                 }
             } else {
+                console.log("2",error)
                 window.alert(error.message)
             }
         }

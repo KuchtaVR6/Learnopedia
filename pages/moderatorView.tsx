@@ -60,10 +60,14 @@ const Profile: NextPage = () => {
 
     useEffect(() => {
         if (sendSuspendHideData.error) {
-            setError1(sendSuspendHideData.error.name)
+            setError2(sendSuspendHideData.error.name)
+        }  else if (sendSuspendHideData.data) {
+            setError2("success!");
         }
         if (sendSuspendUserData.error) {
-            setError2(sendSuspendUserData.error.name)
+            setError1(sendSuspendUserData.error.name)
+        }  else if (sendSuspendUserData.data) {
+            setError1("success!");
         }
     }, [sendSuspendHideData, sendSuspendUserData])
 
@@ -130,6 +134,7 @@ const Profile: NextPage = () => {
                     onClick={() => {
                         setNickname("")
                         setReason("");
+                        setError1("Loading...")
                         sendSuspendUser();
                     }}
                     disabled={nickname.length < 4 || reason.length < 10}>
@@ -151,8 +156,9 @@ const Profile: NextPage = () => {
                 }} setInput={setInnerHideId} width={20}/>
                 <button
                     onClick={() => {
-                        setHideId(0)
+                        setHideId(-1)
                         sendHideContent();
+                        setError2("Loading...")
                     }}
                     disabled={hideId < 0}>Send hide request
                 </button>

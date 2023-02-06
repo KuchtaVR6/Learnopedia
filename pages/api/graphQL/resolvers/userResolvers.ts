@@ -66,11 +66,9 @@ export const userResolvers = {
                             } else {
                                 initialToken = context.initialToken
                             }
-
                             await MailManager.getInstance().unverifiedRequest(ActionType.REGISTER, async () => {
                                 return await UserManager.getInstance().addUser(args.nickname, args.email, args.fname, args.lname, args.password);
                             }, args.fname, args.lname, args.email, args.nickname, initialToken);
-
                             return {
                                 continue: true
                             }

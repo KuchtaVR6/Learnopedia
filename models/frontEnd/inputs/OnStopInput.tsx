@@ -31,6 +31,8 @@ type Args = {
 
     // basic boolean check of validity
     basicValidator?: ( arg: string ) => boolean
+
+    prevState : MutableRefObject<string>
 }
 
 const OnStopInput: FC<Args> = ({
@@ -51,7 +53,8 @@ const OnStopInput: FC<Args> = ({
                                    disableOnBlur,
                                    coolDown,
                                    setCurrentState,
-                                   basicValidator
+                                   basicValidator,
+                                   prevState
                                }) => {
 
     let minSpeed = 500;
@@ -141,44 +144,39 @@ const OnStopInput: FC<Args> = ({
     // when user (potentially) has finished typing or on Blur
     const dispatchForCooling = (inputRegistered : string, ver? : number) =>
     {
-        if (ver)
-        {
-            if (ver > verMax.current)
-            {
-                verMax.current = ver
-            }
-            else if (ver < verMax.current)
-            {
-                // stale request, will be ignored
-                return;
-            }
-        }
-        // since the user might have entered here using on blur new ver number is need
-        verMax.current += 1;
-        let thisVer = verMax.current;
-        if (inputRegistered.length < minLetters) {
-            attemptToSetState(OSIStates.INSUFFICIENT_LETTERS, thisVer)
-        }
-        else {
-            if ((basicValidator && basicValidator(inputRegistered)) || !basicValidator) {
-                attemptToSetState(OSIStates.ON_COOL_DOWN, thisVer)
-
-                clearTimeout(coolDownTimeout.current)
-
-                if (new Date() > coolDownExpiry.current)
-                {
-                    postCoolDown(inputRegistered, thisVer)
+        if(prevState.current !== inputRegistered) {
+            if (ver) {
+                if (ver > verMax.current) {
+                    verMax.current = ver
+                } else if (ver < verMax.current) {
+                    // stale request, will be ignored
+                    return;
                 }
-                else
-                {
-                    let delay = coolDownExpiry.current.getTime() - new Date().getTime()
-                    coolDownTimeout.current = setTimeout(() => {postCoolDown(inputRegistered, thisVer)},delay )
-                }
-
             }
-            else {
-                // if the basic check fails let the superclass know
-                attemptToSetState(OSIStates.INVALID_INPUT, thisVer)
+            // since the user might have entered here using on blur new ver number is need
+            verMax.current += 1;
+            let thisVer = verMax.current;
+            if (inputRegistered.length < minLetters) {
+                attemptToSetState(OSIStates.INSUFFICIENT_LETTERS, thisVer)
+            } else {
+                if ((basicValidator && basicValidator(inputRegistered)) || !basicValidator) {
+                    attemptToSetState(OSIStates.ON_COOL_DOWN, thisVer)
+
+                    clearTimeout(coolDownTimeout.current)
+
+                    if (new Date() > coolDownExpiry.current) {
+                        postCoolDown(inputRegistered, thisVer)
+                    } else {
+                        let delay = coolDownExpiry.current.getTime() - new Date().getTime()
+                        coolDownTimeout.current = setTimeout(() => {
+                            postCoolDown(inputRegistered, thisVer)
+                        }, delay)
+                    }
+
+                } else {
+                    // if the basic check fails let the superclass know
+                    attemptToSetState(OSIStates.INVALID_INPUT, thisVer)
+                }
             }
         }
     }

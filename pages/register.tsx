@@ -9,7 +9,6 @@ import SelfValidatingInput from "../models/frontEnd/inputs/selfValidatingInput";
 import PasswordValidator from "../models/frontEnd/authentication/passwordValidator";
 
 import logo from "../public/images/logo.png";
-import {useRouter} from "next/router";
 import {ConstrainedInputTypes} from "../models/frontEnd/inputs/modifyDisplayConstrained";
 import HCaptcha from "@hcaptcha/react-hcaptcha";
 import Head from "next/head";
@@ -23,10 +22,9 @@ const Register: NextPage = () => {
     const [lname, setLName] = useState("");
     const [password, setPassword] = useState("");
     const [captchaToken, setCaptchaToken] = useState("");
+    const [error, setError] = useState("");
 
     const [allValid, setAllValid] = useState(false)
-
-    const router = useRouter();
 
     const [visibility, setVisibility] = useState(false)
 
@@ -81,12 +79,11 @@ const Register: NextPage = () => {
         if (allValid) {
             sendEmail().then(() => {
                 setVisibility(true)
-            }).catch(() => {
-                router.reload()
+            }).catch((e) => {
+                console.log(e)
+                setError(e.message)
+                //router.reload()
             })
-
-
-            setVisibility(true)
         }
     }
 
@@ -113,7 +110,7 @@ const Register: NextPage = () => {
                     <br/>
                     Already a member?<Link href={"/login"}>Login</Link><br/>
                     <div className={styles.field}>
-                        <label>Nickname:</label> <br/>
+                        <label>Nickname: </label> <br/>
                         <SelfValidatingInput setProp={setNick}
                                              query={checkNickname}
                                              type={ConstrainedInputTypes.NICKNAME}
@@ -168,6 +165,7 @@ const Register: NextPage = () => {
                     <button disabled={!allValid} onClick={() => {
                         reg()
                     }}>Register {allValid ? "✔" : ""}</button>
+                    {error}
 
                     <br/>
                     <br/>
