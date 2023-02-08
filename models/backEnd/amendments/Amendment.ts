@@ -2,14 +2,15 @@ import {UserManager} from "../managers/UserManager";
 import prisma from "../../../prisma/prisma";
 import  {AdoptionAmendmentOutput} from "./AdoptionAmendment";
 import  {PartAddReplaceAmendmentOutput} from "./PartAmendments/PartAddReplaceAmendment";
-import  {CreationAmendmentOutput} from "./CreationAmendment";
+import CreationAmendment, {CreationAmendmentOutput} from "./CreationAmendment";
 import  {ListAmendmentOutput} from "./ListAmendment";
 import  {MetaAmendmentOutput} from "./MetaAmendment";
 import ContentManager from "../contents/ContentManager";
-import {contentShareOutput, ContentType, MetaOutput} from "../contents/Content";
+import Content, {contentShareOutput, ContentType, MetaOutput} from "../contents/Content";
 import {Expirable} from "../tools/Expirable";
 import {User} from "../User";
 import {ContentNotFetched} from "../tools/Errors";
+import {amendment} from "@prisma/client";
 
 export type AmendmentOutput = {
     id : number,
@@ -29,7 +30,7 @@ export type VotingSupport = {
     userOP?: number
 }
 
-type LevelSupport = {
+export type LevelSupport = {
     negatives : number,
     positives : number,
     max : number,
@@ -41,19 +42,27 @@ export enum AmendmentOpinionValues {
     Report
 }
 
+export enum AmendmentTypes {
+    AdoptionAmendment,
+    PartAddReplaceAmendment,
+    CreationAmendment,
+    ListAmendment,
+    MetaAmendment,
+}
+
 export type SpecificAmendmentOutput = AdoptionAmendmentOutput | PartAddReplaceAmendmentOutput | CreationAmendmentOutput | ListAmendmentOutput | MetaAmendmentOutput
 
 class Amendment extends Expirable{
 
     protected readonly targetID : number;
-    private id : number;
+    protected id : number;
     private readonly creationDate : Date;
     private readonly authorID : number | null;
     private readonly significance : number;
     private readonly tariff : number;
     private applied : boolean;
     private vetoed : boolean;
-    private opinions : Map<number, AmendmentOpinionValues>;
+    protected opinions : Map<number, AmendmentOpinionValues>;
 
     public constructor(
         id : number,
@@ -164,6 +173,7 @@ class Amendment extends Expirable{
     public async getSupports(userID? : number) : Promise<VotingSupport>{
 
         let contentManagerInstance = await ContentManager.getInstance()
+
         let target = await contentManagerInstance.getSpecificByID(this.targetID)
 
         let finalArray : LevelSupport[] = [
@@ -370,8 +380,9 @@ class Amendment extends Expirable{
                 if (required <= thisLevel.negatives) {
                     await this.veto()
                 } else if (required <= thisLevel.positives) {
-                    if(!this.applied)
+                    if(!this.applied) {
                         await this.applyThisAmendment()
+                    }
                 }
 
                 multiplication = multiplication / 2;
@@ -379,6 +390,10 @@ class Amendment extends Expirable{
         }
 
         return output
+    }
+
+    public getType() : AmendmentTypes {
+        throw new ContentNotFetched()
     }
 }
 

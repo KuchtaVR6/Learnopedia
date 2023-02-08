@@ -179,14 +179,22 @@ class Lesson extends Content {
 
         let content = await ContentManager.getInstance().getSpecificByID(amendment.newParent)
 
-        await prisma.amendment.update({
-            where: {
-                ID: amendment.getID()
-            },
-            data: {
-                applied: true
-            }
-        })
+        let finalSeqNumber = this.getSeqNumber()
+
+        while(!content.checkSeqNumberVacant(finalSeqNumber)) {
+            finalSeqNumber += 1;
+        }
+
+        if(finalSeqNumber !== this.getSeqNumber()) {
+            await prisma.content.update({
+                where: {
+                    ID: this.getID()
+                },
+                data : {
+                    seqNumber : finalSeqNumber
+                }
+            })
+        }
 
         await prisma.lesson.update({
             where: {
@@ -206,6 +214,10 @@ class Lesson extends Content {
         await amendment.getApplied()
 
         let idsToNewSQMap = new Map<number, number>();
+
+        if(!this.partsFetched) {
+            await this.fetchParts()
+        }
 
         this.sortChildern();
 
@@ -256,6 +268,7 @@ class Lesson extends Content {
 
 
         await this.sortChildern();
+
         this.balanced = false;
         await this.balance(); //TODO in the future it will not be always called
 
@@ -274,17 +287,28 @@ class Lesson extends Content {
 
     public async balance() {
         if (!this.balanced) {
+
+            if(!this.partsFetched) {
+                await this.fetchParts()
+            }
+
             this.sortChildern()
+
+            console.log("BEGIN", this.children)
+
             let childernCopy = new Map<number,LessonPart>(this.children);
             let childernKeys = Array.from(this.children.keys());
 
             let patern = 32;
+            let overwritten = false;
             for (let seq of childernKeys) {
                 if (seq !== patern) {
                     let child = childernCopy.get(seq)
                     if(child) {
-                        this.children.delete(seq)
-
+                        if(!overwritten) {
+                            this.children.delete(seq)
+                        }
+                        overwritten = this.children.has(patern)
                         child.setSeqNumber(patern)
                         this.children.set(patern, child)
 
@@ -300,6 +324,8 @@ class Lesson extends Content {
                 }
                 patern += 32;
             }
+
+            this.sortChildern()
         }
     }
 
@@ -406,13 +432,17 @@ class Lesson extends Content {
         }
     }
 
-    public checkPaternity(ids : { ChildID?: number, LessonPartID? : number, newSeqNumber?: number, delete: boolean }[]) : boolean {
+    public async checkPaternity(ids : { ChildID?: number, LessonPartID? : number, newSeqNumber?: number, delete: boolean }[]) : Promise<boolean> {
 
         let justIDs : number[]= [];
 
-        this.children.forEach((child) => {
-            justIDs.push(child.getID())
-        })
+        if(!this.partsFetched) {
+            await this.fetchParts()
+        }
+
+        for(let seqNum of Array.from(this.children.keys())) {
+            justIDs.push(this.children.get(seqNum)!.getID())
+        }
 
         for(let id of ids) {
             if(id.LessonPartID) {

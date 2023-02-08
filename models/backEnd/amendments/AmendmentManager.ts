@@ -164,7 +164,7 @@ class AmendmentManager {
     }
 
     public async insertToCache(input: fullAmendFetchType): Promise<Amendment> {
-        if (input.ContentID) {
+        if (input.ContentID || input.keywordmodamendment?.creationamendment) {
             let result: Amendment | null = null;
             if (input.keywordmodamendment) {
                 let keywordMan = await KeywordManager.getInstance();
@@ -175,7 +175,7 @@ class AmendmentManager {
                         input.ID,
                         {
                             authorID: input.CreatorID,
-                            targetID: input.ContentID,
+                            targetID: input.ContentID || -1,
                             name: input.keywordmodamendment.creationamendment.newName,
                             description: input.keywordmodamendment.creationamendment.newDescription,
                             keywords: x,
@@ -199,7 +199,7 @@ class AmendmentManager {
                     result = new MetaAmendment(
                         input.ID,
                         input.CreatorID,
-                        input.ContentID,
+                        input.ContentID!,
                         {
                             newName: input.keywordmodamendment.metaamendment.newName? input.keywordmodamendment.metaamendment.newName : undefined,
                             newDescription: input.keywordmodamendment.metaamendment.newDescription? input.keywordmodamendment.metaamendment.newDescription : undefined,
@@ -222,7 +222,7 @@ class AmendmentManager {
                 let myResult = new AdoptionAmendment(
                     input.ID,
                     input.CreatorID,
-                    input.ContentID,
+                    input.ContentID!,
                     input.adoptionamendment.newParent? input.adoptionamendment.newParent : -1,
                     {
                         dbInput: true,
@@ -233,11 +233,6 @@ class AmendmentManager {
                         vetoed: input.vetoed,
                         opinions: (input.amendmentopinion)? this.handleOpinions(input.amendmentopinion) : undefined
                     })
-
-                if(input.adoptionamendment.receiverAmendment)
-                {
-                    myResult.setReceivingAmendmentID(input.adoptionamendment.receiverAmendment)
-                }
 
                 result = myResult;
             }
@@ -263,7 +258,7 @@ class AmendmentManager {
                 result = new ListAmendment(
                     input.ID,
                     input.CreatorID,
-                    input.ContentID,
+                    input.ContentID!,
                     changes,
                     {
                         dbInput: true,
@@ -282,7 +277,7 @@ class AmendmentManager {
                     result = new PartAddReplaceAmendment(
                         input.ID,
                         input.CreatorID,
-                        input.ContentID,
+                        input.ContentID!,
                         input.partamendment.LessonPartID? input.partamendment.LessonPartID : undefined,
                         input.partamendment.partaddreplaceamendment.seqNumber,
                         {

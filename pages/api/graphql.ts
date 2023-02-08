@@ -13,10 +13,15 @@ const SessionRegistryInstance = SessionRegistry.getInstance()
 export const resolveUser = async (cookie : string | undefined, agent : string | undefined | null) => {
     if(cookie && agent)
     {
-        let user = await (await SessionRegistryInstance).getSession(cookie,agent)
-        if(user)
-        {
-            return user;
+        try{
+            let user = await (await SessionRegistryInstance).getSession(cookie,agent)
+            if(user)
+            {
+                return user;
+            }
+        }
+        catch (e) {
+            console.log(e)
         }
     }
     return null

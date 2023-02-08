@@ -10,6 +10,7 @@ import {BiDownvote, BiUpvote} from "react-icons/bi";
 import {gql, useMutation} from "@apollo/client";
 import {BsClockFill, BsFillBookmarkHeartFill, BsFillBookmarkXFill} from "react-icons/bs";
 import Link from "next/link";
+import {AiTwotoneEdit} from "react-icons/ai";
 
 type args = {
     meta: MetaOutput,
@@ -110,6 +111,8 @@ const ContentDisplay: FC<args> = ({meta, contents}) => {
     const [adjustDown, setAdjustDown] = useState(0)
     const [adjustUp, setAdjustUp] = useState(0)
 
+    const [enableEdit, setEnableEdit] = useState(false)
+
     const [sendCountMyView, queryVote] = useMutation(countMyViewMutation)
     const awaitingQueryVote = useRef(false);
 
@@ -147,16 +150,24 @@ const ContentDisplay: FC<args> = ({meta, contents}) => {
                 countMyViewId: meta.id,
                 loggedIn: userContext.loggedIn()
             }
-        }).catch(() => {});
+        }).catch(() => {
+        });
 
     }, [meta, userContext])
 
     return (
         <div className={styles.main}>
-            <EditButton loggedIn={userContext.loggedIn()} label={"Edit Meta"} path={"/edit/meta/" + meta.id}/>
-            {(userContext.loggedIn() && meta.type !== 0) ?
-                <EditButton loggedIn={userContext.loggedIn()} label={"Change parent"}
-                            path={"/edit/adopt/" + meta.id}/> : ""}
+            {enableEdit ?
+                <>
+                    <EditButton loggedIn={userContext.loggedIn()} label={"Edit Meta"} path={"/edit/meta/" + meta.id}/>
+                    {(userContext.loggedIn() && meta.type !== 0) ?
+                        <EditButton loggedIn={userContext.loggedIn()} label={"Change parent"}
+                                    path={"/edit/adopt/" + meta.id}/> : ""}
+                </>
+                :
+                ""
+            }
+
             <span className={"buttonNiceContainer"} style={{float: "right", marginRight: "1%"}}>
                 <Link className={"buttonNice"} href={"/amendments/" + meta.id}>
                     Amendments
@@ -167,6 +178,23 @@ const ContentDisplay: FC<args> = ({meta, contents}) => {
                 {meta.name}
             </h1>
             <hr/>
+            {userContext.loggedIn() ?
+                <button
+                    className={"buttonNice"}
+                    style={{
+                        float: "right",
+                        marginRight: "1%",
+                        backgroundColor: enableEdit ? "orange" : "lightgray"
+                    }}
+                    onClick={() => {
+                        setEnableEdit(!enableEdit)
+                    }}>
+                    <AiTwotoneEdit/> {enableEdit ? "Disable Edit Mode" : "Enable Edit Mode"}
+                </button>
+                :
+                ""
+            }
+
             <button
                 className={"buttonNice"}
                 style={{
@@ -236,25 +264,29 @@ const ContentDisplay: FC<args> = ({meta, contents}) => {
             <hr/>
             <table style={{width: "100%"}}>
                 <tbody>
-                <tr>
-                    <td>
-                        <EditButton loggedIn={userContext.loggedIn()}
-                                    label={meta.type == 0 ? "Add a Chapter" : meta.type == 1 ? "Add a Lesson" : "Add a part"}
-                                    path={meta.type == 2 ? "/edit/add/" + meta.id : "/edit/add/lessonpart/" + meta.id}/>
-                        {userContext.loggedIn() ? <EditButton loggedIn={userContext.loggedIn()} label={"Edit the list"}
-                                                              path={"/edit/list/" + meta.id}/> : ""}
-                        <br/>
-                        <br/>
-                        <hr/>
-                    </td>
-                </tr>
+                {enableEdit ?
+                    <tr>
+                        <td>
+                            <EditButton loggedIn={userContext.loggedIn()}
+                                        label={meta.type == 0 ? "Add a Chapter" : meta.type == 1 ? "Add a Lesson" : "Add a part"}
+                                        path={meta.type == 2 ? "/edit/add/" + meta.id : "/edit/add/lessonpart/" + meta.id}/>
+                            {userContext.loggedIn() ?
+                                <EditButton loggedIn={userContext.loggedIn()} label={"Edit the list"}
+                                            path={"/edit/list/" + meta.id}/> : ""}
+
+                            <br/>
+                            <br/>
+                            <hr/>
+                        </td>
+                    </tr> : ""
+                }
                 <tr>
                     {contents.content ?
                         <td>
                             {
                                 contents.content.map((row) => {
                                     return <LessonPartDisplay row={row} key={row.id} loggedIn={userContext.loggedIn()}
-                                                              id={meta.id}/>
+                                                              id={meta.id} enableEdits={enableEdit}/>
                                 })
                             }
                         </td>
@@ -274,6 +306,16 @@ const ContentDisplay: FC<args> = ({meta, contents}) => {
                                         return (
                                             <div key={keyCounter}>
                                                 <hr/>
+                                                {enableEdit?
+                                                    <>
+                                                        ----------------------------------<br/>
+                                                        ID: {chapter.meta.id} | SeqNumber : {chapter.meta.seqNumber}<br/>
+                                                        ----------------------------------
+                                                    </>
+                                                    :
+                                                    ""
+                                                }
+
                                                 <span className={"buttonNiceContainer"}>
                                                     <Link href={"/view/" + chapter.meta.id}>
                                                         <h3>{chapter.meta.name}</h3>
@@ -307,6 +349,15 @@ const ContentDisplay: FC<args> = ({meta, contents}) => {
                                                     return (
                                                         <div key={keyCounter}>
                                                             <hr/>
+                                                            {enableEdit?
+                                                                <>
+                                                                    ----------------------------------<br/>
+                                                                    ID: {lesson.id} | SeqNumber : {lesson.seqNumber}<br/>
+                                                                    ----------------------------------
+                                                                </>
+                                                                :
+                                                                ""
+                                                            }
                                                             <span className={"buttonNiceContainer"}>
                                                                 <Link href={"/view/" + lesson.id}>
                                                                     <h3>{lesson.name}</h3>

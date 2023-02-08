@@ -163,14 +163,22 @@ class Chapter extends Content {
 
         let content = await ContentManager.getInstance().getSpecificByID(amendment.newParent)
 
-        await prisma.amendment.update({
-            where: {
-                ID: amendment.getID()
-            },
-            data: {
-                applied: true
-            }
-        })
+        let finalSeqNumber = this.getSeqNumber();
+
+        while(!content.checkSeqNumberVacant(finalSeqNumber)) {
+            finalSeqNumber += 1;
+        }
+
+        if(finalSeqNumber !== this.getSeqNumber()) {
+            await prisma.content.update({
+                where: {
+                    ID: this.getID()
+                },
+                data : {
+                    seqNumber : finalSeqNumber
+                }
+            })
+        }
 
         await prisma.chapter.update({
             where: {
@@ -245,14 +253,17 @@ class Chapter extends Content {
             let childernKeys = Array.from(this.children.keys());
 
             let patern = 32;
+            let overwritten = false;
             for(let seq of childernKeys){
                 if (seq !== patern) {
                     let child = childrenCopy.get(seq)
                     if(child) {
-                        this.children.delete(seq)
-
-                        child!.setSeqNumber(patern)
-                        this.children.set(patern, child!)
+                        if(!overwritten) {
+                            this.children.delete(seq)
+                        }
+                        overwritten = this.children.has(patern)
+                        child.setSeqNumber(patern)
+                        this.children.set(patern, child)
 
                         await prisma.content.update({
                             where: {
@@ -283,7 +294,7 @@ class Chapter extends Content {
         return this.children.has(newSeqNumber)
     }
 
-    public checkPaternity(ids : { ChildID?: number, LessonPartID?: number, newSeqNumber?: number, delete: boolean }[]) : boolean {
+    public async checkPaternity(ids : { ChildID?: number, LessonPartID?: number, newSeqNumber?: number, delete: boolean }[]) : Promise<boolean> {
         let justIDs : number[]= [];
 
         this.children.forEach((child) => {

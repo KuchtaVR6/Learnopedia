@@ -212,14 +212,17 @@ export class Course extends Content {
             let childrenKeys = Array.from(this.children.keys());
 
             let patern = 32;
+            let overwritten = false;
             for (let seq of childrenKeys) {
                 if (seq !== patern) {
                     let child = childrenCopy.get(seq)
                     if(child) {
-                        this.children.delete(seq)
-
-                        child!.setSeqNumber(patern)
-                        this.children.set(patern, child!)
+                        if(!overwritten) {
+                            this.children.delete(seq)
+                        }
+                        overwritten = this.children.has(patern)
+                        child.setSeqNumber(patern)
+                        this.children.set(patern, child)
 
                         await prisma.content.update({
                             where: {
@@ -240,7 +243,7 @@ export class Course extends Content {
         return this.children.has(newSeqNumber)
     }
 
-    public checkPaternity(ids : { ChildID?: number, LessonPartID? : number, newSeqNumber?: number, delete: boolean }[]) : boolean {
+    public async checkPaternity(ids : { ChildID?: number, LessonPartID? : number, newSeqNumber?: number, delete: boolean }[]) : Promise<boolean> {
 
         let justIDs : number[]= [];
 

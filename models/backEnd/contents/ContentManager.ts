@@ -264,6 +264,7 @@ class ContentManager {
             include: {
                 amendment: true,
                 keyword: true,
+                creationamendment: true,
 
                 lesson: {
                     include: {
@@ -319,7 +320,24 @@ class ContentManager {
                             include : prismaInclusions
                         },
                         contentopinion : true,
-
+                        creationamendment : {
+                            include : {
+                                keywordmodamendment : {
+                                     include : {
+                                         amendment : {
+                                             include : prismaInclusions
+                                         }
+                                     }
+                                }
+                            }
+                        },
+                        adoptionamendment : {
+                            include : {
+                                amendment : {
+                                    include : prismaInclusions
+                                }
+                            }
+                        },
                         course: {
                             include: {
                                 chapter: {
@@ -330,6 +348,24 @@ class ContentManager {
                                                 amendment: {
                                                     include : prismaInclusions
                                                 },
+                                                creationamendment : {
+                                                    include : {
+                                                        keywordmodamendment : {
+                                                            include : {
+                                                                amendment : {
+                                                                    include : prismaInclusions
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                },
+                                                adoptionamendment : {
+                                                    include : {
+                                                        amendment : {
+                                                            include : prismaInclusions
+                                                        }
+                                                    }
+                                                },
                                                 contentopinion : true
                                             }
                                         },
@@ -339,6 +375,24 @@ class ContentManager {
                                                     include: {
                                                         contentopinion : true,
                                                         keyword: true,
+                                                        creationamendment : {
+                                                            include : {
+                                                                keywordmodamendment : {
+                                                                    include : {
+                                                                        amendment : {
+                                                                            include : prismaInclusions
+                                                                        }
+                                                                    }
+                                                                }
+                                                            }
+                                                        },
+                                                        adoptionamendment : {
+                                                            include : {
+                                                                amendment : {
+                                                                    include : prismaInclusions
+                                                                }
+                                                            }
+                                                        },
                                                         amendment: {
                                                             include : prismaInclusions
                                                         }
@@ -356,7 +410,21 @@ class ContentManager {
                 if (dbFull && dbFull.public && dbFull.course) {
                     //caching the course
                     let KeywordsArray = this.interpretKeywords(dbFull.keyword, dbFull.ID);
-                    let AmendmentsArray = await AmendmentManager.getInstance().insertManyToCache(dbFull.amendment);
+
+                    let fullAmendmentsArray =
+                        [
+                            ...dbFull.amendment,
+                            ...dbFull.creationamendment.map(
+                                (each) => {
+                                    return each.keywordmodamendment.amendment
+                                }),
+                            ...dbFull.adoptionamendment.map(
+                                (each) => {
+                                    return each.amendment
+                                })
+                        ]
+
+                    let AmendmentsArray = await AmendmentManager.getInstance().insertManyToCache(fullAmendmentsArray);
 
                     let upVotes = 0;
                     let downVotes = 0;
@@ -389,7 +457,21 @@ class ContentManager {
                             let row = chapter.content
 
                             let KeywordsArray = this.interpretKeywords(row.keyword, row.ID);
-                            let AmendmentsArray = await AmendmentManager.getInstance().insertManyToCache(row.amendment);
+
+                            let fullAmendmentsArray =
+                                [
+                                    ...row.amendment,
+                                    ...row.creationamendment.map(
+                                        (each) => {
+                                            return each.keywordmodamendment.amendment
+                                        }),
+                                    ...row.adoptionamendment.map(
+                                        (each) => {
+                                            return each.amendment
+                                        })
+                                ]
+
+                            let AmendmentsArray = await AmendmentManager.getInstance().insertManyToCache(fullAmendmentsArray);
                             let upVotes = 0;
                             let downVotes = 0;
                             row.contentopinion.map((opinion) => {
@@ -425,7 +507,21 @@ class ContentManager {
                                 if(row.public) {
 
                                     let KeywordsArray = this.interpretKeywords(row.keyword, row.ID);
-                                    let AmendmentsArray = await AmendmentManager.getInstance().insertManyToCache(row.amendment);
+
+                                    let fullAmendmentsArray =
+                                        [
+                                            ...row.amendment,
+                                            ...row.creationamendment.map(
+                                                (each) => {
+                                                    return each.keywordmodamendment.amendment
+                                                }),
+                                            ...row.adoptionamendment.map(
+                                                (each) => {
+                                                    return each.amendment
+                                                })
+                                        ]
+
+                                    let AmendmentsArray = await AmendmentManager.getInstance().insertManyToCache(fullAmendmentsArray);
                                     let upVotes = 0;
                                     let downVotes = 0;
                                     row.contentopinion.map((opinion) => {
@@ -479,7 +575,7 @@ class ContentManager {
             type : ContentType.LESSON,
             downVotes: 0,
             seqNumber : 0,
-            name : "This content has been deleted... :(",
+            name : "This content is not available now... :(",
             keywords: [],
             creation: "unknown",
             modification: "unknown",
@@ -523,6 +619,21 @@ class ContentManager {
                 course: true,
                 lesson: true,
 
+                creationamendment : {
+                    include : {
+                        keywordmodamendment : {
+                            include : {
+                                amendment : true
+                            }
+                        }
+                    }
+                },
+                adoptionamendment : {
+                    include : {
+                        amendment : true
+                    }
+                },
+
                 contentopinion: true
             }
         })
@@ -534,8 +645,21 @@ class ContentManager {
                     keywordsArray.push(new ActiveKeyword(keyword.ID, keyword.Score, keyword.word, value!.ID))
                 })
 
+                let fullAmendmentsArray =
+                    [
+                        ...value.amendment,
+                        ...value.creationamendment.map(
+                            (each) => {
+                                return each.keywordmodamendment.amendment
+                            }),
+                        ...value.adoptionamendment.map(
+                            (each) => {
+                                return each.amendment
+                            })
+                    ]
+
                 let amendmentsArray: Amendment[] = []
-                value.amendment.map((amendment) => {
+                fullAmendmentsArray.map((amendment) => {
                     amendmentsArray.push(new Amendment(amendment.ID, amendment.CreatorID, amendment.ContentID!, amendment.significance, amendment.tariff, amendment.vetoed,amendment.timestamp))
                 })
 
@@ -737,6 +861,7 @@ class ContentManager {
 
     public async createCreationAmendment(authorID: number, name: string, description: string, keywords: Keyword[], seqNumber: number, type: ContentType, parentID?: number) {
         let author = await UserManager.getInstance().getUserID(authorID);
+        let parent : undefined | Content;
 
         if(type !== ContentType.COURSE && !parentID)
         {
@@ -747,7 +872,7 @@ class ContentManager {
             throw CourseHasNoParent
         }
         else if (parentID) {
-            let parent = await this.getSpecificByID(parentID)
+            parent = await this.getSpecificByID(parentID)
             switch (parent.getType()){
                 case ContentType.CHAPTER:
                     if(type !== ContentType.LESSON)
@@ -820,7 +945,7 @@ class ContentManager {
                 break;
         }
 
-        let parent = await prisma.amendment.create({
+        let amendDBout = await prisma.amendment.create({
             data: {
                 CreatorID: authorID,
                 timestamp: amendment.getCreationDate(),
@@ -863,8 +988,8 @@ class ContentManager {
             }
         })
 
-        if (parent && parent.keywordmodamendment) {
-            parent.keywordmodamendment.keywordentrymod.map((entry) => {
+        if (amendDBout && amendDBout.keywordmodamendment) {
+            amendDBout.keywordmodamendment.keywordentrymod.map((entry) => {
                 if (entry.keyword) {
                     let keyword = keywordsToProvideID.get(entry.keyword.word)
                     if (keyword) {
@@ -874,12 +999,19 @@ class ContentManager {
             })
         }
 
-        amendment.setID(parent.ID)
+        amendment.setID(amendDBout.ID)
+
+        if(parent) {
+            parent.addAmendment(amendment);
+        }
+
         author.addAmendment(amendment);
 
         await AmendmentManager.getInstance().push(amendment);
 
-        await this.applyContentCreation(amendment);
+        if(!parent) {
+            await this.applyContentCreation(amendment);
+        }
     }
 
     public async createAdoptionAmendment(authorID: number, targetID: number, newParent: number) {
@@ -905,7 +1037,8 @@ class ContentManager {
                 throw new CourseHasNoParent();
         }
 
-        let amendment = new AdoptionAmendment(-1, authorID, targetID, newParent, {dbInput: false, otherSignificance: newParentalContent.getSignificance()})
+        let amendment = new AdoptionAmendment(-1, authorID, targetID, newParent, {dbInput: false, otherSignificance: Number.MAX_SAFE_INTEGER})
+        //the cost of such operation must be high (it will be always lower to the maximum possible regardless)
 
         content.addAmendment(amendment)
 
@@ -947,8 +1080,6 @@ class ContentManager {
         })
 
         amendment.setID(parent.ID)
-
-        amendment.setReceivingAmendmentID(secondEntry.ID)
         author.addAmendment(amendment);
 
         await AmendmentManager.getInstance().push(amendment);
@@ -960,8 +1091,8 @@ class ContentManager {
         let content = await this.getSpecificByID(targetID)
         let author = await UserManager.getInstance().getUserID(authorID);
 
-        if(!content.checkPaternity(changes)){
-            throw new WrongParent("provided child",targetID.toString())
+        if(!(await content.checkPaternity(changes))){
+            throw new WrongParent("provided child","Content with id = "+String(targetID))
         }
 
         let amendment = new ListAmendment(-1, authorID, targetID, changes, {dbInput: false, targetType: content.getType()})
@@ -1045,113 +1176,115 @@ class ContentManager {
 
     public async applyContentCreation(amendment: CreationAmendment) {
 
-        let finalID : number | undefined = undefined;
+        if(!amendment.getValueOfApplied()) {
+            let finalID: number | undefined = undefined;
+            let finalSeq = amendment.seqNumber
 
-        if(amendment.parentID)
-        {
-            let content = await this.getSpecificByID(amendment.parentID)
+            if (amendment.parentID) {
+                let content = await this.getSpecificByID(amendment.parentID)
 
-            finalID = content.getSpecificID();
+                finalID = content.getSpecificID();
 
-            if(content.checkSeqNumberVacant(amendment.seqNumber)!){
-                throw SequenceNumberTaken;
-            }
-        }
-
-        let newContent: { ID: number } & any;
-
-        switch (amendment.type) {
-            case ContentType.CHAPTER:
-                newContent = await prisma.content.create({
-                    data: {
-                        name: amendment.name,
-                        description: amendment.description,
-                        views: 0,
-                        dateModified: new Date(),
-                        dateCreated: amendment.getCreationDate(),
-                        seqNumber: amendment.seqNumber,
-                        public: true,
-                        numberOfAuthors: 1,
-
-                        chapter: {
-                            create: {
-                                CourseID: finalID!
-                            }
-                        }
-                    }
-                })
-                break;
-            case ContentType.COURSE:
-                newContent = await prisma.content.create({
-                    data: {
-                        name: amendment.name,
-                        description: amendment.description,
-                        views: 0,
-                        dateModified: new Date(),
-                        dateCreated: amendment.getCreationDate(),
-                        seqNumber: amendment.seqNumber,
-                        public: true,
-                        numberOfAuthors: 1,
-
-                        course: {
-                            create: {}
-                        }
-                    }
-                })
-                break;
-            case ContentType.LESSON:
-                newContent = await prisma.content.create({
-                    data: {
-                        name: amendment.name,
-                        description: amendment.description,
-                        views: 0,
-                        dateModified: new Date(),
-                        dateCreated: amendment.getCreationDate(),
-                        seqNumber: amendment.seqNumber,
-                        public: true,
-                        numberOfAuthors: 1,
-
-                        lesson: {
-                            create: {
-                                ChapterID: finalID!
-                            }
-                        }
-                    }
-                })
-                break;
-        }
-
-        await prisma.amendment.update({
-            where: {
-                ID: amendment.getID()
-            },
-            data: {
-                ContentID: newContent.ID,
-                applied: true
-            }
-        })
-
-        let keywordManager = await KeywordManager.getInstance()
-
-        let idsToUpdate: number[] = [];
-
-        amendment.keywords.map((keyword) => {
-            idsToUpdate.push(keyword.getID())
-            keywordManager.activate(keyword, newContent.ID)
-        })
-
-        await prisma.keyword.updateMany({
-            where: {
-                ID: {
-                    in: idsToUpdate
+                while (content.checkSeqNumberVacant(finalSeq)!) {
+                    finalSeq += 1
                 }
-            },
-            data: {
-                ContentID: newContent.ID
             }
-        })
 
-        await this.getSpecificByID(newContent.ID)
+            let newContent: { ID: number } & any;
+
+            switch (amendment.type) {
+                case ContentType.CHAPTER:
+                    newContent = await prisma.content.create({
+                        data: {
+                            name: amendment.name,
+                            description: amendment.description,
+                            views: 0,
+                            dateModified: new Date(),
+                            dateCreated: amendment.getCreationDate(),
+                            seqNumber: finalSeq,
+                            public: true,
+                            numberOfAuthors: 1,
+
+                            chapter: {
+                                create: {
+                                    CourseID: finalID!
+                                }
+                            }
+                        }
+                    })
+                    break;
+                case ContentType.COURSE:
+                    newContent = await prisma.content.create({
+                        data: {
+                            name: amendment.name,
+                            description: amendment.description,
+                            views: 0,
+                            dateModified: new Date(),
+                            dateCreated: amendment.getCreationDate(),
+                            seqNumber: finalSeq,
+                            public: true,
+                            numberOfAuthors: 1,
+
+                            course: {
+                                create: {}
+                            }
+                        }
+                    })
+                    break;
+                case ContentType.LESSON:
+                    newContent = await prisma.content.create({
+                        data: {
+                            name: amendment.name,
+                            description: amendment.description,
+                            views: 0,
+                            dateModified: new Date(),
+                            dateCreated: amendment.getCreationDate(),
+                            seqNumber: finalSeq,
+                            public: true,
+                            numberOfAuthors: 1,
+
+                            lesson: {
+                                create: {
+                                    ChapterID: finalID!
+                                }
+                            }
+                        }
+                    })
+                    break;
+            }
+
+            await prisma.amendment.update({
+                where: {
+                    ID: amendment.getID()
+                },
+                data: {
+                    ContentID: newContent.ID,
+                    applied: true
+                }
+            })
+
+            let keywordManager = await KeywordManager.getInstance()
+
+            let idsToUpdate: number[] = [];
+
+            amendment.keywords.map((keyword) => {
+                idsToUpdate.push(keyword.getID())
+                keywordManager.activate(keyword, newContent.ID)
+            })
+
+            await prisma.keyword.updateMany({
+                where: {
+                    ID: {
+                        in: idsToUpdate
+                    }
+                },
+                data: {
+                    ContentID: newContent.ID
+                }
+            })
+
+            await this.getSpecificByID(newContent.ID)
+        }
     }
 }
 

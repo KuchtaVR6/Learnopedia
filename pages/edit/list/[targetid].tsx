@@ -96,60 +96,46 @@ const ModList: NextPage<{
         }
 
         let deletion;
-        let x : MetaOutput[] | displayableOutput[];
+        let x: MetaOutput[] | displayableOutput[];
 
-        if(data.mainMeta.type===2)
-        {
+        if (data.mainMeta.type === 2) {
             x = new Array<displayableOutput>();
-            for(let row of extracted)
-            {
+            for (let row of extracted) {
                 deletion = false
                 let copy = {...row as displayableOutput}
 
                 for (let change of listOfChanges) {
-                    if ((change.ChildID && row.id === change.ChildID) || (change.LessonPartID && row.id === change.LessonPartID))
-                    {
-                        if(!change.delete)
-                        {
-                            if(change.newSeqNumber)
-                            {
+                    if ((change.ChildID && row.id === change.ChildID) || (change.LessonPartID && row.id === change.LessonPartID)) {
+                        if (!change.delete) {
+                            if (change.newSeqNumber) {
                                 copy.seqNumber = change.newSeqNumber
                             }
-                        }
-                        else{
+                        } else {
                             deletion = true;
                         }
                     }
                 }
-                if(!deletion)
-                {
+                if (!deletion) {
                     x.push(copy)
                 }
             }
-        }
-        else{
+        } else {
             x = new Array<MetaOutput>();
-            for(let row of extracted)
-            {
+            for (let row of extracted) {
                 deletion = false
                 let copy = {...row as MetaOutput}
                 for (let change of listOfChanges) {
-                    if ((change.ChildID && row.id === change.ChildID) || (change.LessonPartID && row.id === change.LessonPartID))
-                    {
-                        if(!change.delete)
-                        {
-                            if(change.newSeqNumber)
-                            {
+                    if ((change.ChildID && row.id === change.ChildID) || (change.LessonPartID && row.id === change.LessonPartID)) {
+                        if (!change.delete) {
+                            if (change.newSeqNumber) {
                                 copy.seqNumber = change.newSeqNumber
                             }
-                        }
-                        else{
+                        } else {
                             deletion = true;
                         }
                     }
                 }
-                if(!deletion)
-                {
+                if (!deletion) {
                     x.push(copy)
                 }
             }
@@ -183,41 +169,36 @@ const ModList: NextPage<{
         setSelected(-1)
     }
 
-    const getName = (arg : MetaOutput | displayableOutput) =>
-    {
+    const getName = (arg: MetaOutput | displayableOutput) => {
         let x = (arg as MetaOutput).name || undefined
 
         let final;
 
-        if(x){
+        if (x) {
             final = x
-        }
-        else{
+        } else {
             let y = (arg as displayableOutput)
             if (y.output.__typename === "ParagraphOutput") {
-                if(y.output.advancedText) {
+                if (y.output.advancedText) {
                     final = "P:" + y.output.advancedText
-                }
-                else {
+                } else {
                     final = "P:" + y.output.basicText
                 }
-            }
-            else if (y.output.__typename === "EmbeddableOutput") {
+            } else if (y.output.__typename === "EmbeddableOutput") {
                 final = "E:" + y.output.type
-            }
-            else {
+            } else {
                 final = "Q:" + y.output.question
             }
         }
 
-        if(final.length>33) {
-            return final.slice(0,30) + "..."
+        if (final.length > 33) {
+            return final.slice(0, 30) + "..."
         }
         return final
     }
 
     const isL = () => {
-        return data.mainMeta.type===2
+        return data.mainMeta.type === 2
     }
 
     let prevSeqNumber = 0;
@@ -231,7 +212,7 @@ const ModList: NextPage<{
             </Head>
             <div className={styles.main}>
                 <div className={"buttonNiceContainer"}>
-                    <a href={"/view/"+data.mainMeta.id}><BiArrowBack/>Back to the content</a>
+                    <a href={"/view/" + data.mainMeta.id}><BiArrowBack/>Back to the content</a>
                 </div>
                 <h1>List modifications on {data.mainMeta.name}</h1>
                 <hr/>
@@ -243,22 +224,27 @@ const ModList: NextPage<{
                             {
                                 extracted.map((child) => {
                                     let moded = checkIfModded(child.id);
-                                    return (<>
-                                        <button key={child.id} onClick={() => {
+                                    return (<span key={child.id}>
+                                        <button onClick={() => {
                                             setSelected(child.id)
                                         }} disabled={selected == child.id || moded}>
                                             {child.id} - {getName(child)} | {moded ? <>Already
                                             moded</> : <>SQNo.{child.seqNumber}</>}
                                         </button>
                                         <br/>
-                                    </>)
+                                    </span>)
                                 })
                             }
                         </td>
                         <td>
                             <p>Perform</p>
                             <button disabled={!(selected >= 0)} onClick={() => {
-                                setLOCH([...listOfChanges, {ChildID: isL()? null : selected, LessonPartID : isL()? selected : null, delete: true, newSeqNumber: null}]);
+                                setLOCH([...listOfChanges, {
+                                    ChildID: isL() ? null : selected,
+                                    LessonPartID: isL() ? selected : null,
+                                    delete: true,
+                                    newSeqNumber: null
+                                }]);
                             }}><AiFillDelete/>Delete
                             </button>
                             {
@@ -273,8 +259,8 @@ const ModList: NextPage<{
                                                 <button
                                                     onClick={() => {
                                                         setLOCH([...listOfChanges, {
-                                                            ChildID: isL()? null : selected,
-                                                            LessonPartID : isL()? selected : null,
+                                                            ChildID: isL() ? null : selected,
+                                                            LessonPartID: isL() ? selected : null,
                                                             delete: false,
                                                             newSeqNumber: targetValue
                                                         }]);
@@ -308,8 +294,8 @@ const ModList: NextPage<{
                             <button
                                 onClick={() => {
                                     setLOCH([...listOfChanges, {
-                                        ChildID: isL()? null : selected,
-                                        LessonPartID : isL()? selected : null,
+                                        ChildID: isL() ? null : selected,
+                                        LessonPartID: isL() ? selected : null,
                                         delete: false,
                                         newSeqNumber: prevSeqNumber + 32
                                     }]);
@@ -328,7 +314,7 @@ const ModList: NextPage<{
                         return (
                             <>
                                 <button
-                                    key={change.ChildID? change.ChildID - 200 : change.LessonPartID! - 200}
+                                    key={change.ChildID ? change.ChildID - 200 : change.LessonPartID! - 200}
                                     onClick={() => {
                                         setLOCH(listOfChanges.filter((row) => {
                                             return (!row.ChildID || row.ChildID !== change.ChildID) && (!row.LessonPartID || row.LessonPartID !== change.LessonPartID);
@@ -336,7 +322,7 @@ const ModList: NextPage<{
                                     }}
                                 >
                                     <AiFillDelete/>
-                                    {change.ChildID? change.ChildID : change.LessonPartID} - {change.delete ? "to be deleted" : `to be moved to seqNumber ${change.newSeqNumber}`}
+                                    {change.ChildID ? change.ChildID : change.LessonPartID} - {change.delete ? "to be deleted" : `to be moved to seqNumber ${change.newSeqNumber}`}
                                 </button>
                             </>)
                     }

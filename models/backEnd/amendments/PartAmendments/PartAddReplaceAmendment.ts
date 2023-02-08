@@ -1,6 +1,6 @@
 import PartAmendment from "./PartAmendment";
 import {displayableOutput} from "../../lessonParts/LessonPart";
-import {AmendmentOpinionValues, SpecificAmendmentOutput} from "../Amendment";
+import {AmendmentOpinionValues, AmendmentTypes, SpecificAmendmentOutput} from "../Amendment";
 import LessonPartManager from "../../lessonParts/LessonPartManager";
 import ContentManager from "../../contents/ContentManager";
 
@@ -104,6 +104,10 @@ class PartAddReplaceAmendment extends PartAmendment{
         await content.applyPartAddReplaceAmendment(this)
 
         await content.purgeListEdits()
+    }
+
+    public getType() : AmendmentTypes {
+        return AmendmentTypes.PartAddReplaceAmendment
     }
 }
 

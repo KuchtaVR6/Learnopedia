@@ -1,8 +1,15 @@
-import Amendment, {AmendmentOpinionValues, SpecificAmendmentOutput} from "./Amendment";
+import Amendment, {
+    AmendmentOpinionValues,
+    AmendmentTypes,
+    LevelSupport,
+    SpecificAmendmentOutput,
+    VotingSupport
+} from "./Amendment";
 import Keyword from "../contents/keywords/Keyword";
-import {ContentType} from "../contents/Content";
+import {contentShareOutput, ContentType} from "../contents/Content";
 import {ContentNeedsParent} from "../tools/Errors";
 import KeywordManager from "../contents/keywords/KeywordManager";
+import ContentManager from "../contents/ContentManager";
 
 export type CreationAmendmentOutput = {
     __typename: "CreationAmendmentOutput",
@@ -74,6 +81,102 @@ class CreationAmendment extends Amendment{
     public fullyFetched()
     {
         return true;
+    }
+
+    public getType() : AmendmentTypes {
+        return AmendmentTypes.CreationAmendment
+    }
+
+    public async getSupports(userID? : number) : Promise<VotingSupport>{
+
+        let contentManagerInstance = await ContentManager.getInstance()
+
+        let target = await contentManagerInstance.getSpecificByID(this.parentID!)
+
+        let finalArray : LevelSupport[] = [
+            {
+                max: 0,
+                positives: 0,
+                negatives: 0,
+            },
+            {
+                max: 0,
+                positives: 0,
+                negatives: 0,
+            },
+            {
+                max: 0,
+                positives: 0,
+                negatives: 0,
+            }
+        ];
+
+        let userOP : number | undefined = undefined; // -2 report, -1 negative, 1 positive
+
+        const changeFinalArray = (level : contentShareOutput,levelNo : number, op : AmendmentOpinionValues) => {
+            finalArray[levelNo].max = level.maximum
+            if(op===AmendmentOpinionValues.Positive)
+            {
+                finalArray[levelNo].positives += level.owned
+            }
+            else {
+                finalArray[levelNo].negatives += level.owned
+            }
+        }
+
+        this.opinions.forEach((op, user) => {
+            let significances = target.getContentShareOfUser(user);
+
+            if(userID === user) {
+                switch (op) {
+                    case AmendmentOpinionValues.Negative:
+                        userOP = -1;
+                        break;
+                    case AmendmentOpinionValues.Positive:
+                        userOP = 1;
+                        break;
+                    case AmendmentOpinionValues.Report:
+                        userOP = -2;
+                        break;
+                }
+            }
+
+            significances.forEach((level) => {
+                switch (level.level)
+                {
+                    case ContentType.LESSON:
+                        changeFinalArray(level,2,op)
+                        break;
+                    case ContentType.CHAPTER:
+                        changeFinalArray(level,1,op)
+                        break;
+                    case ContentType.COURSE:
+                        changeFinalArray(level,0,op)
+                        break;
+                }
+            })
+        })
+
+        let cutArray : LevelSupport[] = [];
+
+        finalArray.map((each) => {
+            if(each.max>0)
+            {
+                cutArray.push(each)
+            }
+        })
+
+
+
+        return {
+            amendmentID : this.id,
+            individualSupports : cutArray,
+            userOP: userOP
+        }
+    }
+
+    public async applyThisAmendment() {
+        await ContentManager.getInstance().applyContentCreation(this)
     }
 }
 

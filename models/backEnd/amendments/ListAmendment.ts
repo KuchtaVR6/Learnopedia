@@ -1,4 +1,4 @@
-import Amendment, {AmendmentOpinionValues, SpecificAmendmentOutput} from "./Amendment";
+import Amendment, {AmendmentOpinionValues, AmendmentTypes, SpecificAmendmentOutput} from "./Amendment";
 import {ContentType} from "../contents/Content";
 import ContentManager from "../contents/ContentManager";
 
@@ -70,6 +70,10 @@ class ListAmendment extends Amendment {
         await content.applyListAmendment(this)
 
         await content.purgeListEdits()
+    }
+
+    public getType() : AmendmentTypes {
+        return AmendmentTypes.ListAmendment
     }
 }
 

@@ -9,16 +9,24 @@ import ParagraphDisplay from "./ParagraphDisplay";
 type args = {
     row: displayableOutput,
     loggedIn: boolean,
-    id?: number
+    id?: number,
+    enableEdits: boolean
 }
 
-const LessonPartDisplay: FC<args> = ({row, loggedIn, id}) => {
+const LessonPartDisplay: FC<args> = ({row, loggedIn, id, enableEdits}) => {
 
     return (
         <div key={row.id} className={styles.lessonPart} style={{width: "100%", wordBreak: "break-word"}}>
-            {id !== undefined ? <EditButton loggedIn={loggedIn} label={"Edit a part"}
-                                            path={"/edit/lessonpart/" + id + "?child=" + row.id}
-                                            removeText={true}/> : ""}
+            {id !== undefined && enableEdits ?
+                <>
+                    ----------------------------------<br/>
+                    ID: {row.id} | SeqNumber : {row.seqNumber}<br/>
+                    ----------------------------------
+                    <EditButton loggedIn={loggedIn} label={"Edit a part"}
+                                path={"/edit/lessonpart/" + id + "?child=" + row.id}
+                                removeText={true}/>
+                </>
+                : ""}
             {
                 row.output.__typename === "ParagraphOutput" ?
 

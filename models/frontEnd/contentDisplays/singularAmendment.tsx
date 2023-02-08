@@ -128,19 +128,19 @@ const SingularAmendment: FC<args> = (args) => {
                                         {row.otherDetails.change ?
                                             <LessonPartDisplay row={row.otherDetails.change}
                                                                key={row.id}
-                                                               loggedIn={false}/> : ":("}
+                                                               loggedIn={false} enableEdits={false}/> : ":("}
                                         {row.otherDetails.old ?
                                             <>
                                                 <b>The lesson part {row.applied ? "was" : "is"}: </b>
                                                 <LessonPartDisplay row={row.otherDetails.old} loggedIn={false}
-                                                                   key={row.id}/>
+                                                                   key={row.id} enableEdits={false}/>
                                             </> : ""
                                         }
                                     </>
                                     :
                                     row.otherDetails.__typename === "AdoptionAmendmentOutput" ?
                                         <>
-                                            <h3>{row.otherDetails.receiver ? "Was a receiver of an adoption" : "Had be transferred to a different parent"}</h3>
+                                            <h3>{row.applied? "Had been transferred to:" : "Is proposed to be transferred to:"}</h3>
                                             New parent id is: <button
                                             onClick={
                                                 () => {

@@ -450,7 +450,7 @@ class Content extends Expirable {
         throw new UnsupportedOperation("Non-Lesson Content", "applyPartAddReplaceAmendment")
     }
 
-    public checkPaternity(ids: { ChildID?: number, LessonPartID?: number, newSeqNumber?: number, delete: boolean }[]): boolean {
+    public async checkPaternity(ids: { ChildID?: number, LessonPartID?: number, newSeqNumber?: number, delete: boolean }[]): Promise<boolean> {
         throw ContentNotFetched
     }
 
