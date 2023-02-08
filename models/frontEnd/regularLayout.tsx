@@ -60,7 +60,6 @@ const RegularLayout: FC<args> = ({children, enforceUser, navigation, noInlineNav
                     }
                 }
                 else{
-                    console.log("1",e)
                     window.alert(e.message)
                 }
             });

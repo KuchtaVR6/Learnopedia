@@ -162,17 +162,6 @@ class UserStore {
     public async push(nickname: string, email: string, fname: string, lname: string, password: string): Promise<User> {
         let passHash = await User.generateHash(password)
 
-        console.log({
-            data: {
-                email: email,
-                lname: lname,
-                fname: fname,
-                nickname: nickname,
-                passHash: passHash,
-                moderator: false
-            }
-        })
-
         let output = await prisma.user.create({
             data: {
                 email: email,

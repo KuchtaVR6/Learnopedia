@@ -6,7 +6,7 @@ const MAX_IMAGE_SIZE = 4 * 1024 * 1024; // 2 MB
 
 const index = multer({
     storage: multer.diskStorage({
-        destination: './public/uploads/avatars',
+        destination: './public/uploads',
         filename: (req, file, cb) => cb(null, file.fieldname + "_" + Date.now() + '.' + file.mimetype.split('/')[1]),
     }),
     fileFilter: function (req, file, callback) {

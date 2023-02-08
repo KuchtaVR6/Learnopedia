@@ -33,7 +33,7 @@ const View: NextPage<{
                     "name": "Learnopedia",
                     "logo": {
                         "@type": "ImageObject",
-                        "url": "https://learnopedia.org/images/logo.png"
+                        "url": "https://learnopedia.kuchta.uk/images/logo.png"
                     }
                 },
                 "datePublished": creation.getFullYear() + "-" + creation.getMonth() + "-" + creation.getDate(),

@@ -80,7 +80,6 @@ const Register: NextPage = () => {
             sendEmail().then(() => {
                 setVisibility(true)
             }).catch((e) => {
-                console.log(e)
                 setError(e.message)
                 //router.reload()
             })

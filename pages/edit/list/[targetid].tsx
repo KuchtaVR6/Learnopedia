@@ -187,12 +187,33 @@ const ModList: NextPage<{
     {
         let x = (arg as MetaOutput).name || undefined
 
+        let final;
+
         if(x){
-            return x
+            final = x
         }
         else{
-            return "lessonPart"
+            let y = (arg as displayableOutput)
+            if (y.output.__typename === "ParagraphOutput") {
+                if(y.output.advancedText) {
+                    final = "P:" + y.output.advancedText
+                }
+                else {
+                    final = "P:" + y.output.basicText
+                }
+            }
+            else if (y.output.__typename === "EmbeddableOutput") {
+                final = "E:" + y.output.type
+            }
+            else {
+                final = "Q:" + y.output.question
+            }
         }
+
+        if(final.length>33) {
+            return final.slice(0,30) + "..."
+        }
+        return final
     }
 
     const isL = () => {

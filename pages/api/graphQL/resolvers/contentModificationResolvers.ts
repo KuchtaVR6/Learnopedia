@@ -114,7 +114,7 @@ export const contentModificationResolvers = {
             if (thisUser.checkSuspension()) {
                 if (args.args.localCacheImage) {
                     await thisUser.setUploadCachePath(null);
-                    args.args.uri = "/uploads/images/"
+                    args.args.uri = "/api/images/"+args.args.uri
                 }
 
                 await ContentManager.getInstance().createAddReplaceAmendment(thisUser.getID(), args.targetID, args.seqNumber, {

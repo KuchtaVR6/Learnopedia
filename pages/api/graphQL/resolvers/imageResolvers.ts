@@ -2,10 +2,10 @@ import {genericContext} from "../resolvers";
 import {enforceUser} from "./verificationResolvers";
 import fs from "fs";
 
-const deleteFile = (fileToDelete: string | null, folder: string) => {
+const deleteFile = (fileToDelete: string | null) => {
 
     if (fileToDelete && fileToDelete.length > 1) {
-        let finalPath = "./public/uploads/" + folder + "/" + fileToDelete
+        let finalPath = "./public/uploads/" + fileToDelete
         if (finalPath.split("/").length === 5) {
             try{
                 fs.unlinkSync(finalPath)
@@ -22,29 +22,24 @@ export const imageResolvers = {
     Query: {
         avatarAuthorise : async (parent : undefined, args : undefined, context: genericContext) => {
             let thisUser = await enforceUser(context)
-
             let file = thisUser.getAvatarPath()
-
             await thisUser.setAvatarPath(null)
 
-            deleteFile(file, "avatars")
+            deleteFile(file)
 
             return { file :  file }
         },
         uploadAuthorise : async (parent : undefined, args : undefined, context: genericContext) => {
             let thisUser = await enforceUser(context)
-
             let file = thisUser.getUploadCachePath()
-
             await thisUser.setUploadCachePath(null)
 
-            deleteFile(file, "images")
+            deleteFile(file)
 
             return { file :  file }
         },
         getUploadedImageLink : async (parent : undefined, args : undefined, context: genericContext) => {
             let thisUser = await enforceUser(context)
-
             let file = thisUser.getUploadCachePath()
 
             return {file : file}
@@ -54,7 +49,6 @@ export const imageResolvers = {
         avatarFinalise : async (parent : undefined, args : {newPath : string}, context: genericContext) => {
 
             let thisUser = await enforceUser(context)
-
             await thisUser.setAvatarPath(args.newPath)
 
             return {

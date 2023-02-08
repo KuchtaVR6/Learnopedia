@@ -321,7 +321,7 @@ export class User extends Expirable {
         super.refresh()
         let finalPath = "/images/defProfile.png";
         if (this.avatarPath) {
-            finalPath = "/uploads/avatars/" + this.avatarPath
+            finalPath = "/api/images/" + this.avatarPath
         }
         return {
             nickname: this.nickname,

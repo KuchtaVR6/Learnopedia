@@ -5,11 +5,11 @@ const nextConfig = {
     return [
       {
         source: '/mission',
-        destination: '/view/19',
+        destination: '/view/35',
         permanent: true,
       },{
         source : '/termsofuse',
-        destination : '/view/15',
+        destination : '/view/30',
         permanent: true
       }
     ]

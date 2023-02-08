@@ -91,7 +91,7 @@ const EmbeddableInput: FC<args> = (props) => {
                     setHideInput(!hideInput)
                 }
             }}>
-            Embed the image that you have uploaded
+            {hideInput? "Use a different Link" : "Embed the image that you have uploaded"}
         </button>
         <br/>
         <Link href={"/edit/imageUpload"}>Want to upload the image first? (CLICK HERE)</Link><br/>
@@ -100,7 +100,7 @@ const EmbeddableInput: FC<args> = (props) => {
 
         {input.length > 0? "Preview:" : ""}
         <div style={{border: "5px solid"}}>
-            <EmbeddableDisplay uri={parsedInput} type={type} />
+            <EmbeddableDisplay uri={hideInput? "/api/images/"+parsedInput : parsedInput} type={type} />
         </div>
 
         URI: {input.length > 0 ? (!props.current || (props.current.output.__typename !== "EmbeddableOutput" || input !== props.current.output.uri)) ? "✔" : "📕" : "❌"}
