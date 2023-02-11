@@ -80,6 +80,7 @@ const Login: NextPage = () => {
                     next={(router.query.red as string)? router.query.red as string : "profile"}
                     buttonName={"Login"}
                     disable={!(password&&identifier)}
+                    onErrorTrigger={(e) => {console.log(e)}}
                 />
                 <br/>
 

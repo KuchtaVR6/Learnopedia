@@ -104,7 +104,6 @@
 }
 
 .image{
-    width: 100%;
     max-width: 100%;
     max-height: 35em;
     display: flex;

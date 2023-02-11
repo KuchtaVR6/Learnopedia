@@ -7,6 +7,7 @@ import axios from "axios";
 import SVGModifier from "../../models/frontEnd/inputs/svgModifier";
 import {BiDownload, BiRedo, BiUndo} from "react-icons/bi";
 import Head from "next/head";
+import Link from "next/link";
 
 const ImageUpload: NextPage = () => {
 
@@ -225,6 +226,13 @@ const ImageUpload: NextPage = () => {
                 </button>
                 <hr/>
                 <button onClick={upload} disabled={!image || waiting}>Submit the image</button>
+                {(router.query.red as string)?
+                    <div className={"buttonNiceContainer"}>
+                        <Link href={(router.query.red as string)}>Go back to the previous page.</Link>
+                    </div>
+                    :
+                    ""
+                }
             </div>
         </RegularLayout>
     )

@@ -100,14 +100,12 @@ const ParagraphInput: FC<args> = ({setChanges, current}) => {
                         {basicText.length > 0 ? (!current || (current.output.__typename !== "ParagraphOutput" || basicText !== current.output.basicText)) ? "✔" : "📕" : "❌"}
                     </td>
                 </tr>
-                <tr>
-                    {basicText.length > 0? "Preview:" : ""}
-                    <div style={{border: "5px solid", padding: "0 20px"}}>
-                        <ParagraphDisplay basicText={basicText} advancedText={advancedText}/>
-                    </div>
-                </tr>
                 </tbody>
             </table>
+            {basicText.length > 0 ? "Preview:" : ""}
+            <div style={{border: "5px solid", padding: "0 20px"}}>
+                <ParagraphDisplay basicText={basicText} advancedText={advancedText}/>
+            </div>
         </>
     )
 }

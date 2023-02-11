@@ -294,8 +294,6 @@ class Lesson extends Content {
 
             this.sortChildern()
 
-            console.log("BEGIN", this.children)
-
             let childernCopy = new Map<number,LessonPart>(this.children);
             let childernKeys = Array.from(this.children.keys());
 
@@ -476,11 +474,12 @@ class Lesson extends Content {
         let totalOverall = 0;
 
         this.amendments.forEach((amendment) => {
-            if(amendment.getAuthorID() === userID)
-            {
-                total += amendment.getSignificance();
+            if(amendment.getValueOfApplied()) {
+                if (amendment.getAuthorID() === userID) {
+                    total += amendment.getSignificance();
+                }
+                totalOverall += amendment.getSignificance();
             }
-            totalOverall += amendment.getSignificance();
         })
 
         return [total, totalOverall]

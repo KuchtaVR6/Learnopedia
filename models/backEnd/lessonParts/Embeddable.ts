@@ -19,6 +19,8 @@ export class Embeddable extends LessonPart {
     public static getType(uri : string) {
         if(uri.startsWith("https://www.youtube.com/watch?v=") && uri.split("=").length===2)
             return "Youtube"
+        if(uri.startsWith("https://youtu.be/") && uri.split("/").length===4)
+            return "Youtube"
         if(uri.startsWith("https://gist.github.com/") && uri.split("/").length===5)
             return "GithubGist"
         let split = uri.split(".")

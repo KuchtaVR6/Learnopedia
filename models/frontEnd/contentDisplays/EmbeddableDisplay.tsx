@@ -2,6 +2,7 @@ import {FC} from "react";
 import {EmbeddableOutput} from "../../backEnd/lessonParts/Embeddable";
 import Gist from "react-gist";
 import styles from "../../../styles/ContentDisplay.module.css"
+import NoStretchImage from "./noStretchImage";
 
 type args = EmbeddableOutput
 
@@ -20,9 +21,7 @@ const EmbeddableDisplay : FC<args> = (input) => {
 
                         :
                         input.type==="Image"?
-                            <div className={styles.image}>
-                                <img src={`${input.uri}`} alt={`Image from `+ input.uri}/>
-                            </div>
+                            <NoStretchImage uri={input.uri} />
                                 :
                                 <>
                                 </>

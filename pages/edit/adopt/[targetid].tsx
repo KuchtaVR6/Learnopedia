@@ -42,7 +42,7 @@ const Adopt: NextPage<{
 
     const submit = async () => {
         submitMut().then(() => {
-            setWarning("Changes saved correctly, it will take up to 20 minutes for the changes to be visible.");
+            setWarning("Changes saved correctly, please refer to amendments to view it.");
             setSubmitted(true)
             }
         ).catch((e) => {

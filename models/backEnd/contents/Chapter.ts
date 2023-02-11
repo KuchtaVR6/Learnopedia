@@ -333,11 +333,12 @@ class Chapter extends Content {
         let totalOverall = 0;
 
         this.amendments.forEach((amendment) => {
-            if(amendment.getAuthorID() === userID)
-            {
-                total += amendment.getSignificance();
+            if(amendment.getValueOfApplied()) {
+                if (amendment.getAuthorID() === userID) {
+                    total += amendment.getSignificance();
+                }
+                totalOverall += amendment.getSignificance();
             }
-            totalOverall += amendment.getSignificance();
         })
 
         this.children.forEach((child) => {

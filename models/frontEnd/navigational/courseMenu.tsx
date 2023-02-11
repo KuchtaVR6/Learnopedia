@@ -38,46 +38,48 @@ const CourseMenu: FC<{ navigation?: FullOutput, inline?: boolean }> = ({navigati
 
     return (
         <div className={inline ? styles.courseMenuInline : styles.courseMenuMain}>
-            {navigation ?
-                <>
-                    <hr/>
-                    <NavigationTile meta={navigation.metas.meta}/>
-                    <hr/>
-                    {
-                        navigation.metas.chapters.map((chapter) => {
-                            let x = chapter.lessons.map((lesson) => {
-                                return <NavigationTile key={lesson.id} meta={lesson}/>
+            <div className={inline? "" : styles.innerScrollable}>
+                {navigation ?
+                    <>
+                        <hr/>
+                        <NavigationTile meta={navigation.metas.meta}/>
+                        <hr/>
+                        {
+                            navigation.metas.chapters.map((chapter) => {
+                                let x = chapter.lessons.map((lesson) => {
+                                    return <NavigationTile key={lesson.id} meta={lesson}/>
+                                })
+                                keyCounter += 1;
+                                return (
+                                    <div key={keyCounter}>
+                                        <NavigationTile key={chapter.meta.id} meta={chapter.meta}/>
+                                        <hr/>
+                                        {x}
+                                        {x.length > 0 ? <hr/> : ""}
+                                    </div>
+                                )
                             })
-                            keyCounter += 1;
-                            return (
+                        }
+                        <hr/>
+                    </>
+                    : ""}
+                <h3>Popular Content:</h3>
+                <hr/>
+                {
+                    data ?
+                        data.getRecommended.map((row : MetaOutput) => {
+                            keyCounter+=1;
+                            return(
                                 <div key={keyCounter}>
-                                    <NavigationTile key={chapter.meta.id} meta={chapter.meta}/>
+                                    <NavigationTile meta={row} treatEqually={true}/>
                                     <hr/>
-                                    {x}
-                                    {x.length > 0 ? <hr/> : ""}
                                 </div>
                             )
                         })
-                    }
-                    <hr/>
-                </>
-                : ""}
-            <h3>Popular Content:</h3>
-            <hr/>
-            {
-                data ?
-                    data.getRecommended.map((row : MetaOutput) => {
-                        keyCounter+=1;
-                        return(
-                            <div key={keyCounter}>
-                                <NavigationTile meta={row} treatEqually={true}/>
-                                <hr/>
-                            </div>
-                        )
-                    })
-                    :
-                    "Loading"
-            }
+                        :
+                        "Loading"
+                }
+            </div>
         </div>
     )
 }

@@ -44,8 +44,12 @@ class LessonPartManager {
         }
         else if(args.type === lessonPartTypes.EMBEDDABLE) {
             let uri = args.content.uri
-            if(uri.startsWith("https://www.youtube.com/watch?v="))
+            if(uri.startsWith("https://www.youtube.com/watch?v=")) {
                 uri = "https://www.youtube.com/embed/" + uri.split("=")[1]
+            }
+            else if (uri.startsWith("https://youtu.be/")) {
+                uri = "https://www.youtube.com/embed/" + uri.split("/")[3]
+            }
             else if(uri.startsWith("https://gist.github.com/")) {
                 uri = uri.split("/")[4]
             }

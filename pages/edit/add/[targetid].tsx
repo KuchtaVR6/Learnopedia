@@ -45,7 +45,7 @@ const AddChild: NextPage<{
             creationAmendment(name: $name, description: $description, seqNumber: $seqNumber, type: $type, keywords: $keywords, parentID: $parentID) {
                 continue
             }
-    }`
+        }`
 
     const router = useRouter();
 
@@ -58,13 +58,13 @@ const AddChild: NextPage<{
     });
 
     const [submitMut] = useMutation(mutationSpec, {
-        variables : {
-            name : changes.title,
-            description : changes.description,
-            seqNumber : changes.seqNumber,
-            type : data.mainMeta.type+1,
-            keywords : changes.addedKeywords,
-            parentID : parseInt(router.query.targetid as string)
+        variables: {
+            name: changes.title,
+            description: changes.description,
+            seqNumber: changes.seqNumber,
+            type: data.mainMeta.type + 1,
+            keywords: changes.addedKeywords,
+            parentID: parseInt(router.query.targetid as string)
         }
     })
 
@@ -73,8 +73,8 @@ const AddChild: NextPage<{
 
     const submit = async () => {
         submitMut().then(() => {
-            setWarning("Changes saved correctly, it will take up to 20 minutes for the changes to be visible.");
-            setSubmitted(true)
+                setWarning("Changes saved correctly, please refer to amendments to view it.");
+                setSubmitted(true)
             }
         ).catch((e) => {
             setWarning(e.toString())
@@ -91,11 +91,11 @@ const AddChild: NextPage<{
         }
     }, [changes])
 
-    useEffect(()=>{
-        if(data && data.mainMeta.type===2) {
-            router.push("/edit/add/lessonpart/"+router.query.targetid)
+    useEffect(() => {
+        if (data && data.mainMeta.type === 2) {
+            router.push("/edit/add/lessonpart/" + router.query.targetid)
         }
-    },[data])
+    }, [data])
 
     if (data && data.mainMeta.type !== 2) {
         return (
@@ -106,7 +106,7 @@ const AddChild: NextPage<{
                 </Head>
                 <div className={styles.main}>
                     <div className={"buttonNiceContainer"}>
-                        <a href={"/view/"+data.mainMeta.id}><BiArrowBack/>Back to the content</a>
+                        <a href={"/view/" + data.mainMeta.id}><BiArrowBack/>Back to the content</a>
                     </div>
                     <MetaForm type={data.mainMeta.type + 1}
                               parentTitle={data.mainMeta.name}
@@ -115,6 +115,7 @@ const AddChild: NextPage<{
                     />
                     <hr/>
                     <table className={styles.criteria}>
+                        <tbody>
                         <tr>
                             <td>
                                 Title
@@ -149,7 +150,8 @@ const AddChild: NextPage<{
                         </tr>
                         <tr>
                             <td colSpan={2}>
-                                {!submitted? <button onClick={submit} className={styles.submit} disabled={!validity}>Submit</button> : "You may close this page."}
+                                {!submitted ? <button onClick={submit} className={styles.submit}
+                                                      disabled={!validity}>Submit</button> : "You may close this page."}
                             </td>
                         </tr>
                         <tr>
@@ -157,12 +159,12 @@ const AddChild: NextPage<{
                                 <p>{warning}</p>
                             </td>
                         </tr>
+                        </tbody>
                     </table>
                 </div>
             </RegularLayout>
         )
-    }
-    else {
+    } else {
         return (
             <RegularLayout enforceUser={true} navigation={data.output}>
                 <p>Redirecting...</p>

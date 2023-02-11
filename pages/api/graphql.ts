@@ -17,6 +17,7 @@ export const resolveUser = async (cookie : string | undefined, agent : string | 
             let user = await (await SessionRegistryInstance).getSession(cookie,agent)
             if(user)
             {
+                console.log("userFound")
                 return user;
             }
         }

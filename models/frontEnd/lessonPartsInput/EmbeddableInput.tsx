@@ -5,6 +5,7 @@ import {displayableOutput} from "../../backEnd/lessonParts/LessonPart";
 import Link from "next/link";
 import {gql, useQuery} from "@apollo/client";
 import EmbeddableDisplay from "../contentDisplays/EmbeddableDisplay";
+import {useRouter} from "next/router";
 
 type args = {
     setChanges: Dispatch<SetStateAction<lessonPartArgs | null>>,
@@ -15,6 +16,10 @@ const EmbeddableInput: FC<args> = (props) => {
 
     const conditionBasic = (uri : string) => {
         if(uri.startsWith("https://www.youtube.com/watch?v=") && uri.split("=").length===2) {
+            setType("Youtube")
+            return true
+        }
+        if(uri.startsWith("https://youtu.be/") && uri.split("/").length===4) {
             setType("Youtube")
             return true
         }
@@ -45,6 +50,8 @@ const EmbeddableInput: FC<args> = (props) => {
         }
     }`)
 
+    const router = useRouter();
+
     useEffect(() => {
         if((type==="Image" || type==="Youtube" || type==="GithubGist") && input.length>0 && (!props.current || (props.current.output.__typename !== "EmbeddableOutput" || input !== props.current.output.uri)))
             props.setChanges({
@@ -63,6 +70,8 @@ const EmbeddableInput: FC<args> = (props) => {
         let uri = input;
         if(uri.startsWith("https://www.youtube.com/watch?v="))
             uri = "https://www.youtube.com/embed/" + uri.split("=")[1]
+        else if(uri.startsWith("https://youtu.be/") && uri.split("/").length===4)
+            uri = "https://www.youtube.com/embed/" + uri.split("/")[3]
         else if(uri.startsWith("https://gist.github.com/")) {
             uri = uri.split("/")[4]
         }
@@ -94,7 +103,10 @@ const EmbeddableInput: FC<args> = (props) => {
             {hideInput? "Use a different Link" : "Embed the image that you have uploaded"}
         </button>
         <br/>
-        <Link href={"/edit/imageUpload"}>Want to upload the image first? (CLICK HERE)</Link><br/>
+        <div className={"buttonNiceContainer"}>
+            <Link href={"/edit/imageUpload?red="+router.asPath}>Want to upload the image first? (CLICK HERE)</Link><br/>
+        </div>
+
         <b>The type: {type} </b> <br/>
 
 

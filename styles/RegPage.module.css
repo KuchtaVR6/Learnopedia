@@ -48,6 +48,11 @@
     overflow-y: scroll;
 }
 
+.innerScrollable{
+    height: calc(100vh - var(--topPadd)) ;
+    overflow-y: scroll;
+}
+
 .courseMenuInline{
     padding: 0.5em 0.5em;
     width: 100%;

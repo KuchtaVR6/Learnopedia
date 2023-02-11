@@ -1009,7 +1009,7 @@ class ContentManager {
 
         await AmendmentManager.getInstance().push(amendment);
 
-        if(!parent) {
+        if(type === ContentType.COURSE) {
             await this.applyContentCreation(amendment);
         }
     }
@@ -1177,6 +1177,7 @@ class ContentManager {
     public async applyContentCreation(amendment: CreationAmendment) {
 
         if(!amendment.getValueOfApplied()) {
+            await amendment.getApplied();
             let finalID: number | undefined = undefined;
             let finalSeq = amendment.seqNumber
 

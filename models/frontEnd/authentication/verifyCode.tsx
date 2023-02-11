@@ -69,6 +69,7 @@ const VerifyCode: FC<Args> = ({email, visibility, setVisibility, refresh, next, 
             setMessage("Code was incorrect 🛑")
         }
         else {
+            console.log(e)
             setMessage("Provided registration data was incorrect.")
         }
     }

@@ -15,6 +15,9 @@ export const enforceUser = async (context: { user: User, agent: string, refreshT
     const newAccessToken = await (await SessionRegistry.getInstance()).accessTokenRequest(context.refreshToken, context.agent);
 
     const newUser = await resolveUser(newAccessToken, context.agent)
+
+    console.log("userFound")
+
     if (newUser) {
         context.setCookies.push({
             name: "accessToken",
@@ -50,6 +53,8 @@ export const verificationResolvers = {
             } catch (e: any) {
                 throw new AuthenticationError("Email/nickname is incorrect");
             }
+
+            console.log("loginUserFound")
 
             let result = await consideredUser.checkCredentials(args.login, args.password)
 

@@ -68,6 +68,13 @@ const Authenticator: FC<AuthenticatorArgs> = ({
     }
 
     useEffect(() => {
+        if(error?.message === "An operation failed because it depends on one or more records that were required but not found. Record to delete does not exist.")
+        {
+            trigger()
+        }
+    }, [error])
+
+    useEffect(() => {
         if (data) {
 
             window.sessionStorage.setItem("loggedIn", "true")
@@ -80,6 +87,7 @@ const Authenticator: FC<AuthenticatorArgs> = ({
                     router.push(next)
                 }
             }).catch(() => {
+                window.sessionStorage.setItem("loggedIn", "false")
                 /**
                  * atRequest fail can only happen if:
                  * 1. a refresh token invalidation has been triggered
@@ -92,7 +100,7 @@ const Authenticator: FC<AuthenticatorArgs> = ({
                  * the user will be proceeded to the login page to
                  * authenticate again.
                  */
-                router.push("/login?concern=true")
+                router.push("/login")
             })
         }
 

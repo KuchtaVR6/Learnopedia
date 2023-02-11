@@ -25,8 +25,10 @@ const ParagraphDisplay: FC<args> = (input) => {
                     name = x[1]
                 }
 
-                processedText.push(<a href={link} onClick={() => {
-                    window.alert("Redirecting to an external link: " + link)
+                processedText.push(<a href={link} onClick={(e) => {
+                    if(!window.confirm("Redirecting to an external link: " + link)) {
+                        e.preventDefault()
+                    }
                 }}> {name.replaceAll("_"," ")} </a>)
                 processedText.push("")
                 indexInProcessedText += 2;

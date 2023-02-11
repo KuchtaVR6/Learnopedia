@@ -11,6 +11,7 @@ import LessonPartForm from "../../../../models/frontEnd/editForms/lessonpartForm
 import Head from "next/head";
 import {lessonPartArgs} from "../../../../models/backEnd/lessonParts/LessonPartTypes";
 import {BiArrowBack} from "react-icons/bi";
+import {displayableOutput} from "../../../../models/backEnd/lessonParts/LessonPart";
 
 const AddLessonPart: NextPage<{
     data: {
@@ -38,14 +39,16 @@ const AddLessonPart: NextPage<{
                         continue
                     }
                 }`)
-        } if (type === "Embeddable") {
+        }
+        if (type === "Embeddable") {
             setMutationSpec(gql`
                 mutation CreateEmbeddable($targetId: Int!, $seqNumber: Int!, $args: EmbeddableInput!) {
                     createEmbeddable(targetID: $targetId, seqNumber: $seqNumber, args: $args) {
                         continue
                     }
                 }`)
-        } if (type === "QuizQuestion") {
+        }
+        if (type === "QuizQuestion") {
             setMutationSpec(gql`
                 mutation CreateQuizQuestion($targetId: Int!, $seqNumber: Int!, $args: QuizQuestionInput!) {
                     createQuizQuestion(targetID: $targetId, seqNumber: $seqNumber, args: $args) {
@@ -71,7 +74,7 @@ const AddLessonPart: NextPage<{
 
     const submit = async () => {
         submitMut().then(() => {
-                setWarning("Changes saved correctly, it will take up to 20 minutes for the changes to be visible.");
+                setWarning("Changes saved correctly, please refer to amendments to view it.");
                 setSubmitted(true)
             }
         ).catch((e) => {
@@ -89,11 +92,11 @@ const AddLessonPart: NextPage<{
         }
     }, [changes, seqNumber])
 
-    useEffect(()=>{
-        if(data && data.mainMeta.type!==2) {
+    useEffect(() => {
+        if (data && data.mainMeta.type !== 2) {
             router.push("/edit/add/" + router.query.targetid)
         }
-    },[data])
+    }, [data])
 
     if (data && data.mainMeta.type == 2) {
         return (
@@ -104,7 +107,7 @@ const AddLessonPart: NextPage<{
                 </Head>
                 <div className={styles.main}>
                     <div className={"buttonNiceContainer"}>
-                        <a href={"/view/"+data.mainMeta.id}><BiArrowBack/>Back to the content</a>
+                        <a href={"/view/" + data.mainMeta.id}><BiArrowBack/>Back to the content</a>
                     </div>
                     <LessonPartForm
                         setChanges={setChanges}
@@ -112,7 +115,7 @@ const AddLessonPart: NextPage<{
                         setType={setType}
                         seqNumber={seqNumber}
                         setSeqNumber={setSeqNumber}
-                        others={data.output.content? data.output.content : []}
+                        others={data.output.content ? data.output.content : []}
                     />
                     <hr/>
                     <table className={styles.criteria}>

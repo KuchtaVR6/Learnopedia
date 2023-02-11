@@ -370,7 +370,7 @@ class Amendment extends Expirable{
 
         let multiplication = 2**(output.individualSupports.length-1)
 
-        if(!this.getVeto()) {
+        if(!this.getVeto() && !this.applied) {
             for (let thisLevel of output.individualSupports) {
                 let required = this.getCost() * multiplication
                 if (required > thisLevel.max) {

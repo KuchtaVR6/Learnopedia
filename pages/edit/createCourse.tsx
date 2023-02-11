@@ -46,7 +46,7 @@ const CreateCourse: NextPage = () => {
 
     const submit = async () => {
         submitMut().then(() => {
-            setWarning("Changes saved correctly, it will take up to 20 minutes for the changes to be visible. You can close this page.");
+            setWarning("Course created successfully. You can close this page.");
             setSubmitted(true)
             }
         ).catch((e) => {
