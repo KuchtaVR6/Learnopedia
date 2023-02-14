@@ -56,10 +56,11 @@ const RegularLayout: FC<args> = ({children, enforceUser, navigation, noInlineNav
                     window.sessionStorage.setItem("loggedIn","false")
                     if(enforceUser)
                     {
-                        router.push("/login")
+                        router.push("/login?red="+router.asPath)
                     }
                 }
                 else{
+                    console.log("I caused an alert!")
                     window.alert(e.message)
                 }
             });
@@ -69,7 +70,7 @@ const RegularLayout: FC<args> = ({children, enforceUser, navigation, noInlineNav
     useEffect(() => {
         if(error)
         {
-            if (error.message === "Session has been invalidated.") {
+            if (error.message === "Session has been invalidated." || error.message === "Refresh Token is Invalid") {
                 window.sessionStorage.setItem("loggedIn", "false")
                 if (enforceUser) {
                     router.push("/login?red="+router.asPath)

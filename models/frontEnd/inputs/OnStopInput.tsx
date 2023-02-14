@@ -6,6 +6,7 @@ type Args = {
     size?: number,
     maxLength?: number,
     autoFocus?: boolean,
+    name? : string,
     className?: string,
     required?: boolean,
     autoComplete?: string,
@@ -54,7 +55,8 @@ const OnStopInput: FC<Args> = ({
                                    coolDown,
                                    setCurrentState,
                                    basicValidator,
-                                   prevState
+                                   prevState,
+                                   name
                                }) => {
 
     let minSpeed = 500;
@@ -214,6 +216,7 @@ const OnStopInput: FC<Args> = ({
             size={size}
             maxLength={maxLength}
             autoFocus={autoFocus}
+            name = {name}
 
 
             onChange={(e) => {

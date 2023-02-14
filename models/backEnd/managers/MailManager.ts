@@ -48,7 +48,7 @@ export default class MailManager {
         return this.instance;
     }
 
-    private static async send(email: string, html: string, text: string, subject : string, noBackground? : boolean, cc? : string) {
+    private static async send(email: string, html: string, text: string, subject : string, cc? : string) {
 
         // create reusable transporter object using the default SMTP transport
         let transporter = nodemailer.createTransport({
@@ -62,20 +62,6 @@ export default class MailManager {
             },
         });
 
-        let attachments = [{
-            filename: 'logo.png',
-            path: process.cwd() + '/models/emails/images/image-1.png',
-            cid: 'logo'
-        }]
-
-        if(!noBackground){
-            attachments.push({
-                filename: 'background.jpeg',
-                path: process.cwd() + '/models/emails/images/image-2.jpeg',
-                cid: 'background'
-            })
-        }
-
         // send mail with defined transport object
         await transporter.sendMail({
             from: 'learnopediaTesting@gmail.com', // sender address
@@ -83,8 +69,7 @@ export default class MailManager {
             cc: cc,
             subject: subject, // Subject line
             text: text, // plain text body
-            html: html, // html body,
-            attachments: attachments,
+            html: html, // html body
         });
     }
 
@@ -294,7 +279,7 @@ export default class MailManager {
             mainMessage: "This your personal reminder to have a read through the content linked below. We hope it will be insightful and fun! "
         });
 
-        await MailManager.send(user.getEmail(),email,text,"Content Reminder - Learnopedia", true)
+        await MailManager.send(user.getEmail(),email,text,"Content Reminder - Learnopedia")
     }
 
     public async suspendUser(user: User, suspensionLift : string, reason : String) {
@@ -311,7 +296,7 @@ export default class MailManager {
             time: suspensionLift
         });
 
-        await MailManager.send(user.getEmail(),email,text,"Suspension Notice - Learnopedia", true, "kuchcik007pat@gmail.com")
+        await MailManager.send(user.getEmail(),email,text,"Suspension Notice - Learnopedia", "kuchcik007pat@gmail.com")
     }
 }
 

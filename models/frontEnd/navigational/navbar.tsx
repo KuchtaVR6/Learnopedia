@@ -63,8 +63,8 @@ const Navbar: FC<{enforceUser : boolean}> = (data) => {
                     </>
                 }
                 <span className={styles.searchBar}>
-                    <input type={"text"} onChange={(e) => {setSearchInput(e.target.value)}} onKeyPress={(e) => {if(e.key === 'Enter') {search()}}}/>
-                    <button className={styles.searchButton} onClick={() => {search()}}><TbSearch/></button>
+                    <input aria-label={"Search Query"} type={"text"} onChange={(e) => {setSearchInput(e.target.value)}} onKeyPress={(e) => {if(e.key === 'Enter') {search()}}}/>
+                    <button aria-label={"Search Button"} className={styles.searchButton} onClick={() => {search()}}><TbSearch/></button>
                     <p className={showWarning? styles.searchWarning : styles.hide}>The search has to be at least 3 characters long</p>
                 </span>
             </div>

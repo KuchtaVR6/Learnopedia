@@ -11,11 +11,9 @@ type args = {
 const NavigationTile: FC<args> = ({meta, treatEqually}) => {
     return (
         <div
-            className={treatEqually || meta.type == 1 ? styles.addPadding : meta.type == 2 ? styles.addExtraPadding : ""}>
+            className={treatEqually || meta.type == 1 ? styles.addPadding : meta.type == 2 ? styles.addExtraPadding : styles.noPadding}>
             <Link href={"/view/" + meta.id}>
-                <div className={styles.navigationContainer}>
-                    {meta.name}
-                </div>
+                {meta.name}
             </Link>
         </div>
 

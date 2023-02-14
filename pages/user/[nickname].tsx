@@ -81,16 +81,23 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
     if (id) {
 
         // Fetch data from external API
-        const res = await client.query({
-            query: getUser,
-            variables: {
-                nickname: id
-            },
-            fetchPolicy: "network-only",
-        },)
-        if (res.error) {
+        let res;
+        try{
+            res = await client.query({
+                query: getUser,
+                variables: {
+                    nickname: id
+                },
+                fetchPolicy: "network-only",
+            },)
+            if (res.error) {
+                return {notFound: true}
+            }
+        }
+        catch (e) {
             return {notFound: true}
         }
+
 
         const data = (await res.data).getUser
 

@@ -21,7 +21,7 @@
     }
 }
 
-@media(max-width: 32em) {
+@media(max-width: 30.75em) {
     .fullPage{
         --topPadd: 6.7em;
     }
@@ -164,6 +164,33 @@
     position: relative !important;
 }
 
+.noPadding a{
+    text-decoration: none;
+    color: black;
+}
+.noPadding a:hover{
+    text-decoration: none;
+    color: rgba(0, 0, 0, 0.77);
+}
+
+.addPadding a{
+    text-decoration: none;
+    color: black;
+}
+.addPadding a:hover{
+    text-decoration: none;
+    color: rgba(0, 0, 0, 0.77);
+}
+
+.addExtraPadding a{
+    text-decoration: none;
+    color: black;
+}
+.addExtraPadding a:hover{
+    text-decoration: none;
+    color: rgba(0, 0, 0, 0.77);
+}
+
 .addPadding{
     font-weight: normal;
     font-size: 90%;
@@ -200,6 +227,7 @@
     padding: 0.3em 0.6em;
     border-radius: 5px;
     margin-right: 0.2em;
+    line-height: 2.2em;
 }
 
 .searchWarning{

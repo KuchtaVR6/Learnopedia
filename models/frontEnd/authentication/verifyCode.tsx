@@ -82,7 +82,7 @@ const VerifyCode: FC<Args> = ({email, visibility, setVisibility, refresh, next, 
 
                 <h1>We have sent an email with your verification code to: {email}.</h1><br/>
 
-                <label>Verification Code:</label>
+                <label htmlFor={"code"}>Verification Code:</label>
                 <input
                     type={"number"}
                     name={"code"}
@@ -90,7 +90,6 @@ const VerifyCode: FC<Args> = ({email, visibility, setVisibility, refresh, next, 
                     ref={inputRef}
                     onChange={(e) => setCodeValue(e.target.value)}
                 />
-                <span className={prompt.overlay}>_____</span>
                 {message}
 
                 {toggle ? <Authenticator method={query} args={{

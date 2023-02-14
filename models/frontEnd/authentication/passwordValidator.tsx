@@ -31,6 +31,7 @@ const PasswordValidator: FC<Args> = ({setProp}) => {
     return (
         <div>
             <input
+                name={"password"}
                 className={valid ? "" : "invalid"}
                 required={true}
                 type={"password"}

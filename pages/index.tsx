@@ -42,7 +42,7 @@ const Home: NextPage = () => {
 
                     <h2>Now, time for your action:</h2>
                     <div className={"buttonNiceContainer"}>
-                        <Link  href={"/register"}>Register</Link>
+                        <Link href={"/register"}>Register</Link>
                         <br/>
                         <Link href={"/login"}>Log In</Link>
                         <br/>

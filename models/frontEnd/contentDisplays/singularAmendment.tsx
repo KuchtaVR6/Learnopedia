@@ -56,7 +56,8 @@ const SingularAmendment: FC<args> = (args) => {
                         :
                         ""
                 }
-                <div>
+                <div style={{display: row.targetMeta.id===-1? "none": "inherit"}}>
+
                     <i>{row.targetMeta.type === 0 ? "Course" : row.targetMeta.type === 1 ? "Chapter" : "Lesson"}</i>
                     <br/>
                     <span className={"buttonNiceContainer"}>
@@ -70,6 +71,9 @@ const SingularAmendment: FC<args> = (args) => {
                         Created: {row.targetMeta.creation}<br/>
                         <KeywordDisplay keywords={row.targetMeta.keywords}/>
                     </p>
+                </div>
+                <div style={{display: row.targetMeta.id===-1? "inherit": "none"}}>
+                    This content does not exist yet/anymore.
                 </div>
                 <hr/>
             </div>

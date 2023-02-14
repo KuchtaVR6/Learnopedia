@@ -12,7 +12,7 @@ const EmbeddableDisplay : FC<args> = (input) => {
         <>
             {
                 input.type==="Youtube"?
-                    <iframe src={`${input.uri}`} allowFullScreen className={styles.video}/>
+                    <iframe title={`An embedded video available at ${input.uri}`} src={`${input.uri}`} allowFullScreen className={styles.video}/>
                     :
                     input.type==="GithubGist"?
                         <div className={styles.gist}>

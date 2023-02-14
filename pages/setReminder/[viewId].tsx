@@ -68,12 +68,12 @@ const SetReminder: NextPage<{
                     <i>{data.mainMeta.type === 0 ? "Course" : data.mainMeta.type === 1 ? "Chapter" : "Lesson"}</i>
                     <br/>
                     <Link className={styles.hideButton} href={"/view/" + data.mainMeta.id}><h5>{data.mainMeta.name}</h5></Link>
-                    <p className={styles.details}>
+                    <div className={styles.details}>
                         {data.mainMeta.authors}<br/>
                         Last Modified: {data.mainMeta.modification}<br/>
                         Created: {data.mainMeta.creation}<br/>
                         <KeywordDisplay keywords={data.mainMeta.keywords}/>
-                    </p>
+                    </div>
                     {data.mainMeta.description}<br/>
                 </div>
                 <hr/>
@@ -107,8 +107,9 @@ const SetReminder: NextPage<{
                     className={"buttonNice"}
                     onClick={() => {bookmarkAppend()}}
                     disabled={baOutput.loading || baOutput.data || baOutput.error}>
-                    Submit Reminder
+                    {baOutput.loading? <div className={"loader"}></div> : baOutput.data? <div style={{margin: "0 auto"}}>Submitted ⏰</div> : "Submit Reminder"}
                 </button>
+
 
             </div>
 

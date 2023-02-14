@@ -1,5 +1,5 @@
 .page{
-    background-image: url("https://images.unsplash.com/photo-1478361000558-6f397482ffbd?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1228&q=80");
+    background-image: url("../public/images/background.png");
     background-size: cover;
     width: 100%;
     min-height: 100vh;
@@ -70,7 +70,7 @@
 
 .field input{
     font-size: 1.2em;
-    width: inherit;
+    width: 100%;
     padding: 3px;
 }
 

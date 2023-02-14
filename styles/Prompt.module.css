@@ -28,20 +28,12 @@
 .code{
     width: 4.5em;
     font-size: 3em !important;
-    background: none;
-    border: none;
     letter-spacing: 0.2em;
     text-align: left;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
     z-index: 2;
-}
-
-.code:focus{
-    background: none;
-    border: none;
-    outline: none;
 }
 
 .overlay{

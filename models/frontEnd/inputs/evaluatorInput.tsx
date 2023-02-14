@@ -22,7 +22,7 @@ const EvaluatorInput : FC<args> = ({condition, setInput, width, type, placeholde
 
     useEffect(() => {
         if (clear !== undefined) {
-            setInput("")
+            setInput(value? value : "")
             setDisplayedValue(value? value : "")
         }
     },[clear, setInput])

@@ -5,7 +5,7 @@ import Link from "next/link";
 import Authenticator from "../models/frontEnd/authentication/authenticator";
 import Image from 'next/image'
 import styles from '../styles/Forms.module.css'
-import logo from "../public/images/logo.png";
+import logo from "../public/images/logo.svg";
 import {useRouter} from "next/router";
 import Head from "next/head";
 
@@ -34,9 +34,11 @@ const Login: NextPage = () => {
 
             <form className={styles.form} onSubmit={(e) => {e.preventDefault()}}>
 
-                <a className={styles.logoContainer} href={"/"}>
-                    <Image src={logo} alt="Learnopedia Logo"/>
-                </a>
+                <Link href={"/"}>
+                    <div className={styles.logoContainer}>
+                        <Image src={logo} alt="Learnopedia Logo"/>
+                    </div>
+                </Link>
 
                 <br/>
                 <br/>
@@ -46,7 +48,7 @@ const Login: NextPage = () => {
                 Not a member yet? <Link href={"/register"}>Register</Link><br/>
 
                 <div className={styles.field}>
-                    <label>Email or nickname:</label>
+                    <label htmlFor={"identifier"}>Email or nickname:</label><br/>
                     <input
                         autoComplete={"email"}
                         type={"text"}
@@ -55,7 +57,7 @@ const Login: NextPage = () => {
                         id={"email"}
                         onChange={(e) => setIdentifier(e.target.value)}
                     /> <br/><br/>
-                    <label>Password:</label><br/>
+                    <label htmlFor={"password"}>Password:</label><br/>
                     <input
                         autoComplete={"current-password"}
                         name={"password"}

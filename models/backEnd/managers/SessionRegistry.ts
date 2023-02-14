@@ -225,13 +225,16 @@ class Session extends Expirable {
     public async destroy() {
         this.invalidated = true;
 
-        await prisma.session.delete(
-            {
-                where: {
-                    SessionID: this.sessionID
+        try{
+            await prisma.session.delete(
+                {
+                    where: {
+                        SessionID: this.sessionID
+                    }
                 }
-            }
-        )
+            )
+        }
+        catch {}
     }
 
     public async getNewAccessToken(): Promise<AccessToken> {

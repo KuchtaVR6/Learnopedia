@@ -1,7 +1,7 @@
 import {NextPage} from "next";
 import styles from "../styles/Forms.module.css";
 import Image from "next/image";
-import logo from "../public/images/logo.png";
+import logo from "../public/images/logo.svg";
 import Link from "next/link";
 import VerifyCode from "../models/frontEnd/authentication/verifyCode";
 import {useEffect, useRef, useState} from "react";
@@ -38,7 +38,7 @@ const Forgot: NextPage = () => {
         }
     `
 
-    const [sendEmail] = useMutation(forgot, {
+    const [sendEmail, {loading}] = useMutation(forgot, {
         variables: {
             email: email,
             captchaToken: captchaToken
@@ -70,9 +70,11 @@ const Forgot: NextPage = () => {
                     e.preventDefault()
                 }}>
 
-                    <div className={styles.logoContainer}>
-                        <Image src={logo} alt="Learnopedia Logo"/>
-                    </div>
+                    <Link href={"/"}>
+                        <div className={styles.logoContainer}>
+                            <Image src={logo} alt="Learnopedia Logo"/>
+                        </div>
+                    </Link>
 
                     <br/>
                     <br/>
@@ -82,7 +84,7 @@ const Forgot: NextPage = () => {
                     Actually I do remember 😅<Link href={"/login"}>Login</Link><br/>
                     <div className={styles.field}>
 
-                        <label>Email:</label> <br/>
+                        <label htmlFor={"email"}>Email:</label> <br/>
                         <input
                             required={true}
                             type={"email"}
@@ -107,6 +109,7 @@ const Forgot: NextPage = () => {
                     <button disabled={!allValid} onClick={() => {
                         reg()
                     }}>Reset {allValid ? "✔" : ""}</button>
+                    {loading? <div className={"loader"}></div> : ""}
                     <br/>
                     {message}
                 </form>

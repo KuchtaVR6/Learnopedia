@@ -10,10 +10,10 @@ type Args = {
     type: ConstrainedInputTypes,
     disable?: boolean
     placeholder?: string
-    autoComplete?: string
+    name?: string
 }
 
-const SelfValidatingInput: FC<Args> = ({setProp, query, type, disable, placeholder}) => {
+const SelfValidatingInput: FC<Args> = ({ name,setProp, query, type, disable, placeholder}) => {
 
     const [internal, setInternal] = useState("")
     const [message, setMessage] = useState("Must be unique 🤔")
@@ -221,6 +221,7 @@ const SelfValidatingInput: FC<Args> = ({setProp, query, type, disable, placehold
                 basicValidator={basicValidator}
                 OnChange={()=>{setProp("")}}
                 prevState={prevSend}
+                name={name}
             />
             <br/>
             {disable ? "" : <span className={styles.waring}>{message}</span>}

@@ -4,11 +4,11 @@ import {gql, useMutation} from "@apollo/client";
 import Link from "next/link";
 import styles from '../styles/Forms.module.css'
 import Image from "next/image";
+import logo from "../public/images/logo.svg";
 import VerifyCode from "../models/frontEnd/authentication/verifyCode";
 import SelfValidatingInput from "../models/frontEnd/inputs/selfValidatingInput";
 import PasswordValidator from "../models/frontEnd/authentication/passwordValidator";
 
-import logo from "../public/images/logo.png";
 import {ConstrainedInputTypes} from "../models/frontEnd/inputs/modifyDisplayConstrained";
 import HCaptcha from "@hcaptcha/react-hcaptcha";
 import Head from "next/head";
@@ -36,7 +36,7 @@ const Register: NextPage = () => {
         }
     `
 
-    const [sendEmail] = useMutation(addUser, {
+    const [sendEmail, {loading}] = useMutation(addUser, {
         variables: {
             nickname: nickname,
             email: email,
@@ -98,9 +98,11 @@ const Register: NextPage = () => {
                     e.preventDefault()
                 }}>
 
-                    <div className={styles.logoContainer}>
-                        <Image src={logo} alt="Learnopedia Logo"/>
-                    </div>
+                    <Link href={"/"}>
+                        <div className={styles.logoContainer}>
+                            <Image src={logo}/>
+                        </div>
+                    </Link>
 
                     <br/>
                     <br/>
@@ -109,28 +111,28 @@ const Register: NextPage = () => {
                     <br/>
                     Already a member?<Link href={"/login"}>Login</Link><br/>
                     <div className={styles.field}>
-                        <label>Nickname: </label> <br/>
+                        <label htmlFor={"username"}>Nickname: </label> <br/>
                         <SelfValidatingInput setProp={setNick}
                                              query={checkNickname}
                                              type={ConstrainedInputTypes.NICKNAME}
-                                             autoComplete={"username"}/>
+                                             name={"username"}/>
 
                         <br/>
 
-                        <label className={styles.extraPad}>Email:</label> <br/>
+                        <label htmlFor={"email"} className={styles.extraPad}>Email:</label> <br/>
                         <SelfValidatingInput setProp={setEmail}
                                              query={checkEmail}
                                              type={ConstrainedInputTypes.EMAIL}
-                                             autoComplete={"email"}/>
+                                             name={"email"}/>
 
                         <br/>
 
-                        <label className={styles.extraPad}>Password:</label>
+                        <label htmlFor={"password"} className={styles.extraPad}>Password:</label>
                         <PasswordValidator setProp={setPassword}/>
 
                         <br/>
 
-                        <label className={styles.extraPad}>First Name:</label>
+                        <label htmlFor={"fname"} className={styles.extraPad}>First Name:</label><br/>
 
                         <input
                             required={true}
@@ -141,7 +143,7 @@ const Register: NextPage = () => {
                             onChange={(e) => setFName(e.target.value)}
                         />
                         <p/>
-                        <label>Last Name:</label> <br/>
+                        <label htmlFor={"lname"}>Last Name:</label> <br/>
                         <input
                             required={true}
                             type={"text"}
@@ -163,8 +165,9 @@ const Register: NextPage = () => {
 
                     <button disabled={!allValid} onClick={() => {
                         reg()
-                    }}>Register {allValid ? "✔" : ""}</button>
+                    }}>Register</button>
                     {error}
+                    {loading? <div className={"loader"}></div> : ""}
 
                     <br/>
                     <br/>

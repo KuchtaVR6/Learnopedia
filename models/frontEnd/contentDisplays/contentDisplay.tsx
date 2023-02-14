@@ -269,7 +269,7 @@ const ContentDisplay: FC<args> = ({meta, contents}) => {
                         <td>
                             <EditButton loggedIn={userContext.loggedIn()}
                                         label={meta.type == 0 ? "Add a Chapter" : meta.type == 1 ? "Add a Lesson" : "Add a part"}
-                                        path={meta.type == 2 ? "/edit/add/" + meta.id : "/edit/add/lessonpart/" + meta.id}/>
+                                        path={meta.type != 2 ? "/edit/add/" + meta.id : "/edit/add/lessonpart/" + meta.id}/>
                             {userContext.loggedIn() ?
                                 <EditButton loggedIn={userContext.loggedIn()} label={"Edit the list"}
                                             path={"/edit/list/" + meta.id}/> : ""}

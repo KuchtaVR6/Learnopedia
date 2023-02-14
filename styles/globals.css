@@ -32,7 +32,7 @@ input[type=number] {
 }
 
 input:required {
-    background-color: rgba(255, 165, 0, 0.28);
+    background-color: rgba(126, 0, 0, 0.28);
 }
 
 input:required:valid {
@@ -40,7 +40,7 @@ input:required:valid {
 }
 
 input.invalid {
-    background-color: rgba(255, 165, 0, 0.28) !important;
+    background-color: rgba(255, 0, 0, 0.28) !important;
 }
 
 input:disabled.invalid {
@@ -59,7 +59,7 @@ input:disabled.invalid {
 /* palette */
 body{
     --raisin-black: #231f20ff;
-    --international-orange-golden-gate-bridge: rgb(192, 113, 99);
+    --international-orange-golden-gate-bridge: rgb(80, 28, 28);
     --middle-blue: #7ebdc2ff;
     --medium-champagne: #f3dfa2ff;
     --linen: #efe6ddff;
@@ -135,3 +135,20 @@ body{
 }
 
 .gist { font-size:20px !important; }
+
+
+/** taken w3 schools - https://www.w3schools.com/howto/howto_css_loader.asp */
+.loader {
+    border: 16px solid #f3f3f3; /* Light grey */
+    border-top: 16px solid #3498db; /* Blue */
+    border-radius: 50%;
+    width: 4em;
+    height: 4em;
+    animation: spin 2s linear infinite;
+    margin: 1em auto 0;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}

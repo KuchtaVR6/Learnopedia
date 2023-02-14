@@ -6,6 +6,7 @@ import {FullOutput, MetaOutput} from "../../models/backEnd/contents/Content";
 import ContentDisplay from "../../models/frontEnd/contentDisplays/contentDisplay";
 import Head from "next/head";
 import {BiArrowBack} from "react-icons/bi";
+import Link from "next/link";
 
 const View: NextPage<{
     data: {
@@ -33,7 +34,7 @@ const View: NextPage<{
                     "name": "Learnopedia",
                     "logo": {
                         "@type": "ImageObject",
-                        "url": "https://learnopedia.kuchta.uk/images/logo.png"
+                        "url": "https://learnopedia.kuchta.uk/images/logo.svg"
                     }
                 },
                 "datePublished": creation.getFullYear() + "-" + creation.getMonth() + "-" + creation.getDate(),
@@ -75,8 +76,12 @@ const View: NextPage<{
                 </Head>
                 <RegularLayout enforceUser={false} navigation={data.output}>
                     {data.mainMeta.type != 0 ?
-                        <div className={"buttonNiceContainer"} >
-                            <a href={"/view/" + parentID()}><BiArrowBack/>Back to the {data.mainMeta.type == 1? "course" : "chapter"}</a>
+                        <div className={"buttonNiceContainer"} style={{float: "right", width: "fit-content"}}>
+                            <Link href={"/view/" + parentID()}>
+                                <a>
+                                    <BiArrowBack/>Back to the {data.mainMeta.type == 1? "course" : "chapter"}
+                                </a>
+                            </Link>
                             <br/>
                         </div>
                         :
