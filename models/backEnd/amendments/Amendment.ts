@@ -1,16 +1,16 @@
 import {UserManager} from "../managers/UserManager";
 import prisma from "../../../prisma/prisma";
-import  {AdoptionAmendmentOutput} from "./AdoptionAmendment";
-import  {PartAddReplaceAmendmentOutput} from "./PartAmendments/PartAddReplaceAmendment";
-import CreationAmendment, {CreationAmendmentOutput} from "./CreationAmendment";
-import  {ListAmendmentOutput} from "./ListAmendment";
-import  {MetaAmendmentOutput} from "./MetaAmendment";
 import ContentManager from "../contents/ContentManager";
-import Content, {contentShareOutput, ContentType, MetaOutput} from "../contents/Content";
+import {contentShareOutput, ContentType, MetaOutput} from "../contents/Content";
 import {Expirable} from "../tools/Expirable";
 import {User} from "../User";
 import {ContentNotFetched} from "../tools/Errors";
-import {amendment} from "@prisma/client";
+import {
+    AdoptionAmendmentOutput,
+    CreationAmendmentOutput,
+    ListAmendmentOutput, MetaAmendmentOutput,
+    PartAddReplaceAmendmentOutput
+} from "./AmendmentOutputTypes";
 
 export type AmendmentOutput = {
     id : number,
@@ -39,7 +39,7 @@ export type LevelSupport = {
 export enum AmendmentOpinionValues {
     Positive,
     Negative,
-    Report
+    Report,
 }
 
 export enum AmendmentTypes {
@@ -54,7 +54,7 @@ export type SpecificAmendmentOutput = AdoptionAmendmentOutput | PartAddReplaceAm
 
 class Amendment extends Expirable{
 
-    protected readonly targetID : number;
+    protected targetID : number;
     protected id : number;
     private readonly creationDate : Date;
     private readonly authorID : number | null;
@@ -295,6 +295,10 @@ class Amendment extends Expirable{
 
     public getTargetID() {
         return this.targetID
+    }
+
+    public setTargetID(targetID : number) {
+        this.targetID = targetID
     }
 
     public fullyFetched() {

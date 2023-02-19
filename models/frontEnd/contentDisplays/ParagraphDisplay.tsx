@@ -25,11 +25,14 @@ const ParagraphDisplay: FC<args> = (input) => {
                     name = x[1]
                 }
 
-                processedText.push(<a href={link} onClick={(e) => {
-                    if(!window.confirm("Redirecting to an external link: " + link)) {
-                        e.preventDefault()
-                    }
-                }}> {name.replaceAll("_"," ")} </a>)
+                processedText.push(
+                    <a
+                        href={link} rel="noreferrer" target="_blank"
+                        onClick={(e) => {
+                            if (!window.confirm("Redirecting to an external link: " + link)) {
+                                e.preventDefault()
+                            }
+                        }}> {name.replaceAll("_", " ")} </a>)
                 processedText.push("")
                 indexInProcessedText += 2;
             } else {
@@ -40,8 +43,8 @@ const ParagraphDisplay: FC<args> = (input) => {
         let finalProcessedText: (string | DetailedHTMLProps<AnchorHTMLAttributes<HTMLAnchorElement>, HTMLAnchorElement>)[] = [""];
         indexInProcessedText = 0;
 
-        for(let text of processedText) {
-            if(typeof text === 'string') {
+        for (let text of processedText) {
+            if (typeof text === 'string') {
                 //find triple stars
                 let starSplit = text.split("***")
                 for (let i = 0; i < starSplit.length; i++) {
@@ -72,8 +75,7 @@ const ParagraphDisplay: FC<args> = (input) => {
                         indexInProcessedText += 2;
                     }
                 }
-            }
-            else {
+            } else {
                 finalProcessedText.push(text)
                 finalProcessedText.push("")
                 indexInProcessedText += 2;
@@ -83,7 +85,7 @@ const ParagraphDisplay: FC<args> = (input) => {
         setParagraphText(finalProcessedText)
     }
 
-    useEffect(()=> {
+    useEffect(() => {
         renderText(input.basicText)
     }, [input])
 

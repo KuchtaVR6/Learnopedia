@@ -1,4 +1,4 @@
-import {FC, MutableRefObject, useEffect, useRef, useState} from "react";
+import {Dispatch, FC, MutableRefObject, SetStateAction, useEffect, useRef, useState} from "react";
 import axios from "axios";
 import styles from "../../../styles/Profile.module.css";
 import {ImCross} from "react-icons/im";
@@ -9,10 +9,11 @@ type args = {
     enforceImage? : boolean
     imageName : string,
     fileSizeLimit: number
+    setAvatarPath? : Dispatch<SetStateAction<string>>,
     hideOptions?: boolean
 }
 
-const ImageUploader: FC<args> = ({enforceImage, imageName, fileSizeLimit,hideOptions}) => {
+const ImageUploader: FC<args> = ({enforceImage, setAvatarPath, imageName, fileSizeLimit,hideOptions}) => {
 
     const [error, setError] = useState<string>("")
     const [imageSRC, setISRC] = useState("")
@@ -45,6 +46,9 @@ const ImageUploader: FC<args> = ({enforceImage, imageName, fileSizeLimit,hideOpt
                     }
                 }
                 setISRC(URL.createObjectURL(theFile));
+                if(setAvatarPath) {
+                    setAvatarPath(URL.createObjectURL(theFile));
+                }
                 setError("Press Save Changes to upload 👍")
                 setImage(theFile)
             }
@@ -114,11 +118,10 @@ const ImageUploader: FC<args> = ({enforceImage, imageName, fileSizeLimit,hideOpt
                         {imageName ? <label>{imageName}:&nbsp;</label> : ""}
                         <div>
                             <input ref={inputRef} accept="image/*" type="file" id="avatar" name="filename" onChange={(e) => {
-                                handler(e.target)
+                                handler(e.target);
                             }} disabled={!editable}/>
                             <div className={styles.waring}>{error}</div><br/>
                         </div>
-                        {imageSRC? <img src={imageSRC} width={100} alt={"uploaded image preview"}/> : ""}
                     </div>
                 </div>
 

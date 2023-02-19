@@ -36,26 +36,13 @@ export class Course extends Content {
                 seqNumber: number,
                 type: ContentType,
                 numberAuthors : number
-            },
-        children?: Map<number, Chapter> | Chapter[]
+            }
     ) {
         super(id, specificID, data);
 
         this.balanced = true
 
-        if (children) {
-            if (children instanceof Map) {
-                this.children = children;
-            } else {
-                this.children = new Map<number, Chapter>;
-
-                children.map((child) => {
-                    this.children.set(child.getSeqNumber(), child);
-                })
-            }
-        } else {
-            this.children = new Map<number, Chapter>;
-        }
+        this.children = new Map<number, Chapter>;
 
         this.sortChildern()
     }
@@ -240,7 +227,7 @@ export class Course extends Content {
     }
 
     public checkSeqNumberVacant(newSeqNumber : number) {
-        return this.children.has(newSeqNumber)
+        return !this.children.has(newSeqNumber)
     }
 
     public async checkPaternity(ids : { ChildID?: number, LessonPartID? : number, newSeqNumber?: number, delete: boolean }[]) : Promise<boolean> {

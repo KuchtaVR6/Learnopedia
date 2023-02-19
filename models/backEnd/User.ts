@@ -1,13 +1,9 @@
 import bcrypt from 'bcrypt';
 import {Expirable} from "./tools/Expirable";
-import {MaxPasswordLengthExceeded} from "./tools/Errors";
+import {InvalidArgument, MaxPasswordLengthExceeded} from "./tools/Errors";
 import {UserManager} from "./managers/UserManager";
 import prisma from "../../prisma/prisma";
-import Amendment, {
-    AmendmentOpinionValues,
-    AmendmentOutput,
-    VotingSupport
-} from "./amendments/Amendment";
+import Amendment, {AmendmentOpinionValues, AmendmentOutput, VotingSupport} from "./amendments/Amendment";
 import ContentManager from "./contents/ContentManager";
 import AmendmentManager from "./amendments/AmendmentManager";
 import Content, {MetaOutput} from "./contents/Content";
@@ -39,24 +35,24 @@ export class User extends Expirable {
     private avatarPath: string | null;
     private uploadCachePath: string | null;
 
-    private readonly isModerator : boolean;
+    private readonly isModerator: boolean;
 
-    private suspension : Date | null;
+    private suspension: Date | null;
 
     /**
-        content number to upVote (true) / downVote (false)
+     content number to upVote (true) / downVote (false)
      */
-    private opinions : Map<number, boolean>;
+    private opinions: Map<number, boolean>;
 
     /**
      content number to vote
      */
-    private votes : Map<number, AmendmentOpinionValues>;
+    private votes: Map<number, AmendmentOpinionValues>;
 
     /**
      content number to true / date of the coming reminder (if set)
      */
-    private bookmarks : Map<number, Date | true>
+    private bookmarks: Map<number, Date | true>
 
     /**
      * Bcrypt only allows to check strings up to 72 bytes so these methods
@@ -69,10 +65,18 @@ export class User extends Expirable {
      */
 
     private static evaluatePassword(password: string): boolean {
-        if (password.length <= 18) {
-            return true
-        } else {
+        if (password.length < 8) {
+            throw new InvalidArgument("password", "must be at least 8 chars long")
+        } else if (password.length > 18) {
             throw new MaxPasswordLengthExceeded(password.length);
+        } else if (!/[a-z]/i.test(password)) {
+            throw new InvalidArgument("password", "must contain letters")
+        } else if (password.toLowerCase() === password || password.toUpperCase() === password) {
+            throw new InvalidArgument("password", "must contain a mix of letter cases")
+        } else if (!/[0-9]/.test(password)) {
+            throw new InvalidArgument("password", "must contain numbers")
+        } else {
+            return true
         }
     }
 
@@ -106,23 +110,23 @@ export class User extends Expirable {
      * @param colorB        - color on the right side of the banner on the profile page
      */
     public constructor
-        (id: number,
-         nickname: string,
-         email: string,
-         fname: string,
-         lname: string,
-         password: string,
-         amendments: Amendment[],
-         opinions : Map<number, boolean>,
-         votes : Map<number, AmendmentOpinionValues>,
-         avatarPath: string | null,
-         uploadPath: string | null,
-         suspension: Date | null,
-         moderator : boolean,
-         bookmarks : Map<number, Date | true>,
-         colorA?: string | null,
-         colorB?: string | null
-        ) {
+    (id: number,
+     nickname: string,
+     email: string,
+     fname: string,
+     lname: string,
+     password: string,
+     amendments: Amendment[],
+     opinions: Map<number, boolean>,
+     votes: Map<number, AmendmentOpinionValues>,
+     avatarPath: string | null,
+     uploadPath: string | null,
+     suspension: Date | null,
+     moderator: boolean,
+     bookmarks: Map<number, Date | true>,
+     colorA?: string | null,
+     colorB?: string | null
+    ) {
         super(600) // 10 minutes
         this.id = id;
         this.passHash = password;
@@ -150,10 +154,9 @@ export class User extends Expirable {
      * -1 if there is no opinion
      *
      */
-    public checkOpinion(contentId : number) : number {
+    public checkOpinion(contentId: number): number {
         const fetched = this.opinions.get(contentId);
-        if(fetched || !fetched)
-        {
+        if (fetched !== undefined) {
             return Number(fetched)
         }
         return -1
@@ -166,11 +169,9 @@ export class User extends Expirable {
      * -1 if an old opinion was deleted
      *
      */
-    public changeOpinion(contentId : number, positive: boolean) : number{
-        if(this.opinions.has(contentId))
-        {
-            if(this.opinions.get(contentId) === positive)
-            {
+    public changeOpinion(contentId: number, positive: boolean): number {
+        if (this.opinions.has(contentId)) {
+            if (this.opinions.get(contentId) === positive) {
                 this.opinions.delete(contentId)
                 return -1
             }
@@ -181,21 +182,21 @@ export class User extends Expirable {
         return 1
     }
 
-    public async getBookmarkedContent() : Promise<MetaOutput[]> {
+    public async getBookmarkedContent(): Promise<MetaOutput[]> {
         let instance = await ContentManager.getInstance();
-        let result : MetaOutput[] = new Array(this.bookmarks.size)
+        let result: MetaOutput[] = new Array(this.bookmarks.size)
         let index = this.bookmarks.size - 1;
-        for(let key of Array.from(this.bookmarks.keys())) {
+        for (let key of Array.from(this.bookmarks.keys())) {
             result[index] = await (await instance.getContentByID(key)).getMeta()
-            index-=1;
+            index -= 1;
         }
 
         return result;
     }
 
-    public async pushBookmark(contentId : number, options : {delete : true} | {add : true | Date, delete : false}) {
+    public async pushBookmark(contentId: number, options: { delete: true } | { add: true | Date, delete: false }) {
         let output;
-        if(options.delete) {
+        if (options.delete) {
             this.bookmarks.delete(contentId)
             output = await prisma.bookmarks.delete({
                 where: {
@@ -205,29 +206,27 @@ export class User extends Expirable {
                     }
                 }
             })
-        }
-        else {
-            if(this.bookmarks.has(contentId)) {
+        } else {
+            if (this.bookmarks.has(contentId)) {
                 output = await prisma.bookmarks.update({
-                    where : {
-                        userID_contentID : {
-                            userID : this.id,
-                            contentID : contentId
+                    where: {
+                        userID_contentID: {
+                            userID: this.id,
+                            contentID: contentId
                         }
                     },
-                    data : {
-                        reminderTimestamp: (options.add instanceof Date)? options.add : undefined,
-                        reminded: (options.add instanceof Date)? false : undefined
+                    data: {
+                        reminderTimestamp: (options.add instanceof Date) ? options.add : undefined,
+                        reminded: (options.add instanceof Date) ? false : undefined
                     }
                 })
-            }
-            else{
+            } else {
                 output = await prisma.bookmarks.create({
-                    data : {
-                        userID : this.id,
-                        contentID : contentId,
-                        reminded : false,
-                        reminderTimestamp: (options.add instanceof Date)? options.add : undefined
+                    data: {
+                        userID: this.id,
+                        contentID: contentId,
+                        reminded: false,
+                        reminderTimestamp: (options.add instanceof Date) ? options.add : undefined
                     }
                 })
             }
@@ -236,33 +235,32 @@ export class User extends Expirable {
         return output;
     }
 
-    public checkBookmark(contentId: number) : {reminder : boolean, reminderDate? : string} {
+    public checkBookmark(contentId: number): { reminder: boolean, reminderDate?: string } {
         let output = this.bookmarks.get(contentId)
 
-        if(output) {
+        if (output) {
             if (output instanceof Date) {
-                if(output > new Date())
+                if (output > new Date())
                     return {
-                        reminder : true,
-                        reminderDate : output.getFullYear() + "." + Content.twoDigit(output.getMonth() + 1) + "." + Content.twoDigit(output.getDate())
+                        reminder: true,
+                        reminderDate: output.getFullYear() + "." + Content.twoDigit(output.getMonth() + 1) + "." + Content.twoDigit(output.getDate())
                     }
             }
             return {
-                reminder : true
+                reminder: true
             }
         }
         return {
-            reminder : false
+            reminder: false
         }
     }
 
-    public checkVote(amendmentId : number) : AmendmentOpinionValues {
+    public checkVote(amendmentId: number): AmendmentOpinionValues | undefined {
         const fetched = this.votes.get(amendmentId);
-        if(fetched)
-        {
+        if (fetched !== undefined) {
             return fetched
         }
-        return 0
+        return undefined
     }
 
     /**
@@ -272,11 +270,9 @@ export class User extends Expirable {
      * -1 if an old vote was deleted
      *
      */
-    public changeVote(amendmentId : number, newValue : AmendmentOpinionValues) : number{
-        if(this.votes.has(amendmentId))
-        {
-            if(this.votes.get(amendmentId) === newValue)
-            {
+    public changeVote(amendmentId: number, newValue: AmendmentOpinionValues): number {
+        if (this.votes.has(amendmentId)) {
+            if (this.votes.get(amendmentId) === newValue) {
                 this.votes.delete(amendmentId)
                 return -1
             }
@@ -287,13 +283,11 @@ export class User extends Expirable {
         return 1
     }
 
-    public async getVoteData(requestedAmendmentsIDs : number[]) : Promise<VotingSupport[]>
-    {
-        let finalArray : VotingSupport[] = new Array<VotingSupport>();
+    public async getVoteData(requestedAmendmentsIDs: number[]): Promise<VotingSupport[]> {
+        let finalArray: VotingSupport[] = new Array<VotingSupport>();
         let amendmentManagerInstance = AmendmentManager.getInstance();
-        for(let id of requestedAmendmentsIDs) {
-            if(this.votes.has(id))
-            {
+        for (let id of requestedAmendmentsIDs) {
+            if (this.votes.has(id)) {
                 let amendment = await amendmentManagerInstance.retrieve(id)
                 finalArray.push(await amendment.getSupports(this.id))
             }
@@ -340,10 +334,11 @@ export class User extends Expirable {
 
         for (let amend of this.amendments) {
             let content;
+
             try {
                 content = await ContentManager.getInstance().getContentByID(amend.getTargetID());
+            } catch {
             }
-            catch {}
 
             if (content) {
                 totalXP += amend.getSignificance() * content.getSignificance()
@@ -437,7 +432,6 @@ export class User extends Expirable {
         super.refresh()
 
         User.evaluatePassword(password) //evaluate and if there are no errors continue
-
         this.passHash = "";
 
         await User.generateHash(password).then(async (hash: string) => {
@@ -498,28 +492,26 @@ export class User extends Expirable {
             }
         })
     }
-    
+
     public getIsModerator() {
         return this.isModerator
     }
 
-    public checkSuspension() : boolean {
+    public checkSuspension(): boolean {
         if (this.suspension) {
-            if (this.suspension > new Date()) {
-                return false
-            }
+            return this.suspension <= new Date()
         }
         return true
     }
 
-    public async setSuspended(newDate : Date) {
+    public async setSuspended(newDate: Date) {
         this.suspension = newDate;
         await prisma.user.update({
-            where : {
-               ID : this.id
+            where: {
+                ID: this.id
             },
-            data : {
-                suspension : this.suspension
+            data: {
+                suspension: this.suspension
             }
         })
     }

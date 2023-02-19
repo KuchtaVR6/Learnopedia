@@ -104,22 +104,26 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
     if (id) {
 
         // Fetch data from external API
-        const res = await client.query({
-            query: fetchquery,
-            variables: {
-                viewId: id
-            },
-            fetchPolicy: "network-only",
-        },)
-        if (res.error) {
+        try{
+            const res = await client.query({
+                query: fetchquery,
+                variables: {
+                    viewId: id
+                },
+                fetchPolicy: "network-only",
+            },)
+            if (res.error) {
+                return {notFound: true}
+            }
+            const data = (await res.data).view
+
+            // Pass data to the page via props
+            return {props: {data}}
+        }
+        catch {
             return {notFound: true}
         }
 
-        const data = (await res.data).view
-
-
-        // Pass data to the page via props
-        return {props: {data}}
     }
     return {notFound: true}
 }

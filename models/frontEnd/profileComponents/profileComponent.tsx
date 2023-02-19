@@ -20,18 +20,30 @@ const ProfileComponent: FC = () => {
 
     const userContext = useContext(UserContext)
 
+    const [imagePath, setImagePath] = useState("")
+    const [colorA, setColorA] = useState("#FFFFFF")
+    const [colorB, setColorB] = useState("#FFFFFF")
+
     useEffect(() => {
         checkImage()
     }, [])
+
+    useEffect(() => {
+        if(userContext.user() && userContext.request) {
+            setImagePath(userContext.user()?.avatarPath || "/images/defProfile.png")
+            setColorA(userContext.user()?.colorA || "#099978")
+            setColorB(userContext.user()?.colorB || "#023189")
+        }
+    }, [userContext])
 
     if (userContext.user() && userContext.request) {
         return (
             <div>
                 <div className={styles.profile}>
-                    <div className={styles.banner} style={{backgroundImage: `linear-gradient(90deg, ${userContext.user()?.colorA}, ${userContext.user()?.colorB})`}}>
+                    <div className={styles.banner} style={{backgroundImage: `linear-gradient(90deg, ${colorA}, ${colorB})`}}>
                         <div className={styles.imageContainer}>
                             <img
-                                src={userContext.user()?.avatarPath}
+                                src={imagePath}
                                 ref={imageRef}
                                 alt={userContext.user()?.nickname + " profile image"}
                                 style={{width: isPortrait? "100%" : "unset", height: isPortrait? "unset" : "100%"}}
@@ -43,7 +55,13 @@ const ProfileComponent: FC = () => {
                     <br/>
                     <br/>
 
-                    <SimpleDetails data={userContext.user()} loading={userContext.loading()}/>
+                    <SimpleDetails
+                        data={userContext.user()}
+                        loading={userContext.loading()}
+                        setColorAOut={setColorA}
+                        setColorBOut={setColorB}
+                        setAvatarPath={setImagePath}
+                    />
 
                     <XpBar xp={userContext.user()?.XP || 0}/>
                     <br/>

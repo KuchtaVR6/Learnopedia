@@ -4,10 +4,17 @@ import multer from 'multer';
 
 const MAX_IMAGE_SIZE = 4 * 1024 * 1024; // 2 MB
 
+const svgCorrector = (extension: String) => {
+    if(extension === "svg+xml") {
+        return "svg"
+    }
+    return extension
+}
+
 const index = multer({
     storage: multer.diskStorage({
         destination: './public/uploads',
-        filename: (req, file, cb) => cb(null, file.fieldname + "_" + Date.now() + '.' + file.mimetype.split('/')[1]),
+        filename: (req, file, cb) => cb(null, file.fieldname + "_" + Date.now() + '.' + svgCorrector(file.mimetype.split('/')[1])),
     }),
     fileFilter: function (req, file, callback) {
         let split = file.originalname.split(".")

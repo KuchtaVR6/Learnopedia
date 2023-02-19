@@ -2,10 +2,7 @@ import Amendment, {AmendmentOpinionValues, AmendmentTypes, SpecificAmendmentOutp
 import {ContentType} from "../contents/Content";
 import ContentManager from "../contents/ContentManager";
 
-export type ListAmendmentOutput = {
-    __typename: "ListAmendmentOutput",
-    listChanges : { ChildID?: number, LessonPartID?: number, newSeqNumber?: number, delete?: boolean }[]
-}
+
 
 class ListAmendment extends Amendment {
     public readonly changes: { ChildID?: number, LessonPartID?: number, newSeqNumber?: number, delete?: boolean }[];

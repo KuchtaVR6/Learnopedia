@@ -1,7 +1,5 @@
 import {NextPage} from "next";
 import styles from "../styles/Forms.module.css";
-import Image from "next/image";
-import logo from "../public/images/logo.svg";
 import Link from "next/link";
 import VerifyCode from "../models/frontEnd/authentication/verifyCode";
 import {useEffect, useRef, useState} from "react";
@@ -14,6 +12,8 @@ const Forgot: NextPage = () => {
     const [email, setEmail] = useState("");
 
     const [captchaToken, setCaptchaToken] = useState("");
+
+    const captchaRef = useRef<HCaptcha>(null)
 
     const [allValid, setAllValid] = useState(false)
 
@@ -71,9 +71,9 @@ const Forgot: NextPage = () => {
                 }}>
 
                     <Link href={"/"}>
-                        <div className={styles.logoContainer}>
-                            <Image src={logo} alt="Learnopedia Logo"/>
-                        </div>
+                        <a className={styles.logoContainer}>
+                            <img src={"/images/logo.svg"} alt="Learnopedia Logo" style={{display: "table"}}/>
+                        </a>
                     </Link>
 
                     <br/>
@@ -82,7 +82,7 @@ const Forgot: NextPage = () => {
                     <h1>No password? No problem!</h1>
                     <br/>
                     Actually I do remember 😅<Link href={"/login"}>Login</Link><br/>
-                    <div className={styles.field}>
+                    <div className={styles.field} style={{paddingBottom: "2em"}}>
 
                         <label htmlFor={"email"}>Email:</label> <br/>
                         <input
@@ -97,9 +97,8 @@ const Forgot: NextPage = () => {
 
                     </div>
 
-                    <br/>
-
                     <HCaptcha
+                        ref = {captchaRef}
                         sitekey={process.env.NODE_ENV==="production"? process.env.NEXT_PUBLIC_CAPTCHA_SITE_KEY! : process.env.NEXT_PUBLIC_CAPTCHA_SITE_KEY_TEST!}
                         onVerify={(token) => setCaptchaToken(token)}
                     />
@@ -119,7 +118,8 @@ const Forgot: NextPage = () => {
                 visibility={visibility}
                 setVisibility={setVisibility}
                 refresh={sendEmail}
-                next={"/profile?changePass=true"}/>
+                next={"/profile?changePass=true"}
+                onExit={()=>{captchaRef.current!.resetCaptcha()}}/>
         </div>
     )
 }

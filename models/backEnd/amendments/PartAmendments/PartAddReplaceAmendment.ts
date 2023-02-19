@@ -4,14 +4,6 @@ import {AmendmentOpinionValues, AmendmentTypes, SpecificAmendmentOutput} from ".
 import LessonPartManager from "../../lessonParts/LessonPartManager";
 import ContentManager from "../../contents/ContentManager";
 
-export type PartAddReplaceAmendmentOutput = {
-    __typename: "PartAddReplaceAmendmentOutput"
-    change : displayableOutput | null
-    seqNumber : number
-    oldID? : number
-    old? : displayableOutput
-}
-
 class PartAddReplaceAmendment extends PartAmendment{
     private readonly oldID? : number;
     private seqNumber : number;

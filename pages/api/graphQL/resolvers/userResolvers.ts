@@ -32,7 +32,6 @@ export const userResolvers = {
     },
     Mutation: {
         addUser: async (parent: undefined, args: { nickname: string, email: string, fname: string, lname: string, password: string, captchaToken: string }, context: { user: User, agent: string, refreshToken: string, initialToken: string, response: any, setCookies: any, setHeaders: any }) => {
-
             let data = {
                 secret: process.env.NODE_ENV === "production" ? process.env.CAPTCHA_SECRET : process.env.CAPTCHA_SECRET_TEST,
                 response: args.captchaToken
@@ -79,7 +78,6 @@ export const userResolvers = {
             }
             throw UserRobot
         },
-
         modifyUser: async (parent: undefined,
                            args: { nickname: string | undefined, lname: string | undefined, fname: string | undefined, colorA: string | undefined, colorB: string | undefined },
                            context: { user: User, agent: string, refreshToken: string, response: any, setCookies: any, setHeaders: any }) => {
@@ -109,7 +107,6 @@ export const userResolvers = {
 
             return thisUser;
         },
-
         changeEmail: async (parent: undefined,
                             args: { email: string },
                             context: { user: User, agent: string, refreshToken: string, response: any, setCookies: any, setHeaders: any }) => {
@@ -122,7 +119,6 @@ export const userResolvers = {
                 continue: true
             }
         },
-
         changePassword: async (parent: undefined,
                                args: { password: string },
                                context: { user: User, agent: string, refreshToken: string, response: any, setCookies: any, setHeaders: any }) => {
@@ -135,7 +131,6 @@ export const userResolvers = {
                 continue: true
             }
         },
-
         deleteUser: async (parent: undefined,
                            args: { password: string },
                            context: { user: User, agent: string, refreshToken: string, response: any, setCookies: any, setHeaders: any }) => {

@@ -11,14 +11,6 @@ import {ContentNeedsParent} from "../tools/Errors";
 import KeywordManager from "../contents/keywords/KeywordManager";
 import ContentManager from "../contents/ContentManager";
 
-export type CreationAmendmentOutput = {
-    __typename: "CreationAmendmentOutput",
-    name : string,
-    description : string,
-    keywords : {ID : number, Score : number, word : string}[],
-    seqNumber : number,
-}
-
 class CreationAmendment extends Amendment{
     public readonly name : string;
     public readonly description : string;

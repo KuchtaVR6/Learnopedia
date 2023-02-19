@@ -84,6 +84,7 @@ export class SessionRegistry extends Purgeable {
 
     public async accessTokenRequest(refreshToken: string, agent: string): Promise<string> {
 
+
         let x = this.sessions.get(refreshToken)
 
         if (x) {
@@ -115,7 +116,9 @@ export class SessionRegistry extends Purgeable {
             if (await x.informParent(agent)) {
                 let result = x.checkValidity()
                 if (!result) {
+                    console.log("AT has lost validity")
                     if (!x.getSession().checkValidity()) {
+                        console.log(" - - - - - - - - - - - RF has lost validity")
                         await this.purgeAccessTokens(x.getSession())
                         this.sessions.forEach((row, rf) => {
                             if (row === x!.getSession()) {
@@ -310,12 +313,14 @@ class AccessToken extends Expirable {
     }
 
     public async asyncOnDeath(): Promise<void> {
-        await prisma.accesstoken.delete(
-            {
-                where: {
-                    token: this.token
+        try {
+            await prisma.accesstoken.delete(
+                {
+                    where: {
+                        token: this.token
+                    }
                 }
-            }
-        )
+            )
+        } catch {}
     }
 }

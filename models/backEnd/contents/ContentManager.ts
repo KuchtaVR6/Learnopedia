@@ -857,6 +857,7 @@ class ContentManager {
         author.addAmendment(amendment);
 
         //await content.applyMetaAmendment(amendment);
+        return amendment
     }
 
     public async createCreationAmendment(authorID: number, name: string, description: string, keywords: Keyword[], seqNumber: number, type: ContentType, parentID?: number) {
@@ -865,11 +866,11 @@ class ContentManager {
 
         if(type !== ContentType.COURSE && !parentID)
         {
-            throw OrphanedContent
+            throw new OrphanedContent()
         }
         else if (type === ContentType.COURSE && parentID)
         {
-            throw CourseHasNoParent
+            throw new  CourseHasNoParent()
         }
         else if (parentID) {
             parent = await this.getSpecificByID(parentID)
@@ -889,7 +890,7 @@ class ContentManager {
                 case ContentType.LESSON:
                     throw new LessonCannotBeParent()
             }
-            if(parent.checkSeqNumberVacant(seqNumber)!){
+            if(!parent.checkSeqNumberVacant(seqNumber)){
                 throw SequenceNumberTaken;
             }
         }
@@ -1012,6 +1013,7 @@ class ContentManager {
         if(type === ContentType.COURSE) {
             await this.applyContentCreation(amendment);
         }
+        return amendment
     }
 
     public async createAdoptionAmendment(authorID: number, targetID: number, newParent: number) {
@@ -1041,10 +1043,6 @@ class ContentManager {
         //the cost of such operation must be high (it will be always lower to the maximum possible regardless)
 
         content.addAmendment(amendment)
-
-        if (content.getType() === ContentType.COURSE) {
-            throw new CourseHasNoParent();
-        }
 
         let secondEntry = await prisma.amendment.create({
             data: {
@@ -1085,6 +1083,7 @@ class ContentManager {
         await AmendmentManager.getInstance().push(amendment);
 
         //await content.getAdopted(amendment)
+        return amendment
     }
 
     public async createListAmendment(authorID: number, targetID: number, changes: { ChildID?: number, newSeqNumber?: number, LessonPartID? : number, delete: boolean }[]) {
@@ -1124,6 +1123,7 @@ class ContentManager {
         await AmendmentManager.getInstance().push(amendment);
 
         //await content.applyListAmendment(amendment);
+        return amendment
     }
 
     public async createAddReplaceAmendment(authorID: number, targetID: number, seqNumber : number, arg : { oldID? : number, newArgs : lessonPartArgs }) {
@@ -1172,6 +1172,7 @@ class ContentManager {
         await AmendmentManager.getInstance().push(amendment);
 
         //await content.applyPartAddReplaceAmendment(amendment);
+        return amendment
     }
 
     public async applyContentCreation(amendment: CreationAmendment) {
@@ -1186,7 +1187,7 @@ class ContentManager {
 
                 finalID = content.getSpecificID();
 
-                while (content.checkSeqNumberVacant(finalSeq)!) {
+                while (!content.checkSeqNumberVacant(finalSeq)) {
                     finalSeq += 1
                 }
             }
@@ -1264,6 +1265,8 @@ class ContentManager {
                 }
             })
 
+            amendment.setTargetID(newContent.ID)
+
             let keywordManager = await KeywordManager.getInstance()
 
             let idsToUpdate: number[] = [];
@@ -1286,6 +1289,7 @@ class ContentManager {
 
             await this.getSpecificByID(newContent.ID)
         }
+        return amendment
     }
 }
 

@@ -1,0 +1,11 @@
+{
+  "extends": "@istanbuljs/nyc-config-typescript",
+  "all": true,
+  "check-coverage": true,
+  "include" : ["**/models/backEnd/*"],
+  "exclude": ["*.js"],
+  "branches": 0,
+  "lines": 0,
+  "functions": 0,
+  "statements": 0
+}

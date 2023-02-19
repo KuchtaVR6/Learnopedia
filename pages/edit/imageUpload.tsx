@@ -26,6 +26,8 @@ const ImageUpload: NextPage = () => {
     const addImage = (file: File | null) => {
         setInnerImage(file);
 
+        setDone("")
+
         if (file) {
             currentIndex.current += 1;
             if (currentIndex.current >= previousImages.current.length) {
@@ -107,6 +109,7 @@ const ImageUpload: NextPage = () => {
     const changeImage = async (x: FileList) => {
 
         setIsSVG(false)
+        setDone("")
 
         const files = x
         addImage(null)
@@ -143,6 +146,7 @@ const ImageUpload: NextPage = () => {
     }
 
     const [waiting, setWaiting] = useState<boolean>(false)
+    const [done, setDone] = useState<string>("")
 
     const router = useRouter();
 
@@ -161,17 +165,21 @@ const ImageUpload: NextPage = () => {
             try {
                 setError("Uploading...")
                 setWaiting(true)
+                setDone("Uploading...")
                 const response = await axios.post('/api/upload/' + imageName.toLowerCase(), formData, config);
 
                 if (response.data.success) {
                     setWaiting(false)
+                    setDone("Uploaded! 😻")
                     setError(imageName + " uploaded 😻")
                 } else if (response.data.message === "Session has been invalidated.") {
                     await router.push("/login")
                 } else {
+                    setDone("Unexpected error occurred 😿")
                     setError("Unexpected error occurred 😿")
                 }
             } catch(e) {
+                setDone("Unexpected error occurred 😿")
                 setError("Unexpected error occurred 😿")
             }
         }
@@ -219,13 +227,14 @@ const ImageUpload: NextPage = () => {
                     <SVGModifier inputFile={image} setFile={addImage}/> : ""}
                 <hr/>
                 <button disabled={!redoUndo.undo} onClick={undo}><BiUndo/> undo</button>
-                <button disabled={!redoUndo.redo} onClick={redo}><BiRedo/> undo</button>
+                <button disabled={!redoUndo.redo} onClick={redo}><BiRedo/> redo</button>
                 <button disabled={!image} onClick={download}>
                     <BiDownload/>
                     download
                 </button>
                 <hr/>
                 <button onClick={upload} disabled={!image || waiting}>Submit the image</button>
+                {done}
                 {(router.query.red as string)?
                     <div className={"buttonNiceContainer"}>
                         <Link href={(router.query.red as string)}>Go back to the previous page.</Link>

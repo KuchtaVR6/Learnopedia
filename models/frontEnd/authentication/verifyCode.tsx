@@ -12,9 +12,10 @@ type Args = {
     refresh: (options?: MutationFunctionOptions<any, any, DefaultContext, ApolloCache<any>> | undefined) => Promise<any>
     next?: string
     loggedIn?: boolean
+    onExit : () => void
 }
 
-const VerifyCode: FC<Args> = ({email, visibility, setVisibility, refresh, next, loggedIn}) => {
+const VerifyCode: FC<Args> = ({onExit, email, visibility, setVisibility, refresh, next, loggedIn}) => {
     const [mainClass, setMC] = useState([prompt.background, prompt.hide].join(" "));
 
     const [codeValue, setCodeValue] = useState("")
@@ -96,17 +97,12 @@ const VerifyCode: FC<Args> = ({email, visibility, setVisibility, refresh, next, 
                     code: parseInt(codeValue)
                 }} next={next ? next : "profile"} instantTrigger={toggle} onErrorTrigger={onFail}/> : ""}
 
-                <br/><br/>
-
-                If you are waiting <b>more than a minute:</b><br/>
-                <button onClick={() => {
-                    refresh()
-                }}>Resend
-                </button>
                 <br/>
                 <button onClick={() => {
+                    onExit();
                     setVisibility(false)
-                }}>Go back
+                }}>
+                    Go back
                 </button>
 
             </form>

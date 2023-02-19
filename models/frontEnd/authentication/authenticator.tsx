@@ -81,7 +81,8 @@ const Authenticator: FC<AuthenticatorArgs> = ({
             //on success fetch the accessToken
             atRequest().then(() => {
                 //on success redirect to next
-                if (router.route === "/" + next) {
+                if (router.asPath === "/" + next) {
+                    router.replace(router.route, undefined, { shallow: true });
                     router.reload()
                 } else {
                     router.push(next)
@@ -129,6 +130,7 @@ const Authenticator: FC<AuthenticatorArgs> = ({
             <>
                 <button disabled={disable || loading}
                         onClick={trigger}>{loading ? "Loading..." : buttonName ? buttonName : "Submit"}</button>
+                {loading? <div className={"loader"}></div> : ""}
                 {error?.message}
             </>
         )

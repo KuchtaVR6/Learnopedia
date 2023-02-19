@@ -1,10 +1,8 @@
 import {NextPage} from "next";
-import {useEffect, useState} from "react";
+import {LegacyRef, useEffect, useRef, useState} from "react";
 import {gql, useMutation} from "@apollo/client";
 import Link from "next/link";
 import styles from '../styles/Forms.module.css'
-import Image from "next/image";
-import logo from "../public/images/logo.svg";
 import VerifyCode from "../models/frontEnd/authentication/verifyCode";
 import SelfValidatingInput from "../models/frontEnd/inputs/selfValidatingInput";
 import PasswordValidator from "../models/frontEnd/authentication/passwordValidator";
@@ -22,6 +20,9 @@ const Register: NextPage = () => {
     const [lname, setLName] = useState("");
     const [password, setPassword] = useState("");
     const [captchaToken, setCaptchaToken] = useState("");
+
+    const captchaRef = useRef<HCaptcha>(null)
+
     const [error, setError] = useState("");
 
     const [allValid, setAllValid] = useState(false)
@@ -99,9 +100,9 @@ const Register: NextPage = () => {
                 }}>
 
                     <Link href={"/"}>
-                        <div className={styles.logoContainer}>
-                            <Image src={logo}/>
-                        </div>
+                        <a className={styles.logoContainer}>
+                            <img src={"/images/logo.svg"} alt="Learnopedia Logo" style={{display: "table"}}/>
+                        </a>
                     </Link>
 
                     <br/>
@@ -157,6 +158,7 @@ const Register: NextPage = () => {
                     </div>
 
                     <HCaptcha
+                        ref = {captchaRef}
                         sitekey={process.env.NODE_ENV==="production"? process.env.NEXT_PUBLIC_CAPTCHA_SITE_KEY! : process.env.NEXT_PUBLIC_CAPTCHA_SITE_KEY_TEST!}
                         onVerify={(token) => setCaptchaToken(token)}
                     />
@@ -180,7 +182,9 @@ const Register: NextPage = () => {
                 email={email}
                 visibility={visibility}
                 setVisibility={setVisibility}
-                refresh={sendEmail}/>
+                refresh={sendEmail}
+                onExit={()=>{captchaRef.current!.resetCaptcha()}}
+            />
 
         </div>
     )

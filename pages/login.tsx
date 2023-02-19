@@ -3,9 +3,7 @@ import {useState} from "react";
 import {gql} from "@apollo/client";
 import Link from "next/link";
 import Authenticator from "../models/frontEnd/authentication/authenticator";
-import Image from 'next/image'
 import styles from '../styles/Forms.module.css'
-import logo from "../public/images/logo.svg";
 import {useRouter} from "next/router";
 import Head from "next/head";
 
@@ -35,9 +33,9 @@ const Login: NextPage = () => {
             <form className={styles.form} onSubmit={(e) => {e.preventDefault()}}>
 
                 <Link href={"/"}>
-                    <div className={styles.logoContainer}>
-                        <Image src={logo} alt="Learnopedia Logo"/>
-                    </div>
+                    <a className={styles.logoContainer}>
+                        <img src={"/images/logo.svg"} alt="Learnopedia Logo" style={{display: "table"}}/>
+                    </a>
                 </Link>
 
                 <br/>

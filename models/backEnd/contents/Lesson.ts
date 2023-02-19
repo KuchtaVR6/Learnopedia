@@ -411,7 +411,7 @@ class Lesson extends Content {
     }
 
     public checkSeqNumberVacant(newSeqNumber: number): boolean {
-        return this.children.has(newSeqNumber);
+        return !this.children.has(newSeqNumber);
     }
 
     public getLessonPartByID(id: number): LessonPart {

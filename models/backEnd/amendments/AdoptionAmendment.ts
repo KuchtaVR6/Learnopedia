@@ -8,70 +8,60 @@ import Amendment, {
 import ContentManager from "../contents/ContentManager";
 import {contentShareOutput, ContentType} from "../contents/Content";
 
-export type AdoptionAmendmentOutput = {
-    __typename: "AdoptionAmendmentOutput",
-    newParent : number,
-    receiver : boolean
-}
 
-class AdoptionAmendment extends Amendment{
+class AdoptionAmendment extends Amendment {
 
-    public readonly newParent : number;
+    public readonly newParent: number;
 
     public constructor(
-        id : number,
-        authorID : number | null,
-        targetID : number,
-        newParent : number,
-        secondary :
-            {dbInput : false, otherSignificance : number} |
-            {dbInput : true, creationDate : Date, significance : number, tariff : number, applied : boolean, opinions?: Map<number,AmendmentOpinionValues>, vetoed : boolean})
-    {
+        id: number,
+        authorID: number | null,
+        targetID: number,
+        newParent: number,
+        secondary:
+            { dbInput: false, otherSignificance: number } |
+            { dbInput: true, creationDate: Date, significance: number, tariff: number, applied: boolean, opinions?: Map<number, AmendmentOpinionValues>, vetoed: boolean }) {
         super(
             id,
             authorID,
             targetID,
-            secondary.dbInput? secondary.significance : 1,
-            secondary.dbInput? secondary.tariff : secondary.otherSignificance,
-            secondary.dbInput? secondary.vetoed : undefined,
-            secondary.dbInput? secondary.creationDate : undefined,
-            secondary.dbInput? secondary.applied : undefined,
-            secondary.dbInput? secondary.opinions : undefined
-            )
+            secondary.dbInput ? secondary.significance : 1,
+            secondary.dbInput ? secondary.tariff : secondary.otherSignificance,
+            secondary.dbInput ? secondary.vetoed : undefined,
+            secondary.dbInput ? secondary.creationDate : undefined,
+            secondary.dbInput ? secondary.applied : undefined,
+            secondary.dbInput ? secondary.opinions : undefined
+        )
         this.newParent = newParent;
     }
 
-    protected async getSpecificOutput() : Promise<SpecificAmendmentOutput> {
+    protected async getSpecificOutput(): Promise<SpecificAmendmentOutput> {
         return {
             __typename: "AdoptionAmendmentOutput",
-            newParent : this.newParent,
-            receiver : false
+            newParent: this.newParent,
+            receiver: false
         }
     }
 
-    public fullyFetched()
-    {
+    public fullyFetched() {
         return true;
     }
 
     public async applyThisAmendment() {
         let content = await ContentManager.getInstance().getSpecificByID(this.getTargetID())
-
         await content.getAdopted(this)
-
         let parent = await ContentManager.getInstance().getSpecificByID(this.newParent)
-
         await parent.purgeListEdits()
     }
 
-    public async getSupports(userID? : number) : Promise<VotingSupport>{
+    public async getSupports(userID?: number): Promise<VotingSupport> {
 
         let contentManagerInstance = await ContentManager.getInstance()
 
         let target = await contentManagerInstance.getSpecificByID(this.targetID)
         let target2 = await contentManagerInstance.getSpecificByID(this.newParent)
 
-        let finalArray : LevelSupport[] = [
+        let finalArray: LevelSupport[] = [
             {
                 max: 0,
                 positives: 0,
@@ -89,15 +79,13 @@ class AdoptionAmendment extends Amendment{
             }
         ];
 
-        let userOP : number | undefined = undefined; // -2 report, -1 negative, 1 positive
+        let userOP: number | undefined = undefined; // -2 report, -1 negative, 1 positive
 
-        const changeFinalArray = (level : contentShareOutput,levelNo : number, op : AmendmentOpinionValues) => {
+        const changeFinalArray = (level: contentShareOutput, levelNo: number, op: AmendmentOpinionValues) => {
             finalArray[levelNo].max += level.maximum //important difference!!! (due to the nature of this amendment (two stakeholders))
-            if(op===AmendmentOpinionValues.Positive)
-            {
+            if (op === AmendmentOpinionValues.Positive) {
                 finalArray[levelNo].positives += level.owned
-            }
-            else {
+            } else {
                 finalArray[levelNo].negatives += level.owned
             }
         }
@@ -106,7 +94,7 @@ class AdoptionAmendment extends Amendment{
             let significances = target.getContentShareOfUser(user);
             let significances2 = target2.getContentShareOfUser(user);
 
-            if(userID === user) {
+            if (userID === user) {
                 switch (op) {
                     case AmendmentOpinionValues.Negative:
                         userOP = -1;
@@ -121,52 +109,49 @@ class AdoptionAmendment extends Amendment{
             }
 
             significances.forEach((level) => {
-                switch (level.level)
-                {
+                switch (level.level) {
                     case ContentType.LESSON:
-                        changeFinalArray(level,2,op)
+                        changeFinalArray(level, 2, op)
                         break;
                     case ContentType.CHAPTER:
-                        changeFinalArray(level,1,op)
+                        changeFinalArray(level, 1, op)
                         break;
                     case ContentType.COURSE:
-                        changeFinalArray(level,0,op)
+                        changeFinalArray(level, 0, op)
                         break;
                 }
             })
             significances2.forEach((level => {
-                switch (level.level)
-                {
+                switch (level.level) {
                     case ContentType.LESSON:
-                        changeFinalArray(level,2,op)
+                        changeFinalArray(level, 2, op)
                         break;
                     case ContentType.CHAPTER:
-                        changeFinalArray(level,1,op)
+                        changeFinalArray(level, 1, op)
                         break;
                     case ContentType.COURSE:
-                        changeFinalArray(level,0,op)
+                        changeFinalArray(level, 0, op)
                         break;
                 }
             }))
         })
 
-        let cutArray : LevelSupport[] = [];
+        let cutArray: LevelSupport[] = [];
 
         finalArray.map((each) => {
-            if(each.max>0)
-            {
+            if (each.max > 0) {
                 cutArray.push(each)
             }
         })
 
         return {
-            amendmentID : this.id,
-            individualSupports : cutArray,
+            amendmentID: this.id,
+            individualSupports: cutArray,
             userOP: userOP
         }
     }
 
-    public getType() : AmendmentTypes {
+    public getType(): AmendmentTypes {
         return AmendmentTypes.AdoptionAmendment
     }
 }

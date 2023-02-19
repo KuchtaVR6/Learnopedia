@@ -1,4 +1,4 @@
-import {FC, useEffect, useState} from "react";
+import {Dispatch, FC, SetStateAction, useEffect, useState} from "react";
 import {gql, useMutation} from "@apollo/client";
 import styles from "/styles/Profile.module.css";
 import ModifyDisplayConstrained, {ConstrainedInputTypes} from "../inputs/modifyDisplayConstrained";
@@ -10,9 +10,12 @@ type args = {
     data: any,
     loading: boolean
     hideOptions?: boolean
+    setColorAOut?:  Dispatch<SetStateAction<string>>,
+    setColorBOut?:  Dispatch<SetStateAction<string>>,
+    setAvatarPath?:  Dispatch<SetStateAction<string>>,
 }
 
-const SimpleDetails: FC<args> = ({data, loading, hideOptions}) => {
+const SimpleDetails: FC<args> = ({data, loading, hideOptions, setColorAOut, setColorBOut, setAvatarPath}) => {
 
     const modUser = gql`
         mutation Mutation($lname: String, $fname: String, $nickname: String, $colorA : String, $colorB : String) {
@@ -37,6 +40,18 @@ const SimpleDetails: FC<args> = ({data, loading, hideOptions}) => {
     const [simpleChanges, setSimpleChanges] = useState(false)
 
     const [updating, setUpdating] = useState(false)
+
+    useEffect(()=>{
+        if(setColorAOut) {
+            setColorAOut(colorA);
+        }
+    },[colorA])
+
+    useEffect(()=> {
+        if(setColorBOut) {
+            setColorBOut(colorB);
+        }
+    },[colorB])
 
     useEffect(() => {
         if (nickname || fname || lname || colorA || colorB) {
@@ -108,7 +123,7 @@ const SimpleDetails: FC<args> = ({data, loading, hideOptions}) => {
                                         hideOption={hideOptions}/>
                             <ColorInput value={data.colorB.toLowerCase()} setProp={setColorB} desc={"Right Gradient colour: "}
                                         hideOption={hideOptions}/>
-
+                            {simpleChanges? "Please note that the colours and image on the page are just a preview. Press 'Save the changes' to save." : ""}
                         </>
                     }
                 </div>
@@ -117,7 +132,7 @@ const SimpleDetails: FC<args> = ({data, loading, hideOptions}) => {
             </div>
             <div className={styles.zone}>
                 <ImageUploader imageName={"Avatar"} enforceImage={true} fileSizeLimit={2 * 1024 * 1024}
-                               hideOptions={hideOptions}/>
+                               hideOptions={hideOptions} setAvatarPath={setAvatarPath}/>
             </div>
 
         </>

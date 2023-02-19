@@ -1,5 +1,5 @@
 import {User} from "../User";
-import {CredentialsNotUnique, UserNotFoundException} from "../tools/Errors";
+import {CredentialsNotUnique, InvalidArgument, UserNotFoundException} from "../tools/Errors";
 import SelfPurgingMap from "../tools/SelfPurgingMap";
 import prisma from "../../../prisma/prisma";
 import Amendment, {AmendmentOpinionValues} from "../amendments/Amendment";
@@ -33,7 +33,9 @@ export class UserManager {
     }
 
     public async addUser(nickname: string, email: string, fname: string, lname: string, password: string): Promise<User> {
-        if ((await this.validateEmailRes(email)) && (await this.validateNicknameRes(nickname))) {
+        let ansNick = await this.validateEmailRes(email)
+        let ansEmail = await this.validateNicknameRes(nickname)
+        if (ansNick && ansEmail) {
             return this.userStore.push(nickname, email, fname, lname, password)
         }
         throw new CredentialsNotUnique();
@@ -66,11 +68,21 @@ export class UserManager {
     }
 
     public async updateEmail(oldIdentifier: string, newIdentifier: string) {
-        await this.userStore.updateEmail(oldIdentifier, newIdentifier)
+        if(await this.validateEmail(newIdentifier)) {
+            await this.userStore.updateEmail(oldIdentifier, newIdentifier)
+        }
+        else {
+            throw new InvalidArgument("email","must not be taken")
+        }
     }
 
     public async updateNick(oldIdentifier: string, newIdentifier: string) {
-        await this.userStore.updateNick(oldIdentifier, newIdentifier)
+        if(await this.validateNickname(newIdentifier)) {
+            await this.userStore.updateNick(oldIdentifier, newIdentifier)
+        }
+        else {
+            throw new InvalidArgument("nickname","must not be taken")
+        }
     }
 
     public reserve(email: string, nickname: string) {
@@ -86,11 +98,11 @@ export class UserManager {
             return false;
         } else if (password.length > 18) {
             return false;
+        } else if (!/[a-z]/i.test(password)) {
+            return false;
         } else if (password.toLowerCase() === password || password.toUpperCase() === password) {
             return false;
         } else if (!/[0-9]/.test(password)) {
-            return false;
-        } else if (!/[a-z]/i.test(password)) {
             return false;
         }
         return true;
@@ -137,10 +149,12 @@ class UserStore {
     }
 
     private cache(newUser: User): User {
+
         this.mainMap.set(newUser.getEmail().toLowerCase(), newUser)
         this.mainMap.set(newUser.getNickname().toLowerCase(), newUser)
         this.takenMap.set(newUser.getEmail().toLowerCase(), true)
         this.takenMap.set(newUser.getNickname().toLowerCase(), true)
+
         return newUser;
     }
 
@@ -150,7 +164,6 @@ class UserStore {
     }
 
     public release(email: string, nickname: string) {
-        this.takenMap.set(email.toLowerCase(), false);
         if (this.takenMap.get(email.toLowerCase()) === false) {
             this.takenMap.delete(email.toLowerCase())
         }
@@ -357,7 +370,7 @@ class UserStore {
             if (email.length > 3) {
                 if (allowReserved) {
                     let result = this.takenMap.get(email.toLowerCase())
-                    return result === undefined;
+                    return result === true;
                 }
                 return this.takenMap.has(email.toLowerCase())
             }
@@ -373,7 +386,7 @@ class UserStore {
             if (nickname.length > 3) {
                 if (allowReserved) {
                     let result = this.takenMap.get(nickname.toLowerCase())
-                    return result === undefined;
+                    return result === true;
                 }
                 return this.takenMap.has(nickname.toLowerCase())
             }

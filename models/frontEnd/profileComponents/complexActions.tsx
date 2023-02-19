@@ -130,7 +130,7 @@ const ComplexActions: FC<args> = ({data}) => {
                 </div>
             </div>
 
-            <VerifyCode email={data.email} visibility={visibility} setVisibility={setVisibility} refresh={modEmail} loggedIn={true}/>
+            <VerifyCode email={data.email} visibility={visibility} setVisibility={setVisibility} refresh={modEmail} loggedIn={true} onExit={()=>{}}/>
         </div>
     )
 }

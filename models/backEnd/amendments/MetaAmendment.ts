@@ -5,13 +5,7 @@ import {ContentType} from "../contents/Content";
 import KeywordManager from "../contents/keywords/KeywordManager";
 import ContentManager from "../contents/ContentManager";
 
-export type MetaAmendmentOutput = {
-    __typename: "MetaAmendmentOutput",
-    newName? : string,
-    newDescription? : string,
-    addedKeywords? : { ID : number, Score : number, word : string }[],
-    deletedKeywords? : { ID : number, Score : number, word : string }[]
-}
+
 
 class MetaAmendment extends Amendment {
     public readonly newName: string | undefined;

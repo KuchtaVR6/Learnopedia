@@ -267,6 +267,10 @@ const SVGModifier: FC<args> = (props) => {
             setGroupName("")
             throw new Error("Text is too long! Max characters is " + String(Math.round((392 * 2) / 33)))
         }
+        if(!input.match(/^[a-z ]*$/i)){
+            setGroupName("")
+            throw new Error("Special characters are unsupported")
+        }
     }
 
     const textValidator = (input: string) => {
