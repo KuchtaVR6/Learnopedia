@@ -53,7 +53,7 @@ export class Course extends Content {
             {
                 return -1
             }
-            else if (a[0] == b[0])
+            else /* excluded see Testing comment No. 5 */ /* istanbul ignore if */  if (a[0] == b[0])
             {
                 return 0
             }

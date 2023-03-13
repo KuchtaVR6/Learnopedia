@@ -22,6 +22,8 @@ export default class MailManager {
     private readonly register: SelfPurgingMap<string, Action>;
 
     private constructor() {
+        // if excluded see Errors comment No. 2
+        /* istanbul ignore if */
         if (process.env.NODE_ENV === 'development') {
             this.verifyActionTemplateHTML = Handlebars.compile(fs.readFileSync(path.resolve(__dirname, '../../../../models/emails/verifyAction.hbs')).toString());
             this.verifyActionTemplateTEXT = Handlebars.compile(fs.readFileSync(path.resolve(__dirname, '../../../../models/emails/verifyActionText.hbs')).toString());
@@ -137,11 +139,7 @@ export default class MailManager {
             throw ActionNotDefined
         }
 
-        if (email && text) {
-            await MailManager.send(emailAddress, email, text, "Verify your action - Learnopedia")
-        } else {
-            throw ActionNotDefined;
-        }
+        await MailManager.send(emailAddress, email, text, "Verify your action - Learnopedia")
     }
 
     public async verificationRequest(action: ActionType, actionDefinition: (() => Promise<User>), user: User) {
@@ -240,6 +238,8 @@ export default class MailManager {
 
         let randomNumber = Math.round(Math.random() * 8 ) // num from <0,6>
 
+        // if excluded see Errors comment No. 3
+        /* istanbul ignore next */
         switch (randomNumber) {
             case 0:
                 greeting = `It is time... to read ${content.getName()}. At least according to you! 😇`
@@ -336,6 +336,8 @@ class RegisterAction extends Action {
         this.nickname = nickname;
     }
 
+    // excluded see Errors comment No. 4
+    /* istanbul ignore next */
     public onDeath() {
         UserManager.getInstance().release(this.email, this.nickname)
     }

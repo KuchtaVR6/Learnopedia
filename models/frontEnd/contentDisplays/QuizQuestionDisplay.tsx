@@ -65,7 +65,7 @@ const QuizQuestionDisplay: FC<args> = (input) => {
                     return ""
                 }).join("; ")
             }
-            finalFeedback = (selected[0].feedback || "") + ".\n"
+            finalFeedback = (selected[0]?.feedback)? (selected[0]?.feedback) + ".\n" : ""
         }
 
         let op;

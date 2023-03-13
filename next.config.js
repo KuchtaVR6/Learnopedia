@@ -1,5 +1,10 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+
+  httpAgentOptions: {
+    keepAlive: true,
+  },
+
   reactStrictMode: false,
   async redirects() {
     return [

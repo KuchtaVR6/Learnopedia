@@ -33,7 +33,7 @@ const Login: NextPage = () => {
             <form className={styles.form} onSubmit={(e) => {e.preventDefault()}}>
 
                 <Link href={"/"}>
-                    <a className={styles.logoContainer}>
+                    <a className={styles.logoContainer} style={{height: "fit-content", paddingBottom: "1em"}}>
                         <img src={"/images/logo.svg"} alt="Learnopedia Logo" style={{display: "table"}}/>
                     </a>
                 </Link>
@@ -46,7 +46,7 @@ const Login: NextPage = () => {
                 Not a member yet? <Link href={"/register"}>Register</Link><br/>
 
                 <div className={styles.field}>
-                    <label htmlFor={"identifier"}>Email or nickname:</label><br/>
+                    <label htmlFor={"email"}>Email or nickname:</label><br/>
                     <input
                         autoComplete={"email"}
                         type={"text"}
@@ -55,7 +55,7 @@ const Login: NextPage = () => {
                         id={"email"}
                         onChange={(e) => setIdentifier(e.target.value)}
                     /> <br/><br/>
-                    <label htmlFor={"password"}>Password:</label><br/>
+                    <label htmlFor={"current-password"}>Password:</label><br/>
                     <input
                         autoComplete={"current-password"}
                         name={"password"}
@@ -67,6 +67,10 @@ const Login: NextPage = () => {
                 </div>
 
                 Forgot your password? <Link href={"/forgot"}>Reset your Password</Link><br/>
+
+                <p style={{opacity: "70%", padding: "1em 0", width: '65%', margin: "0 auto"}}>
+                    <b>If you have created your account before the 13.03.2023</b>, your old password is no longer working, that is because an additional security feature was added. Please press forgot my password and follow the instructions.
+                </p>
 
 
                 <Authenticator

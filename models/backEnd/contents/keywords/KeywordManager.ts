@@ -124,11 +124,9 @@ class KeywordManager {
         let resultingMap: { score: number, content: MetaOutput }[] = [];
 
         for (let fetchedContent of fetchedContents) {
-            let score = contentIDs.get(fetchedContent.getID())
-            if (score) {
-                let overall = score * fetchedContent.getSignificance();
-                resultingMap.push({score: overall, content: await fetchedContent.getMeta()});
-            }
+            let score = contentIDs.get(fetchedContent.getID())!
+            let overall = score * fetchedContent.getSignificance();
+            resultingMap.push({score: overall, content: await fetchedContent.getMeta()});
         }
 
         return resultingMap

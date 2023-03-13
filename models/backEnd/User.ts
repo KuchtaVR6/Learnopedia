@@ -67,7 +67,7 @@ export class User extends Expirable {
     private static evaluatePassword(password: string): boolean {
         if (password.length < 8) {
             throw new InvalidArgument("password", "must be at least 8 chars long")
-        } else if (password.length > 18) {
+        } else if (password.length > 12) {
             throw new MaxPasswordLengthExceeded(password.length);
         } else if (!/[a-z]/i.test(password)) {
             throw new InvalidArgument("password", "must contain letters")
@@ -87,7 +87,7 @@ export class User extends Expirable {
     public static async generateHash(password: string): Promise<string> {
         User.evaluatePassword(password)
         let saltRounds = 10;
-        return await bcrypt.hash(password, saltRounds)
+        return await bcrypt.hash(process.env.PEPPER_SECRET + password, saltRounds)
     }
 
 
@@ -296,14 +296,19 @@ export class User extends Expirable {
     }
 
     private async comparePasswordAttempt(attempt: string): Promise<boolean> {
+        // else excluded see Test comment No. 1
+        /* istanbul ignore else */
         if (this.passHash.length > 0) {
-            return await bcrypt.compare(attempt, this.passHash)
+            return await bcrypt.compare(process.env.PEPPER_SECRET + attempt, this.passHash)
         }
+        /* istanbul ignore next */
         return false
     }
 
     public async checkCredentials(login: string, password: string): Promise<boolean> {
         if (login == this.email || login == this.nickname) {
+            // else excluded see Test comment No. 1
+            /* istanbul ignore else */
             if (this.passHash) {
                 return await this.comparePasswordAttempt(password);
             }

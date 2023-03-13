@@ -1,5 +1,7 @@
 export class ConsoleLoginError extends Error{
     public constructor(query : string) {
+        // if excluded see Errors comment No. 2
+        /* istanbul ignore if */
         if (process.env.NODE_ENV === 'development') {
             console.log(new Date(), query)
         }

@@ -11,6 +11,7 @@ import {gql, useMutation} from "@apollo/client";
 import {BsClockFill, BsFillBookmarkHeartFill, BsFillBookmarkXFill} from "react-icons/bs";
 import Link from "next/link";
 import {AiTwotoneEdit} from "react-icons/ai";
+import {useRouter} from "next/router";
 
 type args = {
     meta: MetaOutput,
@@ -53,6 +54,8 @@ const ContentDisplay: FC<args> = ({meta, contents}) => {
     const userContext = useContext(UserContext)
 
     const [voteQuerySend, voteOutcome] = useMutation(voteQuery)
+
+    let router = useRouter();
 
     const vote = async (positive: boolean) => {
         await voteQuerySend({
@@ -200,11 +203,17 @@ const ContentDisplay: FC<args> = ({meta, contents}) => {
                 style={{
                     float: "right",
                     marginRight: "1%",
-                    backgroundColor: voteVal === false ? "orange" : "lightgray"
+                    backgroundColor: voteVal === false ? "orange" : "lightgray",
+                    opacity: userContext.loggedIn()? "100%" : "50%"
                 }}
-                disabled={!userContext.loggedIn() || voteOutcome.loading || queryVote.loading}
+                disabled={voteOutcome.loading || queryVote.loading}
                 onClick={() => {
-                    vote(false)
+                    if(!userContext.loggedIn()) {
+                        router.push("/login?red="+router.asPath)
+                    }
+                    else {
+                        vote(false)
+                    }
                 }}>
                 <BiDownvote/> {meta.downVotes + adjustDown}
             </button>
@@ -213,11 +222,17 @@ const ContentDisplay: FC<args> = ({meta, contents}) => {
                 style={{
                     float: "right",
                     marginRight: "1%",
-                    backgroundColor: voteVal === true ? "orange" : "lightgray"
+                    backgroundColor: voteVal === true ? "orange" : "lightgray",
+                    opacity: userContext.loggedIn()? "100%" : "50%"
                 }}
-                disabled={!userContext.loggedIn() || voteOutcome.loading || queryVote.loading}
+                disabled={voteOutcome.loading || queryVote.loading}
                 onClick={() => {
-                    vote(true)
+                    if(!userContext.loggedIn()) {
+                        router.push("/login?red="+router.asPath)
+                    }
+                    else{
+                        vote(true)
+                    }
                 }}>
                 <BiUpvote/> {meta.upVotes + adjustUp}
             </button>
@@ -226,10 +241,18 @@ const ContentDisplay: FC<args> = ({meta, contents}) => {
                 style={{
                     float: "right",
                     marginRight: "1%",
-                    backgroundColor: bookmark !== false ? "orange" : ""
+                    backgroundColor: bookmark !== false ? "orange" : "",
+                    opacity: userContext.loggedIn()? "100%" : "50%"
                 }}
-                disabled={!userContext.loggedIn() || voteOutcome.loading || queryVote.loading}
-                onClick={bookmarkSend}
+                disabled={voteOutcome.loading || queryVote.loading}
+                onClick={() => {
+                    if(!userContext.loggedIn()) {
+                        router.push("/login?red="+router.asPath)
+                    }
+                    else {
+                        bookmarkSend()
+                    }
+                }}
             >
                 {bookmark === true ? <><BsFillBookmarkXFill/>&nbsp;Remove Bookmark</> : bookmark === false ? <>
                     <BsFillBookmarkHeartFill/>&nbsp;Bookmark</> : <><BsFillBookmarkXFill/> <BsClockFill/>&nbsp;Remove
@@ -253,7 +276,8 @@ const ContentDisplay: FC<args> = ({meta, contents}) => {
             <p>
                 Authors: {meta.authors} <br/>
                 Last Modified: {meta.modification} <br/>
-                Created: {meta.creation}
+                Created: {meta.creation} <br/>
+                Type: {meta.type === 0? "Course" : meta.type===1? "Chapter" : "Lesson"}
             </p>
             <hr/>
             <KeywordDisplay keywords={meta.keywords}/>

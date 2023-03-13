@@ -21,10 +21,16 @@ apiRoute.get(async (req: NextApiRequest, res: NextApiResponse) => {
 
             const { size } = fs.statSync(fullPath);
 
+            let type = path.extname(myPath[1]).replace(".","")
+
+            if(type === "svg") {
+                type = "svg+xml"
+            }
+
             res.writeHead(200, {
-                'Content-Type': `image/${path.extname(myPath[1]).replace(".","")}`,
+                'Content-Type': `image/${type}`,
                 'Content-Disposition' : 'inline',
-                'Content-Length': size,
+                'Content-Length': size
             });
 
             fs.createReadStream(fullPath).pipe(res)

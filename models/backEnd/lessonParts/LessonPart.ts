@@ -32,9 +32,7 @@ abstract class LessonPart extends Expirable{
         return this.seqNumber
     }
 
-    public getDisplayable() : displayableOutput{
-        throw new UnsupportedOperation("LessonPart","getDisplayable")
-    }
+    public abstract getDisplayable() : displayableOutput
 
     public setSeqNumber(number : number) {
         this.seqNumber = number;

@@ -3,7 +3,7 @@ import {Expirable} from "./Expirable";
 /**
  * A class for implementing some of SelfPurgingMap functionality manually
  */
-export class Purgeable{
+export class Purgeable {
     private timestamp: Date;
 
     private readonly purgeInterval: number = 600; //10 minutes
@@ -12,10 +12,9 @@ export class Purgeable{
      * @param purgeInterval (OPTIONAL) -    specify minimum time between purges in seconds
      *                                      if not set defaults to 10 minutes
      */
-    public constructor(purgeInterval? : number) {
+    public constructor(purgeInterval?: number) {
         this.timestamp = new Date();
-        if(purgeInterval)
-        {
+        if (purgeInterval) {
             this.purgeInterval = purgeInterval
         }
     }
@@ -23,35 +22,32 @@ export class Purgeable{
     /**
      * Method to be overwritten with the purging methods
      */
-    protected purge(){}
+    protected purge() {
+    }
 
-    protected purgeAsync(){}
+    protected purgeAsync() {
+    }
 
     /**
      * calculate if this is a time for a purge
      */
-    private checkPurge() : boolean {
+    private checkPurge(): boolean {
         return new Date().getTime() > this.expiryTime()
     }
 
     /**
      * calculate the EPOCH second of expiry
      */
-    private expiryTime() : number {
-        if(this.purgeInterval)
-            return this.timestamp.getTime() + this.purgeInterval*1000
-        else
-            return Infinity
+    private expiryTime(): number {
+        return this.timestamp.getTime() + this.purgeInterval * 1000
     }
 
     /**
      * method for reporting actions taken. It will check if
      * a purge is due and perform it in that case.
      */
-    protected async notify()
-    {
-        if(this.checkPurge())
-        {
+    protected async notify() {
+        if (this.checkPurge()) {
             this.timestamp = new Date();
             this.purge();
             await this.purgeAsync();
@@ -71,11 +67,10 @@ export default class SelfPurgingMap<key, value extends Expirable> extends Map<ke
      * @param purgeInterval (OPTIONAL) -    specify minimum time between purges in seconds
      *                                      if not set defaults to 10 minutes
      */
-    public constructor(purgeInterval? : number) {
+    public constructor(purgeInterval?: number) {
         super();
         this.timestamp = new Date();
-        if(purgeInterval)
-        {
+        if (purgeInterval) {
             this.purgeInterval = purgeInterval
         }
     }
@@ -84,15 +79,14 @@ export default class SelfPurgingMap<key, value extends Expirable> extends Map<ke
      * check all the entries and delete expired ones
      * and reset the timestamp (for the next purge)
      */
-    private async purge(){
+    private async purge() {
         this.timestamp = new Date();
 
-        for ( let key of Array.from<key>(super.keys())) {
-            let value : value = super.get(key)!
+        for (let key of Array.from<key>(super.keys())) {
+            let value: value = super.get(key)!
             value.onNudge()
             await value.asyncOnNudge()
-            if(!value.checkValidity())
-            {
+            if (!value.checkValidity()) {
                 value.onDeath()
                 await value.asyncOnDeath()
                 super.delete(key)
@@ -103,28 +97,23 @@ export default class SelfPurgingMap<key, value extends Expirable> extends Map<ke
     /**
      * calculate if this is a time for a purge
      */
-    private checkPurge() : boolean {
+    private checkPurge(): boolean {
         return new Date().getTime() > this.expiryTime()
     }
 
     /**
      * calculate the EPOCH second of expiry
      */
-    private expiryTime() : number {
-        if(this.purgeInterval)
-            return this.timestamp.getTime() + this.purgeInterval*1000
-        else
-            return Infinity
+    private expiryTime(): number {
+        return this.timestamp.getTime() + this.purgeInterval * 1000
     }
 
     /**
      * method for reporting actions taken. It will check if
      * a purge is due and perform it in that case.
      */
-    private async notify()
-    {
-        if(this.checkPurge())
-        {
+    private async notify() {
+        if (this.checkPurge()) {
             await this.purge();
         }
     }
@@ -135,13 +124,13 @@ export default class SelfPurgingMap<key, value extends Expirable> extends Map<ke
      * purges.
      *
      */
-    public set(key: key, value : value) {
+    public set(key: key, value: value) {
         this.notify()
-        return super.set(key,value)
+        return super.set(key, value)
     }
 
     /**
-     * Rest of the map methods get inherited, without notify.
+     * Rest of the map methods get inherited
      */
 }
 

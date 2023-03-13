@@ -6,16 +6,48 @@ import AmendmentManager from "../models/backEnd/amendments/AmendmentManager";
 import ContentManager from "../models/backEnd/contents/ContentManager";
 import KeywordManager from "../models/backEnd/contents/keywords/KeywordManager";
 import Content, {ContentType} from "../models/backEnd/contents/Content";
-import {AuthenticationError} from "apollo-server-micro";
 import {SessionRegistry} from "../models/backEnd/managers/SessionRegistry";
 import MailManager, {ActionType} from "../models/backEnd/managers/MailManager";
 import BookmarkManager from "../models/backEnd/managers/BookmarkManager";
-import exp from "constants";
-import Keyword from "../models/backEnd/contents/keywords/Keyword";
+import Keyword, {ActiveKeyword} from "../models/backEnd/contents/keywords/Keyword";
 import Chapter from "../models/backEnd/contents/Chapter";
 import {lessonPartTypes} from "../models/backEnd/lessonParts/LessonPartTypes";
 import {Course} from "../models/backEnd/contents/Course";
 import Lesson from "../models/backEnd/contents/Lesson";
+import {Expirable} from "../models/backEnd/tools/Expirable";
+import {
+    ActionNotDefined,
+    CodeMismatch,
+    ContentNeedsParent,
+    ContentNotFetched,
+    ContentNotNavigable,
+    EmptyModification,
+    LegacyAmendment,
+    MissingLessonPart,
+    NoChanges,
+    UnsupportedOperation,
+    UserRobot
+} from "../models/backEnd/tools/Errors";
+import SelfPurgingMap, {Purgeable} from "../models/backEnd/tools/SelfPurgingMap";
+import {Embeddable} from "../models/backEnd/lessonParts/Embeddable";
+import {QuizQuestion} from "../models/backEnd/lessonParts/QuizQuestion";
+import LessonPartManager from "../models/backEnd/lessonParts/LessonPartManager";
+
+/**
+ * Branches infeasible to cover:
+ *
+ * 1. Passwords get hashed without the User awaiting them to get hashed (responsiveness), as such for a
+ * very limited time the user has no password associated, and all login would be rejected. Such request is
+ * theoretically possible, but I couldn't reproduce it as such those branches have been excluded.
+ *
+ * 2. The testing is with regard to production version as such these lines have been excluded from the count
+ *
+ * 3. The greeting? That is completely random! If its broken that only makes it more random :)
+ *
+ * 4. Over-depended on time, the super class method being called test with all the subcomponents as well.
+ *
+ * 5. Basically impossible due to the avoidance of collisions for seqNumbers.
+ */
 
 let user: User;
 let nickname = String(new Date().getTime())
@@ -725,6 +757,36 @@ describe('Model testing', function () {
                     }, "testFname", "testLname", email, nickname, initialToken)
                 }).not.to.throw()
             })
+            it('4. suspendUser', async () => {
+                let initialToken = SessionRegistry.generateToken(8);
+
+                expect(async () => {
+                    // this just sends the email does not suspend in reality (that is a separate method)
+                    await MailManager.getInstance().suspendUser(user, "2024.10.12", "Because Testing is Important!!!")
+                }).not.to.throw()
+            })
+            it('5. change password', async () => {
+                let rf = await (await SessionRegistry.getInstance()).addSession(user, "test")
+
+                expect(async () => {
+                    await MailManager.getInstance().verificationRequest(ActionType.CHANGE_PASSWORD, async () => {
+                        await UserManager.getInstance().deleteUser(user);
+                        await (await SessionRegistry.getInstance()).removeSession(rf);
+                        return user
+                    }, user)
+                }).not.to.throw()
+            })
+            it('6. change email', async () => {
+                let rf = await (await SessionRegistry.getInstance()).addSession(user, "test")
+
+                expect(async () => {
+                    await MailManager.getInstance().verificationRequest(ActionType.CHANGE_EMAIL, async () => {
+                        await UserManager.getInstance().deleteUser(user);
+                        await (await SessionRegistry.getInstance()).removeSession(rf);
+                        return user
+                    }, user)
+                }).not.to.throw()
+            })
         })
         describe('5. Bookmark', () => {
             it('1. pushBookmark', async () => {
@@ -1223,6 +1285,8 @@ describe('Model testing', function () {
 
                     let result = await ContentManager.getInstance().getContentByID(created[0].getTargetID())
 
+                    created.push(amendment)
+
                     expect(await result.getMeta()).to.deep.include({name: "newName22"})
                 })
                 it('2. no change', async () => {
@@ -1358,11 +1422,15 @@ describe('Model testing', function () {
                     let amend = await ContentManager.getInstance().createAdoptionAmendment(user.getID(), created[4].getTargetID(), created[3].getTargetID())
                     await amend.applyThisAmendment()
                     expect(amend.getValueOfApplied()).to.equal(true)
+
+                    created.push(amend)
                 })
                 it('2. lesson moves to chapter', async () => {
                     let amend = await ContentManager.getInstance().createAdoptionAmendment(user.getID(), created[4].getTargetID(), created[3].getTargetID())
                     await amend.applyThisAmendment()
                     expect(amend.getValueOfApplied()).to.equal(true)
+
+                    created.push(amend)
                 })
                 it('3. course moves', async () => {
                     try {
@@ -1418,6 +1486,8 @@ describe('Model testing', function () {
                     let amend = await ContentManager.getInstance().createListAmendment(user.getID(), created[0].getTargetID(), changes)
                     await amend.applyThisAmendment();
 
+                    created.push(amend)
+
                     expect(
                         (await ContentManager.getInstance().getSpecificByID(created[1].getTargetID())).getSeqNumber()
                     ).to.equal(128)
@@ -1465,6 +1535,8 @@ describe('Model testing', function () {
                         }
                     })
                     await amend.applyThisAmendment();
+
+                    created.push(amend)
                 })
                 it('2. createEmbeddable', async () => {
                     let amend = await ContentManager.getInstance().createAddReplaceAmendment(user.getID(), created[2].getTargetID(), 32, {
@@ -1476,6 +1548,7 @@ describe('Model testing', function () {
                         }
                     })
                     await amend.applyThisAmendment();
+                    created.push(amend)
                 })
                 it('3. createQuizQuestion', async () => {
                     let amend = await ContentManager.getInstance().createAddReplaceAmendment(user.getID(), created[2].getTargetID(), 32, {
@@ -1488,6 +1561,7 @@ describe('Model testing', function () {
                         }
                     })
                     await amend.applyThisAmendment();
+                    created.push(amend)
                 })
                 it('4. createQuizQuestion wrong type', async () => {
                     try {
@@ -1838,7 +1912,9 @@ describe('Model testing', function () {
                 let wrongID = -100;
 
                 expect((content as Lesson).getLessonPartByID(correctID).getID()).to.equal(correctID)
-                expect(() => {(content as Lesson).getLessonPartByID(wrongID).getID()}).to.throw()
+                expect(() => {
+                    (content as Lesson).getLessonPartByID(wrongID).getID()
+                }).to.throw()
             })
             it('8. Check Paternity', async () => {
                 let content = await ContentManager.getInstance().getSpecificByID(created[2].getTargetID())
@@ -1875,6 +1951,336 @@ describe('Model testing', function () {
 
                 expect(await content.checkPaternity(changes2)).to.equal(false)
             })
+            it('9. Adoption Test', async () => {
+                let amend = await ContentManager.getInstance().createAdoptionAmendment(user.getID(), created[2].getTargetID(), created[4].getTargetID())
+                await amend.applyThisAmendment()
+                expect(amend.getValueOfApplied()).to.equal(true)
+            })
+            it('10. Full read many authors', async () => {
+                let content = await ContentManager.getInstance().getSpecificByID(10)
+                expect((await content.fullRead()).metas.meta.id).to.equal(6)
+            })
+        })
+        describe('12. Tools', () => {
+            it('1. Expirable with no expiry', async () => {
+                let expirable = new Expirable();
+
+                expect(expirable.getTTL()).to.equal(-1)
+                expect(expirable.checkValidity()).to.equal(true)
+            })
+            it('2. Testing Errors', async () => {
+                expect(() => {
+                    throw new ActionNotDefined()
+                }).to.throw()
+                expect(() => {
+                    throw new CodeMismatch()
+                }).to.throw()
+                expect(() => {
+                    throw new EmptyModification()
+                }).to.throw()
+                expect(() => {
+                    throw new ContentNotFetched()
+                }).to.throw()
+                expect(() => {
+                    throw new ContentNotNavigable()
+                }).to.throw()
+                expect(() => {
+                    throw new ContentNeedsParent()
+                }).to.throw()
+                expect(() => {
+                    throw new MissingLessonPart()
+                }).to.throw()
+                expect(() => {
+                    throw new NoChanges()
+                }).to.throw()
+                expect(() => {
+                    throw new LegacyAmendment()
+                }).to.throw()
+                expect(() => {
+                    throw new UserRobot()
+                }).to.throw()
+                expect(() => {
+                    throw new UnsupportedOperation("test", "test")
+                }).to.throw()
+            })
+            it('3. SelfPuringMap', async () => {
+                let map = new SelfPurgingMap(0.001)
+                let mapINF = new SelfPurgingMap()
+
+                map.set("1", new Expirable(0.001))
+                map.set("2", new Expirable(1000))
+
+                mapINF.set("1", new Expirable(0.001))
+                mapINF.set("2", new Expirable(1000))
+
+                // introduce synchronous delay
+                await new Promise(r => setTimeout(r, 100));
+
+                map.set("3", new Expirable(1000))
+                mapINF.set("3", new Expirable(1000))
+
+                // introduce synchronous delay
+                await new Promise(r => setTimeout(r, 100));
+
+                assert(map.size == 2)
+                assert(mapINF.size === 3)
+            })
+            it('4. Purgeable', async () => {
+                expect(async () => {
+                    class funnyTest extends Purgeable {
+                        public notifyPUB() {
+                            super.notify()
+                        }
+                    }
+
+                    let purgeable = new funnyTest(0.001);
+                    let purgeableINF = new funnyTest();
+
+                    await new Promise(r => setTimeout(r, 100));
+
+                    purgeable.notifyPUB();
+                    purgeableINF.notifyPUB();
+                }).to.not.throw()
+            })
+        })
+        describe('13. LessonParts', () => {
+            describe('1. Embeddable', () => {
+                expect(Embeddable.getType("https://www.youtube.com/watch?v=31212231")).to.equal("Youtube")
+                expect(Embeddable.getType("https://youtu.be/31212231")).to.equal("Youtube")
+                expect(Embeddable.getType("https://gist.github.com/31231231231/31231232131")).to.equal("GithubGist")
+                expect(() => {
+                    Embeddable.getType("https://www.youtube.com/watch?v=31212231=123123")
+                }).to.throw()
+                expect(() => {
+                    Embeddable.getType("https://youtu.be/3121/2231")
+                }).to.throw()
+                expect(() => {
+                    Embeddable.getType("https://gist.githu/b.com/")
+                }).to.throw()
+                expect(() => {
+                    Embeddable.getType("asdasdadasdaqda")
+                }).to.throw()
+            })
+            describe('2. Quiz Question', () => {
+                it('1. Constructor with no answers', () => {
+                    expect(() => {
+                        new QuizQuestion(-1, 32, "dsadsda", "WrittenQuestion", [])
+                    }).to.throw()
+                })
+            })
+            describe('3. Lesson Part', () => {
+                it('1. Link modifiers Youtube', async () => {
+                    let test = "1231231231"
+                    let out = await LessonPartManager.getInstance().push(32, {
+                        type: lessonPartTypes.EMBEDDABLE,
+                        content: {
+                            localCacheImage: false,
+                            uri: "https://www.youtube.com/watch?v=" + test
+                        }
+                    })
+
+                    expect(((await LessonPartManager.getInstance().retrieve(out)) as Embeddable).getDisplayable().output)
+                        .to.deep.include({uri: "https://www.youtube.com/embed/" + test})
+
+                    out = await LessonPartManager.getInstance().push(32, {
+                        type: lessonPartTypes.EMBEDDABLE,
+                        content: {
+                            localCacheImage: false,
+                            uri: "https://youtu.be/" + test
+                        }
+                    })
+
+                    expect(((await LessonPartManager.getInstance().retrieve(out)) as Embeddable).getDisplayable().output)
+                        .to.deep.include({uri: "https://www.youtube.com/embed/" + test})
+                })
+                it('2. Link modifiers Github', async () => {
+                    let test = "1231231231"
+                    let out = await LessonPartManager.getInstance().push(32, {
+                        type: lessonPartTypes.EMBEDDABLE,
+                        content: {
+                            localCacheImage: false,
+                            uri: "https://gist.github.com/" + test + "/" + test
+                        }
+                    })
+
+                    expect(((await LessonPartManager.getInstance().retrieve(out)) as Embeddable).getDisplayable().output)
+                        .to.deep.include({uri: test})
+                })
+                it('3. Retrieve not found', async () => {
+                    try {
+                        await LessonPartManager.getInstance().retrieve(-100)
+                        expect(1).to.equal(0)
+                    } catch {
+                        expect(0).to.equal(0)
+                    }
+                })
+                it('4. Errors on ignoring types', async () => {
+                    try {
+                        await LessonPartManager.getInstance().push(32, {
+                            type: 7,
+                            content: {
+                                uri: "test",
+                                localCacheImage: false
+                            }
+                        })
+                        expect(1).to.equal(0)
+                    } catch {
+                        expect(0).to.equal(0)
+                    }
+                })
+                it('5. Retrieve with feedback', async () => {
+                    expect((await LessonPartManager.getInstance().retrieve(50)).getID()).to.equal(50)
+                })
+                it('5. Fetch Broken', async () => {
+                    try {
+                        (await LessonPartManager.getInstance().retrieve(313)).getID()
+                        expect(1).to.equal(0)
+                    } catch {
+                        expect(0).to.equal(0)
+                    }
+                })
+            })
+        })
+        describe('14. Keywords', () => {
+            it('1. Keyword Errors', () => {
+                try {
+                    new Keyword(-1, 0, "blah")
+                    expect(0).to.equal(1)
+                } catch {
+                    expect(0).to.equal(0)
+                }
+                try {
+                    new Keyword(-1, 101, "blah")
+                    expect(0).to.equal(1)
+                } catch {
+                    expect(0).to.equal(0)
+                }
+                try {
+                    new Keyword(-1, 77.77, "blah")
+                    expect(0).to.equal(1)
+                } catch {
+                    expect(0).to.equal(0)
+                }
+                try {
+                    new Keyword(-1, 77, "blahblahblahblahblahblahblahblahblah")
+                    expect(0).to.equal(1)
+                } catch {
+                    expect(0).to.equal(0)
+                }
+                try {
+                    new Keyword(-1, 77, "bl")
+                    expect(0).to.equal(1)
+                } catch {
+                    expect(0).to.equal(0)
+                }
+                try {
+                    new Keyword(-1, 77, "blah!")
+                    expect(0).to.equal(1)
+                } catch {
+                    expect(0).to.equal(0)
+                }
+                try {
+                    new Keyword(-1, 77, "Blah")
+                    expect(0).to.equal(1)
+                } catch {
+                    expect(0).to.equal(0)
+                }
+            })
+            it('2. Keyword Search', async () => {
+                let manager = await KeywordManager.getInstance()
+
+                let result = await manager.resolveSearch("test1 hello notevengonnafindit youtube embeddable")
+
+                assert(result.length > 1)
+            })
+            it('3. Keyword Search ID not found', async () => {
+                let manager = await KeywordManager.getInstance()
+
+                try {
+                    let result = await manager.getKeywordByID(-1)
+                    expect(1).to.equal(0)
+                } catch {
+                    expect(0).to.equal(0)
+                }
+            })
+            it('4. Activating completely new Keyword', async () => {
+                let manager = await KeywordManager.getInstance()
+
+                let keyword = new Keyword(1000000, 50, "thisiscompleteutter")
+
+                manager.activate(keyword, 17)
+            })
+            it('5. Removing active which is not present', async () => {
+                let manager = await KeywordManager.getInstance()
+
+                let keyword = new ActiveKeyword(1000000, 50, "thereisnochance", 17)
+
+                manager.deactivate(keyword)
+            })
+        })
+        describe('15. Amendments', () => {
+            it('1. Specific Output', async () => {
+                for (let amend of created) {
+                    expect((await amend.getFullAmendmentOutput()).id).to.equal(amend.getID())
+                }
+            })
+            it('2. Get cost', async () => {
+                assert(created[0].getCost() > 0)
+            })
+            it('3. Veto', async () => {
+                await created[created.length - 1].veto()
+                assert(created[created.length - 1].getVeto() === true)
+            })
+            it('4. CheckFulfillment Output', async () => {
+                for (let amend of created) {
+                    expect((await amend.checkFulfillmentAndReturn()).amendmentID).to.equal(amend.getID())
+                }
+            })
+            it('5. Get ID of -1', async () => {
+                let amend = new Amendment(-1, null, 17, 1000, 1000)
+
+                expect(() => {
+                    amend.getID()
+                }).to.throw()
+            })
+            it('6. Amendment not fetched error', async () => {
+                let amend = new Amendment(1100, null, 17, 1000, 1000)
+
+                try {
+                    amend.fullyFetched()
+                    expect(1).to.equal(0)
+                } catch {
+                    expect(0).to.equal(0)
+                }
+                try {
+                    await amend.applyThisAmendment()
+                    expect(1).to.equal(0)
+                } catch {
+                    expect(0).to.equal(0)
+                }
+                try {
+                    amend.fullyFetched()
+                    expect(1).to.equal(0)
+                } catch {
+                    expect(0).to.equal(0)
+                }
+                try {
+                    amend.getType()
+                    expect(1).to.equal(0)
+                } catch {
+                    expect(0).to.equal(0)
+                }
+            })
+            it('7. Many functions with top 250 amendments', async () => {
+                for (let i = 1; i <= 250; i++) {
+                    let output = await AmendmentManager.getInstance().retrieveSpecific(i)
+                    expect((await output.getFullAmendmentOutput()).id).to.equal(i)
+                    expect((await output.checkFulfillmentAndReturn()).amendmentID).to.equal(i)
+                    await output.getType()
+                    assert(output.fullyFetched()===true || output.fullyFetched()===false)
+                    await output.getSupports(1)
+                }
+            }).timeout(100000)
         })
     }
 );

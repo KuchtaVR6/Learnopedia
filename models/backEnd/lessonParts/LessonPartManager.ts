@@ -43,6 +43,7 @@ class LessonPartManager {
             return output.LessonPartID
         }
         else if(args.type === lessonPartTypes.EMBEDDABLE) {
+            Embeddable.getType(args.content.uri)
             let uri = args.content.uri
             if(uri.startsWith("https://www.youtube.com/watch?v=")) {
                 uri = "https://www.youtube.com/embed/" + uri.split("=")[1]
@@ -89,7 +90,7 @@ class LessonPartManager {
             else throw new InvalidArgument("QuizQuestion","The type must be one of the following: WrittenQuestion, SingleChoiceQuestion, MultipleChoiceQuestion & there must be at least one answer")
         }
         else{
-            throw UnsupportedOperation;
+            throw new Error("lessonPartManager used wrong type");
         }
     }
 
@@ -144,7 +145,7 @@ class LessonPartManager {
                     }}))
         }
         else{
-            throw UnsupportedOperation;
+            throw new Error("lessonPartManager used wrong type");
         }
     }
 }

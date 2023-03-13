@@ -96,7 +96,7 @@ export class UserManager {
     public validatePassword(password: string) {
         if (password.length < 8) {
             return false;
-        } else if (password.length > 18) {
+        } else if (password.length > 12) {
             return false;
         } else if (!/[a-z]/i.test(password)) {
             return false;

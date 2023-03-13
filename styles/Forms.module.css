@@ -1,6 +1,6 @@
 .page{
-    background-image: url("../public/images/background.png");
-    background-size: cover;
+    background: rgb(2,0,36);
+    background: radial-gradient(circle, rgb(80, 28, 28) 0%, #7ebdc2ff 32%,  #efe6ddff 100%);
     width: 100%;
     min-height: 100vh;
     display: flex;

@@ -71,7 +71,7 @@ const Forgot: NextPage = () => {
                 }}>
 
                     <Link href={"/"}>
-                        <a className={styles.logoContainer}>
+                        <a className={styles.logoContainer} style={{height: "fit-content", paddingBottom: "1em"}}>
                             <img src={"/images/logo.svg"} alt="Learnopedia Logo" style={{display: "table"}}/>
                         </a>
                     </Link>

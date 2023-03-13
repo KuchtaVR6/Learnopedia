@@ -217,6 +217,7 @@ const OnStopInput: FC<Args> = ({
             maxLength={maxLength}
             autoFocus={autoFocus}
             name = {name}
+            id = {name}
 
 
             onChange={(e) => {

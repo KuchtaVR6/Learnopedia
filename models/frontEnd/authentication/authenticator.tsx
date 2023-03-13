@@ -77,7 +77,7 @@ const Authenticator: FC<AuthenticatorArgs> = ({
     useEffect(() => {
         if (data) {
 
-            window.sessionStorage.setItem("loggedIn", "true")
+            window.localStorage.setItem("loggedIn", "true")
             //on success fetch the accessToken
             atRequest().then(() => {
                 //on success redirect to next
@@ -88,7 +88,7 @@ const Authenticator: FC<AuthenticatorArgs> = ({
                     router.push(next)
                 }
             }).catch(() => {
-                window.sessionStorage.setItem("loggedIn", "false")
+                window.localStorage.setItem("loggedIn", "false")
                 /**
                  * atRequest fail can only happen if:
                  * 1. a refresh token invalidation has been triggered

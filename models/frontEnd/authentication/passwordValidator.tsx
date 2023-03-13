@@ -13,7 +13,7 @@ const PasswordValidator: FC<Args> = ({setProp}) => {
     const evaluate = (proposal: string) => {
         if (proposal.length < 8) {
             setMessage("At least 8 characters 📏")
-        } else if (proposal.length > 18) {
+        } else if (proposal.length > 12) {
             setMessage("The password is too long! 💩")
         } else if (proposal.toLowerCase() === proposal || proposal.toUpperCase() === proposal) {
             setMessage("Please mix letter cases 🔠🔡")
@@ -32,6 +32,7 @@ const PasswordValidator: FC<Args> = ({setProp}) => {
         <div>
             <input
                 name={"password"}
+                id={"password"}
                 className={valid ? "" : "invalid"}
                 required={true}
                 type={"password"}

@@ -37,7 +37,7 @@ const AmendmentDisplay: FC<args> = ({input}) => {
                 array.push(amend.id);
             }
         })
-        if(window.sessionStorage.getItem("loggedIn")==="true" && array.length>0)
+        if(window.localStorage.getItem("loggedIn")==="true" && array.length>0)
         {
             fetch({variables : { amendmentIds : array}})
         }

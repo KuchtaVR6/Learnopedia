@@ -48,8 +48,6 @@ const Home: NextPage = () => {
                         <br/>
                         <Link href={"/edit/createCourse"}>Create a Course</Link>
                         <br/>
-                        <Link href={"edit/imageUpload"}>Upload Images</Link>
-                        <br/>
                     </div>
                 </div>
             </RegularLayout>

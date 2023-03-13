@@ -140,7 +140,7 @@ class Lesson extends Content {
         this.children = new Map(Array.from(this.children.entries()).sort((a, b) => {
             if (a[0] < b[0]) {
                 return -1
-            } else if (a[0] == b[0]) {
+            } else /* excluded see Testing comment No. 5 */ /* istanbul ignore if */  if (a[0] == b[0]) {
                 return 0
             } else {
                 return 1
@@ -275,16 +275,6 @@ class Lesson extends Content {
         this.addAmendment(amendment)
     }
 
-    public addChild(seqNum: number, child: LessonPart) {
-        if (!this.children.has(seqNum)) {
-            this.children.set(seqNum, child)
-            this.balanced = false;
-            this.sortChildern()
-        } else {
-            throw new SequenceNumberTaken();
-        }
-    }
-
     public async balance() {
         if (!this.balanced) {
 
@@ -335,10 +325,6 @@ class Lesson extends Content {
 
         while (!amendment.getOldID() && this.children.has(amendment.getNewSeqNum())) {
             amendment.moveNewSeqNum();
-        }
-
-        if (!amendment.getLessonPartID()) {
-            throw MissingLessonPart
         }
 
         await this.modification()
