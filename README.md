@@ -1,34 +1,58 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+This is the code for the Learnopedia platform.
+## Deployed version:
+***You can use this link: https://learnopedia.kuchta.uk/***
 
-## Getting Started
+## Manual Hosting:
 
-First, run the development server:
-
+First, run the development server you need to have **Node Package Manager** ***NPM*** installed and Node 
+<br/>
+*(if errors are encountered please install version: v18.15.0).*
+<br/>
+Additionally, if you don't have yarn install run:
 ```bash
-npm run dev
-# or
+npm install --global yarn
+```
+Afterwards run this command:
+```bash
+yarn install
+```
+If it fails, please run these commands:
+```bash
+yarn remove bcrypt
+yarn install
+yarn add bcrypt
+yarn install
+```
+At this point all the required dependencies are installed 😀!
+<br/>
+### Now for the Database:<br/>
+You need a database environment (I recommend XAMPP or equivalent for your system).
+<br/>
+*instructions in italics are optional but can save time*
+<br/>
+**Create a MySQL database,** *you can all it learnopedia, run it on port 3306.*
+<br/>
+**Create a user with privalages allowing the to change the database (development only, permissions must be restricted in production)**
+*you can all it prisma, set its password as HeyHiHello.*
+<br/>
+If you have followed all instructions in *italics* you can skip to the final step, otherwise in the file .env change the line 7 to:
+```dotenv
+DATABASE_URL="mysql://username:password@localhost:portnumber/database_name"
+```
+Where username, password, portnumber and database_name have been replaced with the once you have chosen.
+<br/>
+**Final Step**
+Run
+```bash
+prisma db push
+prisma generate
+```
+And the database is ready 🥳.
+<br/>
+Now, **simply run**:
+```bash
 yarn dev
 ```
-
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-You can start editing the page by modifying `pages/index.tsx`. The page auto-updates as you edit the file.
 
-[API routes](https://nextjs.org/docs/api-routes/introduction) can be accessed on [http://localhost:3000/api/hello](http://localhost:3000/api/hello). This endpoint can be edited in `pages/api/login.ts`.
-
-The `pages/api` directory is mapped to `/api/*`. Files in this directory are treated as [API routes](https://nextjs.org/docs/api-routes/introduction) instead of React pages.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
